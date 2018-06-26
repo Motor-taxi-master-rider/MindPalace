@@ -1,3 +1,4 @@
+.pytest_cache/
 .webassets-cache/
 webassets-external/
 .DS_Store
