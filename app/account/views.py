@@ -17,7 +17,7 @@ def login():
     """Log in an existing user."""
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.objects(email=form.email.data).first()
         if user is not None and user.password_hash is not None and \
                 user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
@@ -38,8 +38,7 @@ def register():
             last_name=form.last_name.data,
             email=form.email.data,
             password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         token = user.generate_confirmation_token()
         confirm_link = url_for('account.confirm', token=token, _external=True)
         get_queue().enqueue(
@@ -78,7 +77,7 @@ def reset_password_request():
         return redirect(url_for('main.index'))
     form = RequestResetPasswordForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.objects(email=form.email.data).first()
         if user:
             token = user.generate_password_reset_token()
             reset_link = url_for(
@@ -104,7 +103,7 @@ def reset_password(token):
         return redirect(url_for('main.index'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.objects(email=form.email.data).first()
         if user is None:
             flash('Invalid email address.', 'form-error')
             return redirect(url_for('main.index'))
@@ -126,8 +125,7 @@ def change_password():
     if form.validate_on_submit():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.new_password.data
-            db.session.add(current_user)
-            db.session.commit()
+            current_user.save()
             flash('Your password has been updated.', 'form-success')
             return redirect(url_for('main.index'))
         else:
@@ -217,7 +215,7 @@ def join_from_invite(user_id, token):
         flash('You are already logged in.', 'error')
         return redirect(url_for('main.index'))
 
-    new_user = User.query.get(user_id)
+    new_user = User.objects(id=user_id).first()
     if new_user is None:
         return redirect(404)
 
@@ -229,8 +227,7 @@ def join_from_invite(user_id, token):
         form = CreatePasswordForm()
         if form.validate_on_submit():
             new_user.password = form.password.data
-            db.session.add(new_user)
-            db.session.commit()
+            new_user.save()
             flash('Your password has been set. After you log in, you can '
                   'go to the "Your Account" page to review your account '
                   'information and settings.', 'success')

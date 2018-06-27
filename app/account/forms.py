@@ -40,7 +40,7 @@ class RegistrationForm(Form):
     submit = SubmitField('Register')
 
     def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
+        if User.objects(email=field.data).first():
             raise ValidationError('Email already registered. (Did you mean to '
                                   '<a href="{}">log in</a> instead?)'.format(
                                       url_for('account.login')))
@@ -73,7 +73,7 @@ class ResetPasswordForm(Form):
     submit = SubmitField('Reset password')
 
     def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first() is None:
+        if User.objects(email=field.data).first() is None:
             raise ValidationError('Unknown email address.')
 
 
@@ -111,5 +111,5 @@ class ChangeEmailForm(Form):
     submit = SubmitField('Update email')
 
     def validate_email(self, field):
-        if User.query.filter_by(email=field.data).first():
+        if User.objects(email=field.data).first():
             raise ValidationError('Email already registered.')
