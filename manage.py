@@ -30,9 +30,7 @@ def recreate_db():
     Recreates a local database. You probably should not use this on
     production.
     """
-    db.drop_all()
-    db.create_all()
-    db.session.commit()
+    db.connection.drop_database()
 
 
 @manager.option(
@@ -65,17 +63,16 @@ def setup_general():
     """Runs the set-up needed for both local development and production.
        Also sets up first admin user."""
     Role.insert_roles()
-    admin_query = Role.query.filter_by(name='Administrator')
+    admin_query = Role.objects(name='Administrator')
     if admin_query.first() is not None:
-        if User.query.filter_by(email=Config.ADMIN_EMAIL).first() is None:
+        if User.objects(email=Config.ADMIN_EMAIL).first() is None:
             user = User(
                 first_name='Admin',
                 last_name='Account',
                 password=Config.ADMIN_PASSWORD,
                 confirmed=True,
                 email=Config.ADMIN_EMAIL)
-            db.session.add(user)
-            db.session.commit()
+            user.save()
             print('Added administrator {}'.format(user.full_name()))
 
 
