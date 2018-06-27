@@ -1,14 +1,13 @@
 from .. import db
 
 
-class EditableHTML(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    editor_name = db.Column(db.String(100), unique=True)
-    value = db.Column(db.Text)
+class EditableHTML(db.Document):
+    editor_name = db.StringField(max_length=100, unique=True)
+    value = db.StringField()
 
     @staticmethod
     def get_editable_html(editor_name):
-        editable_html_obj = EditableHTML.query.filter_by(
+        editable_html_obj = EditableHTML.objects(
             editor_name=editor_name).first()
 
         if editable_html_obj is None:

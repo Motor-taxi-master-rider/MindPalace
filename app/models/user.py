@@ -12,14 +12,18 @@ class Permission:
     ADMINISTER = 0xff
 
 
-class Role(db.Model):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True)
-    index = db.Column(db.String(64))
-    default = db.Column(db.Boolean, default=False, index=True)
-    permissions = db.Column(db.Integer)
-    users = db.relationship('User', backref='role', lazy='dynamic')
+class Role(db.Document):
+    name = db.StringField(max_length=64, unique=True)
+    index = db.StringField(max_length=64)
+    default = db.BooleanField(default=False)
+    permissions = db.IntField()
+    meta = {
+        'collection': 'roles',
+        'indexes': [
+            {
+                'fields': ['default']
+            }]
+    }
 
     @staticmethod
     def insert_roles():
@@ -32,40 +36,49 @@ class Role(db.Model):
             )
         }
         for r in roles:
-            role = Role.query.filter_by(name=r).first()
+            role = Role.objects(name=r).first()
             if role is None:
                 role = Role(name=r)
             role.permissions = roles[r][0]
             role.index = roles[r][1]
             role.default = roles[r][2]
-            db.session.add(role)
-        db.session.commit()
+            role.save()
 
     def __repr__(self):
         return '<Role \'%s\'>' % self.name
 
 
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    confirmed = db.Column(db.Boolean, default=False)
-    first_name = db.Column(db.String(64), index=True)
-    last_name = db.Column(db.String(64), index=True)
-    email = db.Column(db.String(64), unique=True, index=True)
-    password_hash = db.Column(db.String(128))
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+class User(UserMixin, db.DynamicDocument):
+    confirmed = db.BooleanField(default=False)
+    first_name = db.StringField(max_length=64)
+    last_name = db.StringField(max_length=64)
+    email = db.StringField(max_length=64, unique=True)
+    password_hash = db.StringField(max_length=128)
+    role = db.ReferenceField(Role)
+    meta = {
+        'collection': 'users',
+        'indexes': [
+            {
+                'fields': ['first_name']
+            }, {
+                'fields': ['last_name']
+            }, {
+                'fields': ['email']
+            }]
+    }
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
+
         if self.role is None:
             if self.email == current_app.config['ADMIN_EMAIL']:
-                self.role = Role.query.filter_by(
+                self.role = Role.objects(
                     permissions=Permission.ADMINISTER).first()
             if self.role is None:
-                self.role = Role.query.filter_by(default=True).first()
+                self.role = Role.objects(default=True).first()
 
     def full_name(self):
-        return '%s %s' % (self.first_name, self.last_name)
+        return f'{self.first_name} {self.last_name}'
 
     def can(self, permissions):
         return self.role is not None and \
@@ -89,19 +102,19 @@ class User(UserMixin, db.Model):
         """Generate a confirmation token to email a new user."""
 
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': self.id})
+        return s.dumps({'confirm': str(self.id)})
 
     def generate_email_change_token(self, new_email, expiration=3600):
         """Generate an email change token to email an existing user."""
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'change_email': self.id, 'new_email': new_email})
+        return s.dumps({'change_email': str(self.id), 'new_email': new_email})
 
     def generate_password_reset_token(self, expiration=3600):
         """
         Generate a password reset change token to email to an existing user.
         """
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'reset': self.id})
+        return s.dumps({'reset': str(self.id)})
 
     def confirm_account(self, token):
         """Verify that the provided token is for this user's id."""
@@ -110,11 +123,10 @@ class User(UserMixin, db.Model):
             data = s.loads(token)
         except (BadSignature, SignatureExpired):
             return False
-        if data.get('confirm') != self.id:
+        if data.get('confirm') != str(self.id):
             return False
         self.confirmed = True
-        db.session.add(self)
-        db.session.commit()
+        self.save()
         return True
 
     def change_email(self, token):
@@ -124,16 +136,15 @@ class User(UserMixin, db.Model):
             data = s.loads(token)
         except (BadSignature, SignatureExpired):
             return False
-        if data.get('change_email') != self.id:
+        if data.get('change_email') != str(self.id):
             return False
         new_email = data.get('new_email')
         if new_email is None:
             return False
-        if self.query.filter_by(email=new_email).first() is not None:
+        if User.objects(email=new_email).first() is not None:
             return False
         self.email = new_email
-        db.session.add(self)
-        db.session.commit()
+        self.save()
         return True
 
     def reset_password(self, token, new_password):
@@ -143,22 +154,20 @@ class User(UserMixin, db.Model):
             data = s.loads(token)
         except (BadSignature, SignatureExpired):
             return False
-        if data.get('reset') != self.id:
+        if data.get('reset') != str(self.id):
             return False
         self.password = new_password
-        db.session.add(self)
-        db.session.commit()
+        self.save()
         return True
 
     @staticmethod
     def generate_fake(count=100, **kwargs):
         """Generate a number of fake users for testing."""
-        from sqlalchemy.exc import IntegrityError
         from random import seed, choice
         from faker import Faker
 
         fake = Faker()
-        roles = Role.query.all()
+        roles = Role.objects().all()
 
         seed()
         for i in range(count):
@@ -170,11 +179,7 @@ class User(UserMixin, db.Model):
                 confirmed=True,
                 role=choice(roles),
                 **kwargs)
-            db.session.add(u)
-            try:
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
+            u.save()
 
     def __repr__(self):
         return '<User \'%s\'>' % self.full_name()
@@ -193,4 +198,4 @@ login_manager.anonymous_user = AnonymousUser
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.objects(id=int(user_id))
