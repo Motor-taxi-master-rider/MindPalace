@@ -205,7 +205,7 @@ def confirm(token):
 
 
 @account.route(
-    '/join-from-invite/<int:user_id>/<token>', methods=['GET', 'POST'])
+    '/join-from-invite/<string:user_id>/<token>', methods=['GET', 'POST'])
 def join_from_invite(user_id, token):
     """
     Confirm new user's account with provided token and prompt them to set

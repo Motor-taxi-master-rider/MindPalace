@@ -43,9 +43,9 @@ class Config:
     SEGMENT_API_KEY = os.environ.get('SEGMENT_API_KEY') or ''
 
     # Admin account
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') or 'password'
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') or 'test'
     ADMIN_EMAIL = os.environ.get(
-        'ADMIN_EMAIL') or 'flask-base-admin@example.com'
+        'ADMIN_EMAIL') or 'admin@admin.com'
     EMAIL_SUBJECT_PREFIX = '[{}]'.format(APP_NAME)
     EMAIL_SENDER = '{app_name} Admin <{email}>'.format(
         app_name=APP_NAME, email=MAIL_USERNAME)

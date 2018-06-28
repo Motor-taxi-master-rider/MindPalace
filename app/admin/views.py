@@ -34,8 +34,7 @@ def new_user():
             last_name=form.last_name.data,
             email=form.email.data,
             password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash('User {} successfully created'.format(user.full_name()),
               'form-success')
     return render_template('admin/new_user.html', form=form)
@@ -53,8 +52,7 @@ def invite_user():
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             email=form.email.data)
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         token = user.generate_confirmation_token()
         invite_link = url_for(
             'account.join_from_invite',
@@ -85,8 +83,8 @@ def registered_users():
         'admin/registered_users.html', users=users, roles=roles)
 
 
-@admin.route('/user/<int:user_id>')
-@admin.route('/user/<int:user_id>/info')
+@admin.route('/user/<string:user_id>')
+@admin.route('/user/<string:user_id>/info')
 @login_required
 @admin_required
 def user_info(user_id):
@@ -97,7 +95,7 @@ def user_info(user_id):
     return render_template('admin/manage_user.html', user=user)
 
 
-@admin.route('/user/<int:user_id>/change-email', methods=['GET', 'POST'])
+@admin.route('/user/<string:user_id>/change-email', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def change_user_email(user_id):
@@ -108,15 +106,14 @@ def change_user_email(user_id):
     form = ChangeUserEmailForm()
     if form.validate_on_submit():
         user.email = form.email.data
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash('Email for user {} successfully changed to {}.'.format(
             user.full_name(), user.email), 'form-success')
     return render_template('admin/manage_user.html', user=user, form=form)
 
 
 @admin.route(
-    '/user/<int:user_id>/change-account-type', methods=['GET', 'POST'])
+    '/user/<string:user_id>/change-account-type', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def change_account_type(user_id):
@@ -132,14 +129,13 @@ def change_account_type(user_id):
     form = ChangeAccountTypeForm()
     if form.validate_on_submit():
         user.role = form.role.data
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash('Role for user {} successfully changed to {}.'.format(
             user.full_name(), user.role.name), 'form-success')
     return render_template('admin/manage_user.html', user=user, form=form)
 
 
-@admin.route('/user/<int:user_id>/delete')
+@admin.route('/user/<string:user_id>/delete')
 @login_required
 @admin_required
 def delete_user_request(user_id):
@@ -150,7 +146,7 @@ def delete_user_request(user_id):
     return render_template('admin/manage_user.html', user=user)
 
 
-@admin.route('/user/<int:user_id>/_delete')
+@admin.route('/user/<string:user_id>/_delete')
 @login_required
 @admin_required
 def delete_user(user_id):
@@ -160,8 +156,7 @@ def delete_user(user_id):
               'administrator to do this.', 'error')
     else:
         user = User.objects(id=user_id).first()
-        db.session.delete(user)
-        db.session.commit()
+        user.delete()
         flash('Successfully deleted user %s.' % user.full_name(), 'success')
     return redirect(url_for('admin.registered_users'))
 
@@ -180,7 +175,6 @@ def update_editor_contents():
         editor_contents = EditableHTML(editor_name=editor_name)
     editor_contents.value = edit_data
 
-    db.session.add(editor_contents)
-    db.session.commit()
+    editor_contents.save()
 
     return 'OK', 200
