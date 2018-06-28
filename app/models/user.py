@@ -192,4 +192,4 @@ login_manager.anonymous_user = AnonymousUser
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.objects(id=str(user_id))
+    return User.objects(id=str(user_id)).first()
