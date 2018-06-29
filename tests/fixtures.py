@@ -11,5 +11,5 @@ def test_app():
     app_context = app.app_context()
     app_context.push()
     yield app
-    connection.drop_database('mongomock')
+    connection.drop_database(app.config['MOCK_MONGO'])
     app_context.pop()
