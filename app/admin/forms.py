@@ -1,11 +1,10 @@
 from flask_wtf import FlaskForm
+from flask_mongoengine.wtf.fields import ModelSelectField
 from wtforms import ValidationError
-from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.fields import PasswordField, StringField, SubmitField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
 
-from app import db
 from app.models import Role, User
 
 
@@ -22,20 +21,12 @@ class ChangeUserEmailForm(FlaskForm):
 
 
 class ChangeAccountTypeForm(FlaskForm):
-    role = QuerySelectField(
-        'New account type',
-        validators=[InputRequired()],
-        get_label='name',
-        query_factory=lambda: Role.objects().all().order_by('permissions'))
+    role = ModelSelectField('New account type', validators=[InputRequired()], model=Role, label_attr='name')
     submit = SubmitField('Update role')
 
 
 class InviteUserForm(FlaskForm):
-    role = QuerySelectField(
-        'Account type',
-        validators=[InputRequired()],
-        get_label='name',
-        query_factory=lambda: Role.objects().all().order_by('permissions'))
+    role = ModelSelectField('Account type', validators=[InputRequired()], model=Role, label_attr='name')
     first_name = StringField(
         'First name', validators=[InputRequired(),
                                   Length(1, 64)])
