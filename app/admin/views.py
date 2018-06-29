@@ -89,7 +89,7 @@ def registered_users():
 @admin_required
 def user_info(user_id):
     """View a user's profile."""
-    user = User.objects(id=user_id).first()
+    user = User.objects.get(id=user_id)
     if user is None:
         abort(404)
     return render_template('admin/manage_user.html', user=user)
@@ -100,7 +100,7 @@ def user_info(user_id):
 @admin_required
 def change_user_email(user_id):
     """Change a user's email."""
-    user = User.objects(id=user_id).first()
+    user = User.objects.get(id=user_id)
     if user is None:
         abort(404)
     form = ChangeUserEmailForm()
@@ -123,7 +123,7 @@ def change_account_type(user_id):
               'another administrator to do this.', 'error')
         return redirect(url_for('admin.user_info', user_id=user_id))
 
-    user = User.objects(id=user_id).first()
+    user = User.objects.get(id=user_id)
     if user is None:
         abort(404)
     form = ChangeAccountTypeForm()
@@ -140,7 +140,7 @@ def change_account_type(user_id):
 @admin_required
 def delete_user_request(user_id):
     """Request deletion of a user's account."""
-    user = User.objects(id=user_id).first()
+    user = User.objects.get(id=user_id)
     if user is None:
         abort(404)
     return render_template('admin/manage_user.html', user=user)
@@ -155,7 +155,7 @@ def delete_user(user_id):
         flash('You cannot delete your own account. Please ask another '
               'administrator to do this.', 'error')
     else:
-        user = User.objects(id=user_id).first()
+        user = User.objects.get(id=user_id)
         user.delete()
         flash('Successfully deleted user %s.' % user.full_name(), 'success')
     return redirect(url_for('admin.registered_users'))

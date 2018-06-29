@@ -18,7 +18,12 @@ class Role(db.Document):
     index = db.StringField(max_length=64)
     default = db.BooleanField(default=False)
     permissions = db.IntField()
-    meta = {'collection': 'roles', 'indexes': [{'fields': ['default']}]}
+    meta = {
+        'collection': 'roles',
+        'indexes': [{
+            'fields': ['default']
+        }]
+    }
 
     @staticmethod
     def insert_roles():
@@ -51,8 +56,7 @@ class User(UserMixin, db.DynamicDocument):
     password_hash = db.StringField(max_length=128)
     role = db.ReferenceField(Role)
     meta = {
-        'collection':
-        'users',
+        'collection': 'users',
         'indexes': [{
             'fields': ['first_name']
         }, {
@@ -77,7 +81,7 @@ class User(UserMixin, db.DynamicDocument):
 
     def can(self, permissions):
         return self.role is not None and \
-            (self.role.permissions & permissions) == permissions
+               (self.role.permissions & permissions) == permissions
 
     def is_admin(self):
         return self.can(Permission.ADMINISTER)
@@ -193,4 +197,4 @@ login_manager.anonymous_user = AnonymousUser
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.objects(id=user_id).first()
+    return User.objects.get(id=user_id)
