@@ -1,7 +1,5 @@
 import time
 
-import pytest
-
 from app.models import AnonymousUser, Permission, Role, User
 
 
