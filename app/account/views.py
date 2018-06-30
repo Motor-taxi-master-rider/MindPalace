@@ -1,6 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from app import db
 from app.account.forms import (ChangeEmailForm, ChangePasswordForm,
                                CreatePasswordForm, LoginForm, RegistrationForm,
                                RequestResetPasswordForm, ResetPasswordForm)

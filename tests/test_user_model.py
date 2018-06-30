@@ -95,28 +95,28 @@ def test_duplicate_email_change_token(test_app):
 def test_roles_and_permissions(test_app):
     Role.insert_roles()
     u = User(email='user@example.com', password='password')
-    assert u.can(Permission.GENERAL)
-    assert not u.can(Permission.ADMINISTER)
+    assert u.can(Permission.GENERAL.value)
+    assert not u.can(Permission.ADMINISTER.value)
 
 
 def test_make_administrator(test_app):
     Role.insert_roles()
     u = User(email='user@example.com', password='password')
-    assert not u.can(Permission.ADMINISTER)
+    assert not u.can(Permission.ADMINISTER.value)
     u.role = Role.objects(
-        permissions=Permission.ADMINISTER).first()
-    assert u.can(Permission.ADMINISTER)
+        permissions=Permission.ADMINISTER.value).first()
+    assert u.can(Permission.ADMINISTER.value)
 
 
 def test_administrator(test_app):
     Role.insert_roles()
-    r = Role.objects(permissions=Permission.ADMINISTER).first()
+    r = Role.objects(permissions=Permission.ADMINISTER.value).first()
     u = User(email='user@example.com', password='password', role=r)
-    assert u.can(Permission.ADMINISTER)
-    assert u.can(Permission.GENERAL)
+    assert u.can(Permission.ADMINISTER.value)
+    assert u.can(Permission.GENERAL.value)
     assert u.is_admin()
 
 
 def test_anonymous(test_app):
     u = AnonymousUser()
-    assert not u.can(Permission.GENERAL)
+    assert not u.can(Permission.GENERAL.value)

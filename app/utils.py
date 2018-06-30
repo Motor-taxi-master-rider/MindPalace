@@ -31,7 +31,7 @@ class CustomSelectField(Field):
                  label='',
                  validators=None,
                  multiple=False,
-                 choices=[],
+                 choices=(),
                  allow_custom=True,
                  **kwargs):
         super(CustomSelectField, self).__init__(label, validators, **kwargs)

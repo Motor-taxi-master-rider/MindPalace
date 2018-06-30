@@ -34,7 +34,7 @@ This is a rather complicated function, but the general idea
 is that it will allow is to create a decorator that will
 kick users to a 403 page if they dont have a certain permission
 or let them continue. First there is a permission_required
-method which takes in a permission e.g. Permission.ADMINISTER
+method which takes in a permission e.g. Permission.ADMINISTER.value
 Then it create a function called 'decorator' which performs
 the check in a separate function itself decorates called
 'decorated_function'. It returns the result from
@@ -50,7 +50,7 @@ you don't really need to know about
 
 ```
 def admin_required(f):
-    return permission_required(Permission.ADMINISTER)(f)
+    return permission_required(Permission.ADMINISTER.value)(f)
 ```
 
 This is a decorator created by the permission required decorator

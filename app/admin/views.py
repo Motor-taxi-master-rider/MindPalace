@@ -1,7 +1,6 @@
 from flask import (Blueprint, abort, flash, redirect, render_template, request,
                    url_for)
 
-from app import db
 from app.admin.forms import (ChangeAccountTypeForm, ChangeUserEmailForm,
                              InviteUserForm, NewUserForm)
 from app.decorators import admin_required

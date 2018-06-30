@@ -1,3 +1,5 @@
+import enum
+
 from flask import current_app
 from itsdangerous import BadSignature, SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -8,7 +10,7 @@ from flask_login import AnonymousUserMixin, UserMixin
 from .. import db, login_manager
 
 
-class Permission:
+class Permission(enum.Enum):
     GENERAL = 0x01
     ADMINISTER = 0xff
 
@@ -28,9 +30,9 @@ class Role(db.Document):
     @staticmethod
     def insert_roles():
         roles = {
-            'User': (Permission.GENERAL, 'main', True),
+            'User': (Permission.GENERAL.value, 'main', True),
             'Administrator': (
-                Permission.ADMINISTER,
+                Permission.ADMINISTER.value,
                 'admin',
                 False  # grants all permissions
             )
@@ -72,7 +74,7 @@ class User(UserMixin, db.DynamicDocument):
         if self.role is None:
             if self.email == current_app.config['ADMIN_EMAIL']:
                 self.role = Role.objects(
-                    permissions=Permission.ADMINISTER).first()
+                    permissions=Permission.ADMINISTER.value).first()
             if self.role is None:
                 self.role = Role.objects(default=True).first()
 
@@ -84,7 +86,7 @@ class User(UserMixin, db.DynamicDocument):
                (self.role.permissions & permissions) == permissions
 
     def is_admin(self):
-        return self.can(Permission.ADMINISTER)
+        return self.can(Permission.ADMINISTER.value)
 
     @property
     def password(self):
