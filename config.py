@@ -1,5 +1,6 @@
 import os
 import sys
+from abc import ABC, abstractmethod
 
 from raygun4py.middleware import flask as flask_raygun
 
@@ -19,15 +20,14 @@ if os.path.exists('config.env'):
             os.environ[var[0]] = var[1].replace("\"", "")
 
 
-class Config:
-    APP_NAME = os.environ.get('APP_NAME') or 'Flask-Base'
+class Config(ABC):
+    APP_NAME = os.environ.get('APP_NAME') or 'MindPalace'
 
     if os.environ.get('SECRET_KEY'):
         SECRET_KEY = os.environ.get('SECRET_KEY')
     else:
         SECRET_KEY = 'SECRET_KEY_ENV_VAR_NOT_SET'
         print('SECRET KEY ENV VAR NOT SET! SHOULD NOT SEE IN PRODUCTION')
-    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
     # Email
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.sendgrid.net'
@@ -67,16 +67,18 @@ class Config:
     RQ_DEFAULT_PASSWORD = url.password
     RQ_DEFAULT_DB = 0
 
-    @staticmethod
-    def init_app(app):
-        pass
+    @classmethod
+    @abstractmethod
+    def init_app(cls, app):
+        """init app with config"""
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
     ASSETS_DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
+    MONGODB_DB = 'doc_search'
+    MONGODB_HOST = '127.0.0.1'
+    MONGODB_PORT = 27017
 
     @classmethod
     def init_app(cls, app):
@@ -99,8 +101,11 @@ class TestingConfig(Config):
 
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+    MONGODB_DB = os.environ.get('MONGODB_DB')
+    MONGODB_HOST = os.environ.get('MONGODB_HOST')
+    MONGODB_PORT = os.environ.get('MONGODB_PORT')
+    MONGODB_USERNAME = os.environ.get('MONGODB_USERNAME')
+    MONGODB_PASSWORD = os.environ.get('MONGODB_PASSWORD')
     SSL_DISABLE = (os.environ.get('SSL_DISABLE') or 'True') == 'True'
 
     @classmethod
