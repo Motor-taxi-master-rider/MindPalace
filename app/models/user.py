@@ -53,7 +53,7 @@ class User(UserMixin, db.DynamicDocument):
     first_name = db.StringField(max_length=64)
     last_name = db.StringField(max_length=64)
     email = db.StringField(max_length=64, unique=True)
-    password_hash = db.StringField(max_length=128)
+    _password = db.StringField(max_length=128, db_field='password_hash')
     role = db.ReferenceField(Role)
     meta = {
         'collection': 'users',
@@ -88,14 +88,14 @@ class User(UserMixin, db.DynamicDocument):
 
     @property
     def password(self):
-        raise AttributeError('`password` is not a readable attribute')
+        return self._password
 
     @password.setter
     def password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self._password = generate_password_hash(password)
 
     def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password, password)
 
     def generate_confirmation_token(self, expiration=604800):
         """Generate a confirmation token to email a new user."""

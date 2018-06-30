@@ -7,13 +7,7 @@ from app.models import AnonymousUser, Permission, Role, User
 
 def test_password_setter(test_app):
     u = User(password='password')
-    assert u.password_hash is not None
-
-
-def test_no_password_getter(test_app):
-    u = User(password='password')
-    with pytest.raises(AttributeError):
-        u.password()
+    assert u.password is not None
 
 
 def test_password_verification(test_app):
@@ -25,7 +19,7 @@ def test_password_verification(test_app):
 def test_password_salts_are_random(test_app):
     u1 = User(email='user1@example.com', password='password')
     u2 = User(email='user2@example.com', password='notpassword')
-    assert u1.password_hash != u2.password_hash
+    assert u1.password != u2.password
 
 
 def test_valid_confirmation_token(test_app):

@@ -18,7 +18,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.objects(email=form.email.data).first()
-        if user is not None and user.password_hash is not None and \
+        if user is not None and user.password is not None and \
                 user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             flash('You are now logged in. Welcome back!', 'success')
@@ -219,7 +219,7 @@ def join_from_invite(user_id, token):
     if new_user is None:
         return redirect(404)
 
-    if new_user.password_hash is not None:
+    if new_user.password is not None:
         flash('You have already joined.', 'error')
         return redirect(url_for('main.index'))
 
