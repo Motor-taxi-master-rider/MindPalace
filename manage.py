@@ -27,7 +27,7 @@ def recreate_db():
     Recreates a local database. You probably should not use this on
     production.
     """
-    db.connection.drop_database('test')
+    db.connection.drop_database(app.config['MONGODB_DB'])
 
 
 @manager.option(
@@ -71,6 +71,11 @@ def setup_general():
                 email=Config.ADMIN_EMAIL)
             user.save()
             print('Added administrator {}'.format(user.full_name()))
+
+            for document in DocumentMeta.objects().all():
+                document.create_by = user
+                document.save()
+            print('Assigned documents to {}'.format(user.full_name()))
 
 
 @manager.command

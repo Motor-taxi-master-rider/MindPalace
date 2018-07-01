@@ -1,4 +1,4 @@
-from app.models import Category, DocumentCache, DocumentMeta
+from app.models import Category, DocumentCache, DocumentMeta, User
 import pytest
 import datetime
 from mongoengine.errors import ValidationError
@@ -30,10 +30,19 @@ def test_large_document_theme(test_app):
     dm = DocumentMeta(theme=long_string, category=Category.REVIEWED.value)
     dm.save()
     assert dm.theme == long_string
-    assert len(repr(dm)) < 40
+    assert len(str(dm)) < 25
 
 
 def test_large_document_cache_content(test_app):
     dc = DocumentCache(content='test content' * 1000)
     dc.save()
     assert dc.content == 'test content' * 1000
+
+
+def test_create_by_user(test_app):
+    u = User(email='test', password='password')
+    u.save()
+    dm = DocumentMeta(theme='valid', category=Category.REVIEWED.value, create_by=u)
+    dm.save()
+    assert dm.create_by == u
+    assert dm.create_by.email == 'test'
