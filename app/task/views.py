@@ -20,21 +20,22 @@ def get_my_doc_meta():
         documents=documents)
 
 
-@task.route('/doc_meta', methods=['POST'])
+@task.route('/doc_meta', methods=['GET', 'POST'])
 @login_required
 def new_doc_meta():
     """new document meta data for current user"""
     form = DocMetaForm()
     if form.validate_on_submit():
+        print(form.category.data)
         doc_meta = DocumentMeta(
             theme=form.theme.data,
             category=form.category.data,
             url=form.link.data,
             priority=form.priority.data,
-            create_by=current_user)
+            create_by=current_user.id)
         doc_meta.save()
         flash(f'Document {str(doc_meta)} is successfully created.')
-    return 'success'
+    return render_template('task/new_document.html', form=form)
 
 
 @task.route('/doc_meta/<string:doc_meta_id>', methods=['PUT'])
@@ -56,14 +57,16 @@ def update_doc_meta(doc_meta_id):
     return 'success'
 
 
-@task.route('/doc_meta/<string:doc_meta_id>', methods=['DELETE'])
+@task.route('/doc_meta/delete/<string:doc_meta_id>', methods=['GET', 'POST'])
 @login_required
 def delete_doc_meta(doc_meta_id):
     """delete document meta data with given id"""
     doc_meta = DocumentMeta.objects.get_or_404(id=doc_meta_id)
     if current_user.can(
-            Permission.ADMINISTER) or current_user == doc_meta.create_by:
+            Permission.ADMINISTER.value) or current_user == doc_meta.create_by:
         doc_meta.delete()
         flash(f'Document {str(doc_meta)} is successfully deleted.')
     else:
         abort(550)
+    flash(f'Document {str(doc_meta.theme)} is successfully deleted.')
+    return redirect(url_for('task.get_my_doc_meta'))

@@ -8,12 +8,11 @@ from app.models import Category
 class DocMetaForm(FlaskForm):
     theme = StringField(
         'Theme', validators=[InputRequired(),
-                             Length(1, 256),
-                             Email()])
+                             Length(1, 256)])
     category = SelectField(
         'Category',
         validators=[InputRequired()],
-        choices=[(cat.name.lower(), cat.value) for cat in Category])
+        choices=[(cat.value, cat.name.lower()) for cat in Category])
     link = StringField(
         'Link', validators=[InputRequired(),
                             Length(1, 1024),
