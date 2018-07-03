@@ -1,11 +1,10 @@
 import enum
 
 from flask import current_app
+from flask_login import AnonymousUserMixin, UserMixin
 from itsdangerous import BadSignature, SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from flask_login import AnonymousUserMixin, UserMixin
 
 from .. import db, login_manager
 
@@ -20,12 +19,7 @@ class Role(db.Document):
     index = db.StringField(max_length=64)
     default = db.BooleanField(default=False)
     permissions = db.IntField()
-    meta = {
-        'collection': 'roles',
-        'indexes': [{
-            'fields': ['default']
-        }]
-    }
+    meta = {'collection': 'roles', 'indexes': [{'fields': ['default']}]}
 
     @staticmethod
     def insert_roles():
@@ -58,7 +52,8 @@ class User(UserMixin, db.DynamicDocument):
     _password = db.StringField(max_length=128, db_field='password_hash')
     role = db.ReferenceField(Role)
     meta = {
-        'collection': 'users',
+        'collection':
+        'users',
         'indexes': [{
             'fields': ['first_name']
         }, {

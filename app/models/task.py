@@ -23,7 +23,10 @@ class DocumentCache(db.Document):
 
 class DocumentMeta(db.DynamicDocument):
     theme = db.StringField(max_length=256, required=True, unique=True)
-    category = db.StringField(max_length=64, required=True, choices=[category.value for category in Category])
+    category = db.StringField(
+        max_length=64,
+        required=True,
+        choices=[category.value for category in Category])
     url = db.StringField(max_length=1024)
     priority = db.IntField()
     comment = db.ListField(db.StringField())
