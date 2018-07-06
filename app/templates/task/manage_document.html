@@ -6,8 +6,12 @@
             Back to Document List
         </a>
         <h2 class="ui header">
-            Add New Document
+            {{ action }} {{ data_type }}
+            {% if action == 'Create' %}
             <div class="sub header">Create a new url based document</div>
+            {% elif action == 'Update' %}
+            <div class="sub header">Update meta data of the document</div>
+            {% endif %}
         </h2>
 
         {{ f.render_form(form) }}

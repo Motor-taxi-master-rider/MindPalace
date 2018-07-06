@@ -14,10 +14,10 @@ class DocMetaForm(FlaskForm):
         'Category',
         validators=[InputRequired()],
         choices=[(cat.value, cat.name.lower()) for cat in Category])
-    link = URLField(
+    url = URLField(
         'Link', validators=[InputRequired(),
                             Length(1, 1024),
                             URL()])
     priority = IntegerField(
         'Priority', validators=[NumberRange(0, 3)], default=0)
-    submit = SubmitField('Add Document')
+    submit = SubmitField('Submit Document')

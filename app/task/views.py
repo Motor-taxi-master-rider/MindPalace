@@ -30,36 +30,35 @@ def new_doc_meta():
         doc_meta = DocumentMeta(
             theme=form.theme.data,
             category=form.category.data,
-            url=form.link.data,
+            url=form.url.data,
             priority=form.priority.data,
             create_by=current_user.id)
         try:
             doc_meta.save()
         except NotUniqueError:
-            flash('Theme already exists.','form-error')
+            flash('Theme already exists.', 'form-error')
         else:
             flash(f'Document {str(doc_meta)} is successfully created.', 'form-success')
             return redirect(url_for('task.new_doc_meta'))
-    return render_template('task/new_document.html', form=form)
+    return render_template('task/manage_document.html', form=form, action='Create', data_type='New Document')
 
 
-@task.route('/doc_meta/<string:doc_meta_id>', methods=['PUT'])
+@task.route('/doc_meta/<string:doc_meta_id>', methods=['GET', 'POST'])
 @login_required
 def update_doc_meta(doc_meta_id):
     """update document meta data with given id"""
     doc_meta = DocumentMeta.objects.get(id=doc_meta_id)
     if doc_meta is None:
         abort(404)
-    form = DocMetaForm()
+    form = DocMetaForm(obj=doc_meta)
     if form.validate_on_submit():
-        doc_meta = DocumentMeta(
-            theme=form.theme.data,
-            category=form.category.data,
-            url=form.link.data,
-            priority=form.priority.data)
+        doc_meta.theme = form.theme.data
+        doc_meta.category = form.category.data
+        doc_meta.url = form.url.data
+        doc_meta.priority = form.priority.data
         doc_meta.save()
         flash(f'Document {str(doc_meta)} is successfully updated.', 'form-success')
-    return 'success'
+    return render_template('task/manage_document.html', form=form, action='Update', data_type=str(doc_meta))
 
 
 @task.route('/doc_meta/delete/<string:doc_meta_id>', methods=['GET', 'POST'])

@@ -46,8 +46,8 @@ class DocumentMeta(db.DynamicDocument):
         return f'<Document \'{str(self)}\'>'
 
     def __str__(self):
-        if len(self.theme) > 20:
-            title = f'{self.theme[:20]}...'
+        if len(self.theme) > 30:
+            title = f'{self.theme[:30]}...'
         else:
             title = self.theme
         return title

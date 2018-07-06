@@ -30,7 +30,7 @@ def test_large_document_theme(test_app):
     dm = DocumentMeta(theme=long_string, category=Category.REVIEWED.value)
     dm.save()
     assert dm.theme == long_string
-    assert len(str(dm)) < 25
+    assert len(str(dm)) < 35
 
 
 def test_large_document_cache_content(test_app):
