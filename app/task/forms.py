@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, StringField, SubmitField
-from wtforms.validators import URL, Email, InputRequired, Length, NumberRange
+from wtforms.fields.html5 import URLField
+from wtforms.validators import URL, InputRequired, Length, NumberRange
 
 from app.models import Category
 
@@ -13,7 +14,7 @@ class DocMetaForm(FlaskForm):
         'Category',
         validators=[InputRequired()],
         choices=[(cat.value, cat.name.lower()) for cat in Category])
-    link = StringField(
+    link = URLField(
         'Link', validators=[InputRequired(),
                             Length(1, 1024),
                             URL()])
