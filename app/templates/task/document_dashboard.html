@@ -1,9 +1,12 @@
-{% extends 'layouts/base.html' %} {% block content %}
+{% extends 'layouts/base.html' %}
+{% import 'macros/form_macros.html' as f %}
+{% block content %}
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
         <h2 class="ui header">
             My Documents
         </h2>
+
         <div class="ui vertical animated right floated button" tabindex="0">
             <a class="item" href="{{ url_for('task.new_doc_meta') }}">
                 <div class="hidden content">New</div>
@@ -12,6 +15,7 @@
                 </div>
             </a>
         </div>
+
         <div class="ui menu">
             <div id="select-category" class="ui dropdown item">
                 <div class="text">
@@ -33,24 +37,46 @@
             </div>
         </div>
 
+        {% set flashes = {
+        'error': get_flashed_messages(category_filter=['form-error']),
+        'warning': get_flashed_messages(category_filter=['form-check-email']),
+        'info': get_flashed_messages(category_filter=['form-info']),
+        'success': get_flashed_messages(category_filter=['form-success'])
+        } %}
+        {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
+        {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
+        {{ f.form_message(flashes['info'], header='Information', class='info') }}
+        {{ f.form_message(flashes['success'], header='Success!', class='success') }}
+
         {# Use overflow-x: scroll so that mobile views don't freak out # when the table is too wide #}
         <div style="overflow-x: scroll;">
             <table class="ui searchable sortable unstackable selectable celled table">
                 <thead>
-                    <tr>
-                        <th>Theme</th>
-                        <th class="sorted ascending">Category</th>
-                    </tr>
+                <tr>
+                    <th>Theme</th>
+                    <th class="sorted descending">Category</th>
+                    <th>Operation</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for d in documents | sort(attribute='category') %}
-                    <tr>
-                        <td>
-                            <a href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
-                        </td>
-                        <td class="doc category">{{ d.category }}</td>
-                    </tr>
-                    {% endfor %}
+                {% for d in documents | sort(attribute='category') %}
+                <tr>
+                    <td>
+                        <a href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
+                    </td>
+                    <td class="doc category">{{ d.category }}</td>
+                    <td>
+                        <div class="ui small basic icon buttons">
+                            <button class="ui button"><i class="edit outline icon"></i></button>
+                            <button class="ui button">
+                                <a class="item" href="{{ url_for('task.delete_doc_meta', doc_meta_id= d.id|string) }}">
+                                    <i class="trash outline icon"></i>
+                                </a>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -79,4 +105,12 @@
             }
         });
     });
+
+
+
+
+
+
+
+
 </script> {% endblock %}

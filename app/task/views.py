@@ -1,9 +1,9 @@
-from flask import (Blueprint, abort, flash, jsonify, redirect, render_template,
-                   request, url_for)
-from flask_login import current_user, login_required
+from flask import Blueprint, abort, flash, redirect, render_template, url_for
+from mongoengine.errors import NotUniqueError
 
-from app.models import Category, DocumentCache, DocumentMeta, Permission, User
+from app.models import Category, DocumentMeta, Permission, User
 from app.task.forms import DocMetaForm
+from flask_login import current_user, login_required
 
 task = Blueprint('task', __name__)
 
@@ -33,8 +33,13 @@ def new_doc_meta():
             url=form.link.data,
             priority=form.priority.data,
             create_by=current_user.id)
-        doc_meta.save()
-        flash(f'Document {str(doc_meta)} is successfully created.')
+        try:
+            doc_meta.save()
+        except NotUniqueError:
+            flash('Theme already exists.','form-error')
+        else:
+            flash(f'Document {str(doc_meta)} is successfully created.', 'form-success')
+            return redirect(url_for('task.new_doc_meta'))
     return render_template('task/new_document.html', form=form)
 
 
@@ -53,7 +58,7 @@ def update_doc_meta(doc_meta_id):
             url=form.link.data,
             priority=form.priority.data)
         doc_meta.save()
-        flash(f'Document {str(doc_meta)} is successfully updated.')
+        flash(f'Document {str(doc_meta)} is successfully updated.', 'form-success')
     return 'success'
 
 
@@ -65,8 +70,7 @@ def delete_doc_meta(doc_meta_id):
     if current_user.can(
             Permission.ADMINISTER.value) or current_user == doc_meta.create_by:
         doc_meta.delete()
-        flash(f'Document {str(doc_meta)} is successfully deleted.')
     else:
         abort(550)
-    flash(f'Document {str(doc_meta.theme)} is successfully deleted.')
+    flash(f'Document {str(doc_meta.theme)} is successfully deleted.', 'form-success')
     return redirect(url_for('task.get_my_doc_meta'))
