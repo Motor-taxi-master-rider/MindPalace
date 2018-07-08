@@ -1,8 +1,16 @@
 import datetime
 import enum
 
+from mongoengine import signals
+
 from .. import db
 from .user import User
+from .utils import handler
+
+
+@handler(signals.pre_save)
+def update_modified(sender, document):
+    document.update_at = datetime.datetime.utcnow()
 
 
 class Category(enum.Enum):
@@ -13,6 +21,7 @@ class Category(enum.Enum):
     FLIP = 'FLIP'
 
 
+@update_modified.apply
 class DocumentCache(db.Document):
     content = db.StringField()
     update_at = db.DateTimeField(default=datetime.datetime.utcnow)
@@ -21,6 +30,7 @@ class DocumentCache(db.Document):
     }
 
 
+@update_modified.apply
 class DocumentMeta(db.DynamicDocument):
     theme = db.StringField(max_length=256, required=True, unique=True)
     category = db.StringField(
