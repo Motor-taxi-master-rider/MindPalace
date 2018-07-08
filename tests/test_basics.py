@@ -1,9 +1,10 @@
 from flask import current_app
+import pytest
 
-
-def test_app_exists(test_app):
+@pytest.mark.usefixtures('app')
+def test_app_exists():
     assert not (current_app is None)
 
-
-def test_app_is_testing(test_app):
+@pytest.mark.usefixtures('app')
+def test_app_is_testing():
     assert current_app.config['TESTING']

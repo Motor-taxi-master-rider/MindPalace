@@ -1,12 +1,12 @@
 from flask import url_for
+
+from app.models import User
 from flask_wtf import FlaskForm
 from wtforms import ValidationError
 from wtforms.fields import (BooleanField, PasswordField, StringField,
                             SubmitField)
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
-
-from app.models import User
 
 
 class LoginForm(FlaskForm):

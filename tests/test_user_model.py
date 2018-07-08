@@ -1,33 +1,40 @@
 import time
 
+import pytest
+
 from app.models import AnonymousUser, Permission, Role, User
 
 
-def test_password_setter(test_app):
+@pytest.mark.usefixtures('app')
+def test_password_setter():
     u = User(password='password')
     assert u.password is not None
 
 
-def test_password_verification(test_app):
+@pytest.mark.usefixtures('app')
+def test_password_verification():
     u = User(password='password')
     assert u.verify_password('password')
     assert not u.verify_password('notpassword')
 
 
-def test_password_salts_are_random(test_app):
+@pytest.mark.usefixtures('app')
+def test_password_salts_are_random():
     u1 = User(email='user1@example.com', password='password')
     u2 = User(email='user2@example.com', password='notpassword')
     assert u1.password != u2.password
 
 
-def test_valid_confirmation_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_valid_confirmation_token():
     u = User(password='password')
     u.save()
     token = u.generate_confirmation_token()
     assert u.confirm_account(token)
 
 
-def test_invalid_confirmation_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_invalid_confirmation_token():
     u1 = User(email='user1@example.com', password='password')
     u2 = User(email='user2@example.com', password='notpassword')
     u1.save()
@@ -36,7 +43,8 @@ def test_invalid_confirmation_token(test_app):
     assert not u2.confirm_account(token)
 
 
-def test_expired_confirmation_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_expired_confirmation_token():
     u = User(password='password')
     u.save()
     token = u.generate_confirmation_token(1)
@@ -44,7 +52,8 @@ def test_expired_confirmation_token(test_app):
     assert not u.confirm_account(token)
 
 
-def test_valid_reset_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_valid_reset_token():
     u = User(password='password')
     u.save()
     token = u.generate_password_reset_token()
@@ -52,7 +61,8 @@ def test_valid_reset_token(test_app):
     assert u.verify_password('notpassword')
 
 
-def test_invalid_reset_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_invalid_reset_token():
     u1 = User(email='user1@example.com', password='password')
     u2 = User(email='user2@example.com', password='notpassword')
     u1.save()
@@ -62,7 +72,8 @@ def test_invalid_reset_token(test_app):
     assert u2.verify_password('notpassword')
 
 
-def test_valid_email_change_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_valid_email_change_token():
     u = User(email='user@example.com', password='password')
     u.save()
     token = u.generate_email_change_token('otheruser@example.org')
@@ -70,7 +81,8 @@ def test_valid_email_change_token(test_app):
     assert u.email == 'otheruser@example.org'
 
 
-def test_invalid_email_change_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_invalid_email_change_token():
     u1 = User(email='user@example.com', password='password')
     u2 = User(email='otheruser@example.org', password='notpassword')
     u1.save()
@@ -80,7 +92,8 @@ def test_invalid_email_change_token(test_app):
     assert u2.email == 'otheruser@example.org'
 
 
-def test_duplicate_email_change_token(test_app):
+@pytest.mark.usefixtures('db')
+def test_duplicate_email_change_token():
     u1 = User(email='user@example.com', password='password')
     u2 = User(email='otheruser@example.org', password='notpassword')
     u1.save()
@@ -90,14 +103,16 @@ def test_duplicate_email_change_token(test_app):
     assert u2.email == 'otheruser@example.org'
 
 
-def test_roles_and_permissions(test_app):
+@pytest.mark.usefixtures('db')
+def test_roles_and_permissions():
     Role.insert_roles()
     u = User(email='user@example.com', password='password')
     assert u.can(Permission.GENERAL.value)
     assert not u.can(Permission.ADMINISTER.value)
 
 
-def test_make_administrator(test_app):
+@pytest.mark.usefixtures('db')
+def test_make_administrator():
     Role.insert_roles()
     u = User(email='user@example.com', password='password')
     assert not u.can(Permission.ADMINISTER.value)
@@ -106,7 +121,8 @@ def test_make_administrator(test_app):
     assert u.can(Permission.ADMINISTER.value)
 
 
-def test_administrator(test_app):
+@pytest.mark.usefixtures('db')
+def test_administrator():
     Role.insert_roles()
     r = Role.objects(permissions=Permission.ADMINISTER.value).first()
     u = User(email='user@example.com', password='password', role=r)
@@ -115,6 +131,7 @@ def test_administrator(test_app):
     assert u.is_admin()
 
 
-def test_anonymous(test_app):
+@pytest.mark.usefixtures('app')
+def test_anonymous():
     u = AnonymousUser()
     assert not u.can(Permission.GENERAL.value)

@@ -1,9 +1,8 @@
+from app.models import Category
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, StringField, SubmitField
 from wtforms.fields.html5 import URLField
 from wtforms.validators import URL, InputRequired, Length, NumberRange
-
-from app.models import Category
 
 
 class DocMetaForm(FlaskForm):

@@ -1,9 +1,9 @@
 from flask import Blueprint, abort, flash, redirect, render_template, url_for
-from mongoengine.errors import NotUniqueError
 
 from app.models import Category, DocumentMeta, Permission, User
 from app.task.forms import DocMetaForm
 from flask_login import current_user, login_required
+from mongoengine.errors import NotUniqueError
 
 task = Blueprint('task', __name__)
 
