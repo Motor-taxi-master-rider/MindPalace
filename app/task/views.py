@@ -1,9 +1,9 @@
 from flask import Blueprint, abort, flash, redirect, render_template, url_for
+from flask_login import current_user, login_required
+from mongoengine.errors import NotUniqueError
 
 from app.models import Category, DocumentMeta, Permission, User
 from app.task.forms import DocMetaForm
-from flask_login import current_user, login_required
-from mongoengine.errors import NotUniqueError
 
 task = Blueprint('task', __name__)
 
@@ -38,9 +38,14 @@ def new_doc_meta():
         except NotUniqueError:
             flash('Theme already exists.', 'form-error')
         else:
-            flash(f'Document {str(doc_meta)} is successfully created.', 'form-success')
+            flash(f'Document {str(doc_meta)} is successfully created.',
+                  'form-success')
             return redirect(url_for('task.new_doc_meta'))
-    return render_template('task/manage_document.html', form=form, action='Create', data_type='New Document')
+    return render_template(
+        'task/manage_document.html',
+        form=form,
+        action='Create',
+        data_type='New Document')
 
 
 @task.route('/doc_meta/<string:doc_meta_id>', methods=['GET', 'POST'])
@@ -57,8 +62,13 @@ def update_doc_meta(doc_meta_id):
         doc_meta.url = form.url.data
         doc_meta.priority = form.priority.data
         doc_meta.save()
-        flash(f'Document {str(doc_meta)} is successfully updated.', 'form-success')
-    return render_template('task/manage_document.html', form=form, action='Update', data_type=str(doc_meta))
+        flash(f'Document {str(doc_meta)} is successfully updated.',
+              'form-success')
+    return render_template(
+        'task/manage_document.html',
+        form=form,
+        action='Update',
+        data_type=str(doc_meta))
 
 
 @task.route('/doc_meta/delete/<string:doc_meta_id>', methods=['GET', 'POST'])
@@ -71,5 +81,6 @@ def delete_doc_meta(doc_meta_id):
         doc_meta.delete()
     else:
         abort(550)
-    flash(f'Document {str(doc_meta.theme)} is successfully deleted.', 'form-success')
+    flash(f'Document {str(doc_meta.theme)} is successfully deleted.',
+          'form-success')
     return redirect(url_for('task.get_my_doc_meta'))

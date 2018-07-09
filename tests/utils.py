@@ -15,7 +15,7 @@ def logout(client):
 
 
 def is_redirect_to(response, route):
-    return response.headers.get('location') == url_for(route, _external=True)
+    return response.headers.get('location').startswith(url_for(route, _external=True))
 
 
 class MockRedisQueue(Queue):

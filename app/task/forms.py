@@ -1,14 +1,13 @@
-from app.models import Category
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, StringField, SubmitField
 from wtforms.fields.html5 import URLField
 from wtforms.validators import URL, InputRequired, Length, NumberRange
 
+from app.models import Category
+
 
 class DocMetaForm(FlaskForm):
-    theme = StringField(
-        'Theme', validators=[InputRequired(),
-                             Length(1, 256)])
+    theme = StringField('Theme', validators=[InputRequired(), Length(1, 256)])
     category = SelectField(
         'Category',
         validators=[InputRequired()],
