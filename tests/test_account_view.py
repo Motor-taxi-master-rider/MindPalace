@@ -4,7 +4,7 @@ from flask_login import current_user
 
 import app.account.views
 from app.models import User
-from utils import login, is_redirect_to, MockRedisQueue
+from utils import login, redirect_to, real_url, MockRedisQueue
 
 
 @pytest.mark.usefixtures('app')
@@ -41,8 +41,8 @@ def test_register_api(client, db, monkeypatch):
         'password': 't12345',
         'password2': 't12345',
     }
-    assert is_redirect_to(client.post(url_for('account.register'),
-                                      data=data), 'main.index')
+    assert redirect_to(client.post(url_for('account.register'),
+                                   data=data)) == real_url('main.index')
     user = User.objects(email=data['email']).first()
     assert user.first_name == data['first_name']
     assert user.last_name == data['last_name']
@@ -59,22 +59,22 @@ def test_register_api(client, db, monkeypatch):
 def test_logout_api(client, admin):
     login(client, admin)
     assert current_user == admin
-    assert is_redirect_to(client.get(url_for('account.logout')), 'main.index')
+    assert redirect_to(client.get(url_for('account.logout'))) == real_url('main.index')
     assert current_user.is_anonymous
 
 
 @pytest.mark.usefixtures('app')
 def test_manage_api(client, admin):
-    assert is_redirect_to(client.get(
-        url_for('account.manage')), 'account.login')
+    assert redirect_to(client.get(
+        url_for('account.manage'))) == real_url('account.login')
     login(client, admin)
     assert client.get(url_for('account.manage')).status_code == 200
 
 
 @pytest.mark.usefixtures('app')
 def test_get_reset_password_request_api(client, admin):
-    assert is_redirect_to(client.get(
-        url_for('account.reset_password_request')), 'main.index')
+    assert redirect_to(client.get(
+        url_for('account.reset_password_request'))) == real_url('main.index')
     login(client, admin)
     assert client.get(
         url_for('account.reset_password_request')).status_code == 200
@@ -88,8 +88,8 @@ def test_post_reset_password_request_api_success(client, admin, monkeypatch):
         User, 'generate_password_reset_token', lambda s: 'token')
     monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
 
-    assert is_redirect_to(client.post(url_for('account.reset_password_request'),
-                                      data={'email': admin.email}), 'account.login')
+    assert redirect_to(client.post(url_for('account.reset_password_request'),
+                                   data={'email': admin.email})) == real_url('account.login')
     queued_object = mock_queue.get(False)
     assert queued_object['recipient'] == admin.email
     assert queued_object['user'] == admin
@@ -105,8 +105,8 @@ def test_post_reset_password_request_api_failure(client, admin, monkeypatch):
         User, 'generate_password_reset_token', lambda s: 'token')
     monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
 
-    assert is_redirect_to(client.post(url_for('account.reset_password_request'), data={
-        'email': 'not@valid.com'}), 'account.login')
+    assert redirect_to(client.post(url_for('account.reset_password_request'), data={
+        'email': 'not@valid.com'})) == real_url('account.login')
 
 
 @pytest.mark.usefixtures('app')
@@ -117,8 +117,8 @@ def test_post_reset_password_api_success(client, admin):
         'new_password2': '54321t'
     }
     token = admin.generate_password_reset_token()
-    assert is_redirect_to(client.post(
-        url_for('account.reset_password', token=token), data=data), 'account.login')
+    assert redirect_to(client.post(
+        url_for('account.reset_password', token=token), data=data)) == real_url('account.login')
     admin.reload()
     assert admin.verify_password(data['new_password'])
 
@@ -130,8 +130,8 @@ def test_post_reset_password_api_failure(client, admin):
         'new_password': '54321t',
         'new_password2': '54321t'
     }
-    assert is_redirect_to(client.post(
-        url_for('account.reset_password', token='notvalid'), data=data), 'main.index')
+    assert redirect_to(client.post(
+        url_for('account.reset_password', token='notvalid'), data=data)) == real_url('main.index')
 
     admin.reload()
     assert not admin.verify_password(data['new_password'])
