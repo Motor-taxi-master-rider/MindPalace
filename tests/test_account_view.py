@@ -4,7 +4,7 @@ from flask_login import current_user
 
 import app.account.views
 from app.models import User
-from utils import login, redirect_to, real_url,  MockRedisQueue
+from utils import login, logout, redirect_to, real_url,  MockRedisQueue
 
 
 def test_login_success(client, admin):
@@ -167,9 +167,9 @@ def test_post_change_email_request_success(client, admin, monkeypatch):
         url_for('account.change_email_request'), data=data)) == real_url('main.index')
     admin.reload()
     queued_object = mock_queue.get(False)
-    queued_object['recipient'] = data['email']
-    queued_object['user'] = admin
-    queued_object['change_email_link'] = url_for(
+    assert queued_object['recipient'] == data['email']
+    assert queued_object['user'] == admin
+    assert queued_object['change_email_link'] == url_for(
         'account.change_email', token='token', _external=True)
 
 
@@ -229,9 +229,9 @@ def test_get_confirm_request(client, admin, monkeypatch):
     assert redirect_to(client.get(
         url_for('account.confirm_request'))) == real_url('main.index')
     queued_object = mock_queue.get(False)
-    queued_object['recipient'] = admin.email
-    queued_object['user'] = admin
-    queued_object['confirm_link'] = url_for(
+    assert queued_object['recipient'] == admin.email
+    assert queued_object['user'] == admin
+    assert queued_object['confirm_link'] == url_for(
         'account.confirm', token='token', _external=True)
 
 
@@ -275,6 +275,36 @@ def test_post_join_from_invite_success(client):
                                            user_id=str(new_user.id), token=token), data=data)) == real_url('account.login')
     new_user.reload()
     assert new_user.verify_password('t12345')
+
+
+@pytest.mark.usefixtures('db')
+def test_post_join_from_invite_failure(client, admin, monkeypatch):
+    new_user = User(email='user@user.com')
+    new_user.save()
+    token = new_user.generate_confirmation_token()
+
+    login(client, admin)
+    assert redirect_to(client.post(url_for('account.join_from_invite',
+                                           user_id=str(new_user.id), token=token))) == real_url('main.index')
+
+    logout(client)
+    assert client.post(url_for('account.join_from_invite',
+                               user_id='1'*24, token=token)).status_code == 404
+
+    assert redirect_to(client.post(url_for('account.join_from_invite',
+                                           user_id=str(admin.id), token=token))) == real_url('main.index')
+
+    mock_queue = MockRedisQueue()
+    monkeypatch.setattr(User, 'generate_confirmation_token',
+                        lambda s: 'new_token')
+    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
+    assert redirect_to(client.post(url_for('account.join_from_invite',
+                                           user_id=str(new_user.id), token='invalid'))) == real_url('main.index')
+    queued_object = mock_queue.get(False)
+    assert queued_object['recipient'] == new_user.email
+    assert queued_object['user'] == new_user
+    assert queued_object['invite_link'] == url_for(
+        'account.join_from_invite', user_id=str(new_user.id), token='new_token', _external=True)
 
 
 def test_get_unconfirmed(client, admin):

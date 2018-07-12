@@ -1,4 +1,5 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (Blueprint, abort, flash, redirect, render_template, request,
+                   url_for)
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_rq import get_queue
 
@@ -215,9 +216,9 @@ def join_from_invite(user_id, token):
         flash('You are already logged in.', 'error')
         return redirect(url_for('main.index'))
 
-    new_user = User.objects.get(id=user_id)
+    new_user = User.objects(id=user_id).first()
     if new_user is None:
-        return redirect(404)
+        abort(404)
 
     if new_user.password is not None:
         flash('You have already joined.', 'error')

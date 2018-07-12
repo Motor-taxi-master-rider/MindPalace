@@ -1,6 +1,6 @@
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urljoin, urlparse
 
-from flask import url_for, request, redirect
+from flask import redirect, request, url_for
 
 
 def register_template_utils(app):
