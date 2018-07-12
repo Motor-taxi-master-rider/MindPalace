@@ -1,7 +1,6 @@
-from flask import url_for
-from wtforms.compat import text_type
-from wtforms.fields import Field
-from wtforms.widgets import HiddenInput
+from urllib.parse import urlparse, urljoin
+
+from flask import url_for, request, redirect
 
 
 def register_template_utils(app):
@@ -23,27 +22,15 @@ def index_for_role(role):
     return url_for(role.index)
 
 
-class CustomSelectField(Field):
-    widget = HiddenInput()
+def is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and \
+           ref_url.netloc == test_url.netloc
 
-    def __init__(self,
-                 label='',
-                 validators=None,
-                 multiple=False,
-                 choices=(),
-                 allow_custom=True,
-                 **kwargs):
-        super(CustomSelectField, self).__init__(label, validators, **kwargs)
-        self.multiple = multiple
-        self.choices = choices
-        self.allow_custom = allow_custom
 
-    def _value(self):
-        return text_type(self.data) if self.data is not None else ''
-
-    def process_formdata(self, valuelist):
-        if valuelist:
-            self.data = valuelist[1]
-            self.raw_data = [valuelist[1]]
-        else:
-            self.data = ''
+def redirect_back(endpoint, **values):
+    target = request.form['next']
+    if not target or not is_safe_url(target):
+        target = url_for(endpoint, **values)
+    return redirect(target)

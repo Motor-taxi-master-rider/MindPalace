@@ -137,8 +137,6 @@
         {{ field(class='ui button') }}
     {% elif field.type == 'FormField' %}
         {{ render_form(field) }}
-    {% elif field.type == 'CustomSelectField' %}
-        {{ render_custom_select(field) }}
     {% else %}
         {{ field.label }}
         {% if field.description %}
