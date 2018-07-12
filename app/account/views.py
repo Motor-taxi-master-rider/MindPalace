@@ -216,9 +216,7 @@ def join_from_invite(user_id, token):
         flash('You are already logged in.', 'error')
         return redirect(url_for('main.index'))
 
-    new_user = User.objects(id=user_id).first()
-    if new_user is None:
-        abort(404)
+    new_user = User.objects.get_or_404(id=user_id)
 
     if new_user.password is not None:
         flash('You have already joined.', 'error')

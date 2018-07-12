@@ -33,3 +33,18 @@ def admin(db):
     admin.save()
     yield admin
     admin.delete()
+
+
+@pytest.fixture(scope='function')
+def user(db):
+    user_role = Role.objects(name='User').first()
+    user = User(
+        first_name='User',
+        last_name='Account',
+        password='test',
+        confirmed=True,
+        email='user@user.com',
+        role=user_role)
+    user.save()
+    yield user
+    user.delete()

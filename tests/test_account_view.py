@@ -198,11 +198,9 @@ def test_post_change_email_request_faliure(client, admin, monkeypatch):
 
 
 def test_get_change_email_success(client, admin):
-    token = admin.generate_email_change_token('new@admin.com')
-    assert redirect_to(client.get(url_for('account.change_email', token=token))
-                       ) == real_url('account.login')
     login(client, admin)
 
+    token = admin.generate_email_change_token('new@admin.com')
     assert redirect_to(client.get(url_for('account.change_email',
                                           token=token))) == real_url('main.index')
     admin.reload()

@@ -139,9 +139,7 @@ def change_account_type(user_id):
 @admin_required
 def delete_user_request(user_id):
     """Request deletion of a user's account."""
-    user = User.objects.get(id=user_id)
-    if user is None:
-        abort(404)
+    user = User.objects.get_or_404(id=user_id)
     return render_template('admin/manage_user.html', user=user)
 
 
