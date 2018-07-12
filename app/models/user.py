@@ -1,7 +1,8 @@
+import datetime
 import enum
 
 from flask import current_app
-from flask_login import AnonymousUserMixin, UserMixin
+from flask_login import AnonymousUserMixin, UserMixin, current_user
 from itsdangerous import BadSignature, SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -49,11 +50,11 @@ class User(UserMixin, db.DynamicDocument):
     first_name = db.StringField(max_length=64)
     last_name = db.StringField(max_length=64)
     email = db.StringField(max_length=64, unique=True)
+    last_seen = db.DateTimeField(default=datetime.datetime.utcnow)
     _password = db.StringField(max_length=128, db_field='password_hash')
     role = db.ReferenceField(Role)
     meta = {
-        'collection':
-        'users',
+        'collection': 'users',
         'indexes': [{
             'fields': ['first_name']
         }, {
@@ -179,6 +180,14 @@ class User(UserMixin, db.DynamicDocument):
 
     def __repr__(self):
         return '<User \'%s\'>' % self.full_name()
+
+
+@current_app.before_request
+def modify_last_seen():
+    if current_user.is_authenticated:
+        if (datetime.datetime.utcnow() - current_user.last_seen).seconds > 100:
+            current_user.last_seen = datetime.datetime.utcnow()
+            current_user.save()
 
 
 class AnonymousUser(AnonymousUserMixin):
