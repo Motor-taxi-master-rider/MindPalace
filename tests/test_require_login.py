@@ -1,8 +1,7 @@
 import pytest
-from utils import login, redirect_to, real_url,  MockRedisQueue
-
-import app.account.views
 from flask import url_for
+
+from utils import login, redirect_to, real_url
 
 
 @pytest.mark.parametrize("endpoint, arguments", [
@@ -23,7 +22,7 @@ from flask import url_for
     ('admin.delete_user_request', {'user_id': 'id'}),
     ('admin.delete_user', {'user_id': 'id'}),
 ])
-def test_api_require_login(client, admin, endpoint, arguments):
+def test_api_require_login(client, endpoint, arguments):
     assert redirect_to(client.get(url_for(endpoint, **arguments))
                        ) == real_url('account.login')
 

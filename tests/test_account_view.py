@@ -4,7 +4,7 @@ from flask_login import current_user
 
 import app.account.views
 from app.models import User
-from utils import login, logout, redirect_to, real_url,  MockRedisQueue
+from utils import login, logout, redirect_to, real_url, MockRedisQueue
 
 
 def test_login_success(client, admin):
@@ -59,14 +59,6 @@ def test_logout(client, admin):
     assert redirect_to(client.get(url_for('account.logout'))
                        ) == real_url('main.index')
     assert current_user.is_anonymous
-
-
-def test_get_reset_password_request(client, admin):
-    assert redirect_to(client.get(
-        url_for('account.reset_password_request'))) == real_url('main.index')
-    login(client, admin)
-    assert client.get(
-        url_for('account.reset_password_request')).status_code == 200
 
 
 def test_post_reset_password_request_success(client, admin, monkeypatch):
@@ -199,8 +191,8 @@ def test_post_change_email_request_faliure(client, admin, monkeypatch):
 
 def test_get_change_email_success(client, admin):
     login(client, admin)
-
     token = admin.generate_email_change_token('new@admin.com')
+
     assert redirect_to(client.get(url_for('account.change_email',
                                           token=token))) == real_url('main.index')
     admin.reload()
@@ -208,8 +200,8 @@ def test_get_change_email_success(client, admin):
 
 
 def test_get_change_email_failure(client, admin):
-    admin.generate_email_change_token('another_new@admin.com')
     login(client, admin)
+    admin.generate_email_change_token('another_new@admin.com')
 
     assert redirect_to(client.get(url_for('account.change_email',
                                           token='notvalid'))) == real_url('main.index')
@@ -234,12 +226,10 @@ def test_get_confirm_request(client, admin, monkeypatch):
 
 
 def test_get_confirm_success(client, admin):
+    login(client, admin)
     admin.confirmed = False
     admin.save()
     token = admin.generate_confirmation_token()
-    assert redirect_to(client.get(url_for('account.confirm', token=token))
-                       ) == real_url('account.login')
-    login(client, admin)
 
     assert redirect_to(client.get(
         url_for('account.confirm', token=token))) == real_url('main.index')
@@ -248,10 +238,10 @@ def test_get_confirm_success(client, admin):
 
 
 def test_get_confirm_failure(client, admin):
+    login(client, admin)
     admin.confirmed = False
     admin.save()
     admin.generate_confirmation_token()
-    login(client, admin)
 
     assert redirect_to(client.get(
         url_for('account.confirm', token='invalid'))) == real_url('main.index')
@@ -270,7 +260,8 @@ def test_post_join_from_invite_success(client):
     }
 
     assert redirect_to(client.post(url_for('account.join_from_invite',
-                                           user_id=str(new_user.id), token=token), data=data)) == real_url('account.login')
+                                           user_id=str(new_user.id), token=token), data=data)) == real_url(
+        'account.login')
     new_user.reload()
     assert new_user.verify_password('t12345')
 
@@ -287,7 +278,7 @@ def test_post_join_from_invite_failure(client, admin, monkeypatch):
 
     logout(client)
     assert client.post(url_for('account.join_from_invite',
-                               user_id='1'*24, token=token)).status_code == 404
+                               user_id='1' * 24, token=token)).status_code == 404
 
     assert redirect_to(client.post(url_for('account.join_from_invite',
                                            user_id=str(admin.id), token=token))) == real_url('main.index')
