@@ -2,7 +2,7 @@ import pytest
 from mongoengine import connect
 
 from app import create_app
-from app.models import User, Role
+from app.models import User, Role, DocumentMeta, Category
 
 
 @pytest.fixture(scope='module')
@@ -48,3 +48,31 @@ def user(db):
     user.save()
     yield user
     user.delete()
+
+
+@pytest.fixture(scope='function')
+def another_user(db):
+    user_role = Role.objects(name='User').first()
+    user = User(
+        first_name='User another',
+        last_name='Account',
+        password='test',
+        confirmed=True,
+        email='another_user@user.com',
+        role=user_role)
+    user.save()
+    yield user
+    user.delete()
+
+
+@pytest.fixture(scope='function')
+def doc(db, user):
+    doc_meta = DocumentMeta(
+        theme='hello world',
+        category=Category.REVIEWED.value,
+        url='https://www.test.com',
+        priority=1,
+        create_by=user)
+    doc_meta.save()
+    yield doc_meta
+    doc_meta.delete()

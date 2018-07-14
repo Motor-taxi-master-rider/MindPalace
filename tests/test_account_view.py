@@ -5,7 +5,7 @@ from flask_login import current_user
 import app.account.views
 from app.account.forms import LoginForm, ChangePasswordForm
 from app.models import User
-from utils import captured_templates, login, logout, redirect_to, real_url, MockRedisQueue, INVALID_USER_ID
+from utils import captured_templates, login, logout, redirect_to, real_url, MockRedisQueue, INVALID_OBJECT_ID
 
 
 def test_login_success(client, admin):
@@ -285,7 +285,7 @@ def test_post_join_from_invite_failure(client, admin, monkeypatch):
 
     logout(client)
     assert client.post(url_for('account.join_from_invite',
-                               user_id=INVALID_USER_ID, token=token)).status_code == 404
+                               user_id=INVALID_OBJECT_ID, token=token)).status_code == 404
 
     assert redirect_to(client.post(url_for('account.join_from_invite',
                                            user_id=str(admin.id), token=token))) == real_url('main.index')

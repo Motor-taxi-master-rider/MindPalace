@@ -8,9 +8,9 @@ from app.task.forms import DocMetaForm
 task = Blueprint('task', __name__)
 
 
-@task.route('/doc_meta/my_documents', methods=['GET'])
+@task.route('/doc_meta/my_documents')
 @login_required
-def get_my_doc_meta():
+def my_doc_meta():
     """Get all documents meta data of user"""
     user = User.objects.get_or_404(id=current_user.id)
     documents = DocumentMeta.objects(create_by=user).all()
@@ -26,13 +26,13 @@ def new_doc_meta():
     """new document meta data for current user"""
     form = DocMetaForm()
     if form.validate_on_submit():
-        print(form.category.data)
         doc_meta = DocumentMeta(
             theme=form.theme.data,
             category=form.category.data,
             url=form.url.data,
             priority=form.priority.data,
-            create_by=current_user)
+            create_by=current_user.id
+        )
         try:
             doc_meta.save()
         except NotUniqueError:
@@ -40,7 +40,6 @@ def new_doc_meta():
         else:
             flash(f'Document {str(doc_meta)} is successfully created.',
                   'form-success')
-            return redirect(url_for('task.new_doc_meta'))
     return render_template(
         'task/manage_document.html',
         form=form,
@@ -52,9 +51,7 @@ def new_doc_meta():
 @login_required
 def update_doc_meta(doc_meta_id):
     """update document meta data with given id"""
-    doc_meta = DocumentMeta.objects.get(id=doc_meta_id)
-    if doc_meta is None:
-        abort(404)
+    doc_meta = DocumentMeta.objects.get_or_404(id=doc_meta_id)
     form = DocMetaForm(obj=doc_meta)
     if form.validate_on_submit():
         doc_meta.theme = form.theme.data
@@ -80,7 +77,7 @@ def delete_doc_meta(doc_meta_id):
             Permission.ADMINISTER.value) or current_user == doc_meta.create_by:
         doc_meta.delete()
     else:
-        abort(550)
+        abort(401)
     flash(f'Document {str(doc_meta.theme)} is successfully deleted.',
           'form-success')
-    return redirect(url_for('task.get_my_doc_meta'))
+    return redirect(url_for('task.my_doc_meta'))

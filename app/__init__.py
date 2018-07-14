@@ -1,13 +1,12 @@
-import datetime
 import os
 
 from flask import Flask
 from flask_assets import Environment
 from flask_compress import Compress
-from flask_login import current_user, LoginManager
+from flask_login import LoginManager
 from flask_mail import Mail
-from flask_rq import RQ
 from flask_mongoengine import MongoEngine
+from flask_rq import RQ
 from flask_wtf import CSRFProtect
 
 from app.assets import app_css, app_js, vendor_css, vendor_js
@@ -75,13 +74,5 @@ def create_app(config_name):
 
     from .task import task as task_blueprint
     app.register_blueprint(task_blueprint, url_prefix='/task')
-
-    @app.before_request
-    def modify_last_seen():
-        if current_user.is_authenticated:
-            if (datetime.datetime.utcnow() -
-                    current_user.last_seen).seconds > 100:
-                current_user.last_seen = datetime.datetime.utcnow()
-                current_user.save()
 
     return app

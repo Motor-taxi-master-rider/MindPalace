@@ -21,6 +21,10 @@ from utils import login, redirect_to, real_url
     ('admin.change_account_type', {'user_id': 'id'}),
     ('admin.delete_user_request', {'user_id': 'id'}),
     ('admin.delete_user', {'user_id': 'id'}),
+    ('task.my_doc_meta', {}),
+    ('task.new_doc_meta', {}),
+    ('task.update_doc_meta', {'doc_meta_id': 'id'}),
+    ('task.delete_doc_meta', {'doc_meta_id': 'id'}),
 ])
 def test_api_require_login(client, endpoint, arguments):
     assert redirect_to(client.get(url_for(endpoint, **arguments))

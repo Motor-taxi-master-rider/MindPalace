@@ -7,7 +7,7 @@ from flask.testing import FlaskClient
 
 from app.models import User
 
-INVALID_USER_ID = '1' * 24
+INVALID_OBJECT_ID = '1' * 24
 
 
 @contextmanager

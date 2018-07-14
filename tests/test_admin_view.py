@@ -5,7 +5,7 @@ from mongoengine import DoesNotExist
 import app.admin.views
 from app.admin.forms import ChangeUserEmailForm, ChangeAccountTypeForm
 from app.models import User, Role, EditableHTML
-from utils import captured_templates, login, MockRedisQueue, redirect_to, real_url, INVALID_USER_ID
+from utils import captured_templates, login, MockRedisQueue, redirect_to, real_url, INVALID_OBJECT_ID
 
 
 def test_post_new_user(client, admin):
@@ -63,7 +63,7 @@ def test_get_user_info(client, admin):
         assert template.name == 'admin/manage_user.html'
         assert context['user'] == admin
 
-    assert client.get(url_for('admin.user_info', user_id=INVALID_USER_ID)).status_code == 404
+    assert client.get(url_for('admin.user_info', user_id=INVALID_OBJECT_ID)).status_code == 404
 
 
 def test_post_change_user_email(client, admin):
@@ -79,7 +79,7 @@ def test_post_change_user_email(client, admin):
         admin.reload()
         assert admin.email == data['email']
 
-    assert client.post(url_for('admin.change_user_email', user_id=INVALID_USER_ID)).status_code == 404
+    assert client.post(url_for('admin.change_user_email', user_id=INVALID_OBJECT_ID)).status_code == 404
 
 
 def test_post_change_account_type(client, admin, user):
@@ -99,7 +99,7 @@ def test_post_change_account_type(client, admin, user):
     assert redirect_to(client.post(url_for('admin.change_account_type', user_id=str(admin.id)), data=data)) == \
            real_url('admin.user_info', user_id=admin.id)
 
-    assert client.post(url_for('admin.change_account_type', user_id=INVALID_USER_ID), data=data).status_code == 404
+    assert client.post(url_for('admin.change_account_type', user_id=INVALID_OBJECT_ID), data=data).status_code == 404
 
 
 def test_get_delete_user_request(client, admin):
@@ -111,7 +111,7 @@ def test_get_delete_user_request(client, admin):
         assert template.name == 'admin/manage_user.html'
         assert context['user'] == admin
 
-    assert client.get(url_for('admin.delete_user_request', user_id=INVALID_USER_ID)).status_code == 404
+    assert client.get(url_for('admin.delete_user_request', user_id=INVALID_OBJECT_ID)).status_code == 404
 
 
 def test_get_delete_user(client, admin, user):
