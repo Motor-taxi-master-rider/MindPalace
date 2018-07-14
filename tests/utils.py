@@ -1,10 +1,25 @@
+from contextlib import contextmanager
 from queue import Queue
 from urllib.parse import urlparse, urlunparse
 
-from flask import url_for, Response
+from flask import url_for, Response, template_rendered
 from flask.testing import FlaskClient
 
 from app.models import User
+
+
+@contextmanager
+def captured_templates(app):
+    def record(sender, template, context, **extra):
+        nonlocal recorded
+        recorded.append((template, context))
+
+    recorded = []
+    template_rendered.connect(record, app)
+    try:
+        yield recorded
+    finally:
+        template_rendered.disconnect(record, app)
 
 
 def login(client: FlaskClient, user: User, password: str = 'test') -> Response:

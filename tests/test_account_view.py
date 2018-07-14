@@ -3,12 +3,17 @@ from flask import url_for
 from flask_login import current_user
 
 import app.account.views
+from app.account.forms import LoginForm, ChangePasswordForm
 from app.models import User
-from utils import login, logout, redirect_to, real_url, MockRedisQueue
+from utils import captured_templates, login, logout, redirect_to, real_url, MockRedisQueue
 
 
 def test_login_success(client, admin):
-    assert client.get(url_for('account.login')).status_code == 200
+    with captured_templates(client.application) as templates:
+        assert client.get(url_for('account.login')).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/login.html'
+        assert isinstance(context['form'], LoginForm)
     assert current_user.is_anonymous
     login(client, admin)
     assert not current_user.is_anonymous
@@ -25,8 +30,6 @@ def test_login_failure(client, admin):
 
 @pytest.mark.usefixtures('db')
 def test_register(client, monkeypatch):
-    assert client.get(url_for('account.register')).status_code == 200
-
     mock_queue = MockRedisQueue()
     monkeypatch.setattr(
         User, 'generate_confirmation_token', lambda s: 'token')
@@ -137,8 +140,12 @@ def test_post_change_password_failure(client, admin):
         'new_password2': 't12345'
     }
 
-    assert client.post(
-        url_for('account.change_password'), data=data).status_code == 200
+    with captured_templates(client.application) as templates:
+        assert client.post(
+            url_for('account.change_password'), data=data).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/manage.html'
+        assert isinstance(context['form'], ChangePasswordForm)
     admin.reload()
     assert not admin.verify_password(data['new_password'])
     assert admin.verify_password('test')
@@ -300,7 +307,11 @@ def test_get_unconfirmed(client, admin):
     login(client, admin)
     admin.confirmed = False
     admin.save()
-    assert client.get(url_for('account.unconfirmed')).status_code == 200
+
+    with captured_templates(client.application) as templates:
+        assert client.get(url_for('account.unconfirmed')).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/unconfirmed.html'
 
     admin.confirmed = True
     admin.save()
