@@ -7,6 +7,8 @@ from flask.testing import FlaskClient
 
 from app.models import User
 
+INVALID_USER_ID = '1' * 24
+
 
 @contextmanager
 def captured_templates(app):
@@ -39,8 +41,8 @@ def redirect_to(response: Response) -> str:
     return urlunparse((url_parse.scheme, url_parse.netloc, url_parse.path, '', '', ''))
 
 
-def real_url(route: str) -> str:
-    return url_for(route, _external=True)
+def real_url(route: str, **arguments) -> str:
+    return url_for(route, **arguments, _external=True)
 
 
 class MockRedisQueue(Queue):

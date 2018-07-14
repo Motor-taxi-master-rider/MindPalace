@@ -32,7 +32,7 @@ def new_doc_meta():
             category=form.category.data,
             url=form.url.data,
             priority=form.priority.data,
-            create_by=current_user.id)
+            create_by=current_user)
         try:
             doc_meta.save()
         except NotUniqueError:
