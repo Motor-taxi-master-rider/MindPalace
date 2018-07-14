@@ -165,7 +165,7 @@ def test_post_change_email_request_success(client, admin, monkeypatch):
         'account.change_email', token='token', _external=True)
 
 
-def test_post_change_email_request_faliure(client, admin, monkeypatch):
+def test_post_change_email_request_failure(client, admin, monkeypatch):
     login(client, admin)
     mock_queue = MockRedisQueue()
     monkeypatch.setattr(

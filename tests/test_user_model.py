@@ -1,8 +1,11 @@
+import datetime
 import time
 
 import pytest
+from flask import url_for
 
 from app.models import AnonymousUser, Permission, Role, User
+from utils import login
 
 
 @pytest.mark.usefixtures('app')
@@ -135,3 +138,14 @@ def test_administrator():
 def test_anonymous():
     u = AnonymousUser()
     assert not u.can(Permission.GENERAL.value)
+
+
+def test_last_seen(client, user):
+    user.last_seen = datetime.datetime.utcfromtimestamp(1000000000)
+    user.save()
+    assert user.last_seen.timestamp() != pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
+
+    login(client, user)
+    client.get(url_for('main.index'))
+    user.reload()
+    assert user.last_seen.timestamp() == pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
