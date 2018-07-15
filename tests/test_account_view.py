@@ -28,6 +28,13 @@ def test_login_failure(client, admin):
     assert current_user.is_anonymous
 
 
+def test_login_with_valid_next_endpoint(client, admin):
+    assert redirect_to(client.post(url_for('account.login', next='/task/doc_meta/my_documents'), data={
+        'email': admin.email,
+        'password': 'test'
+    })) == real_url('task.my_doc_meta')
+
+
 @pytest.mark.usefixtures('db')
 def test_register(client, monkeypatch):
     mock_queue = MockRedisQueue()
