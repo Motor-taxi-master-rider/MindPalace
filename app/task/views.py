@@ -33,13 +33,9 @@ def new_doc_meta():
             priority=form.priority.data,
             create_by=current_user.id
         )
-        try:
-            doc_meta.save()
-        except NotUniqueError:
-            flash('Theme already exists.', 'form-error')
-        else:
-            flash(f'Document {str(doc_meta)} is successfully created.',
-                  'form-success')
+        doc_meta.save()
+        flash(f'Document {str(doc_meta)} is successfully created.',
+              'form-success')
     return render_template(
         'task/manage_document.html',
         form=form,

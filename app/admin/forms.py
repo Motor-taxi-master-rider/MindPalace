@@ -1,9 +1,8 @@
 from flask_mongoengine.wtf.fields import ModelSelectField
 from flask_wtf import FlaskForm
-from wtforms import ValidationError
 from wtforms.fields import PasswordField, StringField, SubmitField
 from wtforms.fields.html5 import EmailField
-from wtforms.validators import Email, EqualTo, InputRequired, Length
+from wtforms.validators import Email, EqualTo, InputRequired, Length, ValidationError
 
 from app.models import Role, User
 

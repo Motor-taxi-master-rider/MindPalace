@@ -1,10 +1,9 @@
 from flask import url_for
 from flask_wtf import FlaskForm
-from wtforms import ValidationError
 from wtforms.fields import (BooleanField, PasswordField, StringField,
                             SubmitField)
 from wtforms.fields.html5 import EmailField
-from wtforms.validators import Email, EqualTo, InputRequired, Length
+from wtforms.validators import Email, EqualTo, InputRequired, Length, ValidationError
 
 from app.models import User
 
@@ -43,7 +42,7 @@ class RegistrationForm(FlaskForm):
         if User.objects(email=field.data).first():
             raise ValidationError('Email already registered. (Did you mean to '
                                   '<a href="{}">log in</a> instead?)'.format(
-                                      url_for('account.login')))
+                url_for('account.login')))
 
 
 class RequestResetPasswordForm(FlaskForm):

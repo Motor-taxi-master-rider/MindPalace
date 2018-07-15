@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, StringField, SubmitField
 from wtforms.fields.html5 import URLField
-from wtforms.validators import URL, InputRequired, Length, NumberRange
+from wtforms.validators import URL, InputRequired, Length, NumberRange, ValidationError
 
-from app.models import Category
+from app.models import Category, DocumentMeta
 
 
 class DocMetaForm(FlaskForm):
@@ -19,3 +19,7 @@ class DocMetaForm(FlaskForm):
     priority = IntegerField(
         'Priority', validators=[NumberRange(0, 3)], default=0)
     submit = SubmitField('Submit Document')
+
+    def validate_theme(self, theme):
+        if DocumentMeta.objects(theme=theme.data).first():
+            raise ValidationError(f'Theme is already exists.')
