@@ -22,4 +22,4 @@ class DocMetaForm(FlaskForm):
 
     def validate_theme(self, theme):
         if DocumentMeta.objects(theme=theme.data).first():
-            raise ValidationError(f'Theme is already exists.')
+            raise ValidationError('Theme already exists.')
