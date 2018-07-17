@@ -20,7 +20,7 @@ class DocMetaForm(FlaskForm):
                             Length(1, 1024),
                             URL()])
     priority = SelectField(
-        'Priority', choices=[(i, i) for i in range(1, 4)], default=0)
+        'Priority', choices=[(i, i) for i in range(0, 4)], coerce=int, default=0)
     submit = SubmitField('Submit Document')
 
     def validate_theme(self, theme):
