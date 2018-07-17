@@ -62,10 +62,16 @@ def test_post_update_doc_meta_success(client, admin, doc):
         form = context['form']
         assert isinstance(form, DocMetaForm)
 
+    form.theme.data = 'new theme'
+    form.category.data = Category.HIGHLIGHT.value
     form.url.data = 'https://www.newtest.com'
+    form.priority.data = 3
     assert client.post(url_for('task.update_doc_meta', doc_meta_id=str(doc.id)), data=form.data).status_code == 200
     doc.reload()
+    assert doc.theme == 'new theme'
+    assert doc.category == Category.HIGHLIGHT.value
     assert doc.url == 'https://www.newtest.com'
+    assert doc.priority == 3
 
 
 def test_post_update_doc_meta_failure(client, admin, doc):
