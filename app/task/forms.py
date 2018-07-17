@@ -5,7 +5,7 @@ from wtforms.fields.html5 import URLField
 from wtforms.validators import URL, InputRequired, Length, NumberRange, ValidationError
 
 from app.models import Category, DocumentMeta
-from utils import INVALID_OBJECT_ID
+from app.utils import INVALID_OBJECT_ID
 
 
 class DocMetaForm(FlaskForm):
@@ -19,8 +19,8 @@ class DocMetaForm(FlaskForm):
         'Link', validators=[InputRequired(),
                             Length(1, 1024),
                             URL()])
-    priority = IntegerField(
-        'Priority', validators=[NumberRange(0, 3)], default=0)
+    priority = SelectField(
+        'Priority', choices=[(i, i) for i in range(1, 4)], default=0)
     submit = SubmitField('Submit Document')
 
     def validate_theme(self, theme):
