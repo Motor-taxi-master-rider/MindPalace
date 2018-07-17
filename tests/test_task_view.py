@@ -27,15 +27,9 @@ def test_post_new_doc_meta_success(client, admin):
         'url': 'https://www.helloword.com',
     }
 
-    with captured_templates(client.application) as templates:
-        assert client.post(url_for('task.new_doc_meta'), data=data).status_code == 200
-        template, context = templates.pop()
-        assert template.name == 'task/manage_document.html'
-        assert context['action'] == 'Create'
-        assert context['data_type'] == 'New Document'
-        assert isinstance(context['form'], DocMetaForm)
-        assert DocumentMeta.objects.get(theme=data['theme']).url == data['url']
-        assert len(DocumentMeta.objects().all()) == 2
+    assert redirect_to(client.post(url_for('task.new_doc_meta'), data=data)) == real_url('task.new_doc_meta')
+    assert DocumentMeta.objects.get(theme=data['theme']).url == data['url']
+    assert DocumentMeta.objects(theme=data['theme']).first()
 
 
 def test_post_new_doc_meta_failure(client, admin, doc):
@@ -47,7 +41,7 @@ def test_post_new_doc_meta_failure(client, admin, doc):
     }
 
     client.post(url_for('task.new_doc_meta'), data=data)
-    assert len(DocumentMeta.objects().all()) == 1
+    assert len(DocumentMeta.objects(theme=data['theme']).all()) == 1
 
 
 def test_post_update_doc_meta_success(client, admin, doc):
@@ -66,7 +60,8 @@ def test_post_update_doc_meta_success(client, admin, doc):
     form.category.data = Category.HIGHLIGHT.value
     form.url.data = 'https://www.newtest.com'
     form.priority.data = 3
-    assert client.post(url_for('task.update_doc_meta', doc_meta_id=str(doc.id)), data=form.data).status_code == 200
+    assert redirect_to(client.post(url_for('task.update_doc_meta', doc_meta_id=str(doc.id)), data=form.data)) == \
+           real_url('task.update_doc_meta', doc_meta_id=str(doc.id))
     doc.reload()
     assert doc.theme == 'new theme'
     assert doc.category == Category.HIGHLIGHT.value
@@ -77,12 +72,22 @@ def test_post_update_doc_meta_success(client, admin, doc):
 def test_post_update_doc_meta_failure(client, admin, doc):
     login(client, admin)
     data = {
-        'theme': 'whats up',
+        'theme': 'duplicate',
         'category': Category.REVIEWED.value,
         'url': 'https://www.helloword.com',
+        'priority': 1
     }
 
     assert client.post(url_for('task.update_doc_meta', doc_meta_id=INVALID_OBJECT_ID), data=data).status_code == 404
+    doc.reload()
+    assert doc.url == 'https://www.test.com'
+
+    with captured_templates(client.application) as templates:
+        assert client.post(url_for('task.update_doc_meta', doc_meta_id=str(doc.id)), data=data).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'task/manage_document.html'
+        form = context['form']
+        assert not form.validate()
     doc.reload()
     assert doc.url == 'https://www.test.com'
 

@@ -73,6 +73,14 @@ def doc(db, user):
         url='https://www.test.com',
         priority=1,
         create_by=user)
+    dup_doc_meta = DocumentMeta(
+        theme='duplicate',
+        category=Category.REVIEWED.value,
+        url='https://www.duplicate.com',
+        priority=1,
+        create_by=user)
     doc_meta.save()
+    dup_doc_meta.save()
     yield doc_meta
     doc_meta.delete()
+    dup_doc_meta.delete()

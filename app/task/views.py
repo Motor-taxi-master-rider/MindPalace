@@ -40,6 +40,7 @@ def new_doc_meta():
         else:
             flash(f'Document {str(doc_meta)} is successfully created.',
                   'form-success')
+        return redirect(url_for('task.new_doc_meta'))
     return render_template(
         'task/manage_document.html',
         form=form,
@@ -54,13 +55,17 @@ def update_doc_meta(doc_meta_id):
     doc_meta = DocumentMeta.objects.get_or_404(id=doc_meta_id)
     form = DocMetaForm(obj=doc_meta)
     if form.validate_on_submit():
-        doc_meta.update(set__theme=form.theme.data,
-                        set__category=form.category.data,
-                        set__url=form.url.data,
-                        set__priority=form.priority.data)
-        doc_meta.save()
-        flash(f'Document {str(doc_meta)} is successfully updated.',
-              'form-success')
+        try:
+            doc_meta.update(set__theme=form.theme.data,
+                            set__category=form.category.data,
+                            set__url=form.url.data,
+                            set__priority=form.priority.data)
+        except NotUniqueError:
+            flash('Theme already exists.', 'form-error')
+        else:
+            flash(f'Document {str(doc_meta)} is successfully updated.',
+                  'form-success')
+        return redirect(url_for('task.update_doc_meta', doc_meta_id=doc_meta_id))
     return render_template(
         'task/manage_document.html',
         form=form,
