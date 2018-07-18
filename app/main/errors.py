@@ -29,7 +29,6 @@ def internal_server_error(_):
 @main.before_request
 def modify_last_seen():
     if current_user.is_authenticated:
-        if (datetime.datetime.utcnow() -
-            current_user.last_seen).seconds > 100:
+        if (datetime.datetime.utcnow() - current_user.last_seen).seconds > 100:
             current_user.last_seen = datetime.datetime.utcnow()
             current_user.save()

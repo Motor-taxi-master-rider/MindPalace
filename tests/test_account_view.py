@@ -5,7 +5,8 @@ from flask_login import current_user
 import app.account.views
 from app.account.forms import LoginForm, ChangePasswordForm
 from app.models import User
-from utils import captured_templates, login, logout, redirect_to, real_url, MockRedisQueue, INVALID_OBJECT_ID
+from app.utils import INVALID_OBJECT_ID
+from utils import captured_templates, login, logout, redirect_to, real_url, MockRedisQueue
 
 
 def test_login_success(client, admin):

@@ -31,8 +31,7 @@ def new_doc_meta():
             category=form.category.data,
             url=form.url.data,
             priority=form.priority.data,
-            create_by=current_user.id
-        )
+            create_by=current_user.id)
         try:
             doc_meta.save()
         except NotUniqueError:
@@ -56,16 +55,18 @@ def update_doc_meta(doc_meta_id):
     form = DocMetaForm(obj=doc_meta)
     if form.validate_on_submit():
         try:
-            doc_meta.update(set__theme=form.theme.data,
-                            set__category=form.category.data,
-                            set__url=form.url.data,
-                            set__priority=form.priority.data)
+            doc_meta.update(
+                set__theme=form.theme.data,
+                set__category=form.category.data,
+                set__url=form.url.data,
+                set__priority=form.priority.data)
         except NotUniqueError:
             flash('Theme already exists.', 'form-error')
         else:
             flash(f'Document {str(doc_meta)} is successfully updated.',
                   'form-success')
-        return redirect(url_for('task.update_doc_meta', doc_meta_id=doc_meta_id))
+        return redirect(
+            url_for('task.update_doc_meta', doc_meta_id=doc_meta_id))
     return render_template(
         'task/manage_document.html',
         form=form,

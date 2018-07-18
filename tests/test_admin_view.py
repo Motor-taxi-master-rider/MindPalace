@@ -5,7 +5,8 @@ from mongoengine import DoesNotExist
 import app.admin.views
 from app.admin.forms import ChangeUserEmailForm, ChangeAccountTypeForm
 from app.models import User, Role, EditableHTML
-from utils import captured_templates, login, MockRedisQueue, redirect_to, real_url, INVALID_OBJECT_ID
+from app.utils import INVALID_OBJECT_ID
+from utils import captured_templates, login, MockRedisQueue, redirect_to, real_url
 
 
 def test_post_new_user(client, admin):

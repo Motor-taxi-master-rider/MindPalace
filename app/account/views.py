@@ -1,5 +1,4 @@
-from flask import (Blueprint, flash, redirect, render_template, request,
-                   url_for)
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_rq import get_queue
 
@@ -91,8 +90,9 @@ def reset_password_request():
                 user=user,
                 reset_link=reset_link,
                 next=request.args.get('next'))
-        flash('A password reset link has been sent to {}.'.format(
-            form.email.data), 'warning')
+        flash(
+            'A password reset link has been sent to {}.'.format(
+                form.email.data), 'warning')
         return redirect(url_for('account.login'))
     return render_template('account/reset_password.html', form=form)
 
@@ -187,8 +187,9 @@ def confirm_request():
         # current_user is a LocalProxy, we want the underlying user object
         user=current_user._get_current_object(),
         confirm_link=confirm_link)
-    flash('A new confirmation link has been sent to {}.'.format(
-        current_user.email), 'warning')
+    flash(
+        'A new confirmation link has been sent to {}.'.format(
+            current_user.email), 'warning')
     return redirect(url_for('main.index'))
 
 
@@ -227,14 +228,16 @@ def join_from_invite(user_id, token):
         if form.validate_on_submit():
             new_user.password = form.password.data
             new_user.save()
-            flash('Your password has been set. After you log in, you can '
-                  'go to the "Your Account" page to review your account '
-                  'information and settings.', 'success')
+            flash(
+                'Your password has been set. After you log in, you can '
+                'go to the "Your Account" page to review your account '
+                'information and settings.', 'success')
             return redirect(url_for('account.login'))
         return render_template('account/join_invite.html', form=form)
     else:
-        flash('The confirmation link is invalid or has expired. Another '
-              'invite email with a new link has been sent to you.', 'error')
+        flash(
+            'The confirmation link is invalid or has expired. Another '
+            'invite email with a new link has been sent to you.', 'error')
         token = new_user.generate_confirmation_token()
         invite_link = url_for(
             'account.join_from_invite',

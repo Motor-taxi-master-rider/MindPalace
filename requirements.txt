@@ -35,3 +35,5 @@ WTForms==2.1
 Flask-mongoengine
 mongomock
 pytest-flask
+isort
+yapf

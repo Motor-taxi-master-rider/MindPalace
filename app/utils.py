@@ -1,7 +1,8 @@
 from urllib.parse import urljoin, urlparse
 
 from flask import redirect, request, url_for
-from tests.utils import INVALID_OBJECT_ID
+
+INVALID_OBJECT_ID = '1' * 24
 
 
 def register_template_utils(app):
