@@ -55,11 +55,11 @@ def update_doc_meta(doc_meta_id):
     form = DocMetaForm(obj=doc_meta)
     if form.validate_on_submit():
         try:
-            doc_meta.update(
-                set__theme=form.theme.data,
-                set__category=form.category.data,
-                set__url=form.url.data,
-                set__priority=form.priority.data)
+            doc_meta.theme = form.theme.data
+            doc_meta.category = form.category.data
+            doc_meta.url = form.url.data
+            doc_meta.priority = form.priority.data
+            doc_meta.save()
         except NotUniqueError:
             flash('Theme already exists.', 'form-error')
         else:

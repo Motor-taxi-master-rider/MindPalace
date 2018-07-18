@@ -2,7 +2,7 @@ import pytest
 from mongoengine import connect
 
 from app import create_app
-from app.models import User, Role, DocumentMeta, Category
+from app.models import Category, DocumentMeta, Role, User
 
 
 @pytest.fixture(scope='module')

@@ -3,10 +3,11 @@ from flask import url_for
 from mongoengine import DoesNotExist
 
 import app.admin.views
-from app.admin.forms import ChangeUserEmailForm, ChangeAccountTypeForm
-from app.models import User, Role, EditableHTML
+from app.admin.forms import ChangeAccountTypeForm, ChangeUserEmailForm
+from app.models import EditableHTML, Role, User
 from app.utils import INVALID_OBJECT_ID
-from utils import captured_templates, login, MockRedisQueue, redirect_to, real_url
+from utils import (MockRedisQueue, captured_templates, login, real_url,
+                   redirect_to)
 
 
 def test_post_new_user(client, admin):
@@ -41,7 +42,8 @@ def test_post_invite_user(client, admin, monkeypatch):
         'email': 'test@test.com',
     }
 
-    assert client.post(url_for('admin.invite_user'), data=data).status_code == 200
+    assert client.post(
+        url_for('admin.invite_user'), data=data).status_code == 200
     new_user = User.objects(email='test@test.com').first()
     assert new_user is not None
     assert new_user.role == user_role
@@ -49,22 +51,25 @@ def test_post_invite_user(client, admin, monkeypatch):
     queued_object = mock_queue.get(False)
     assert queued_object['recipient'] == data['email']
     assert queued_object['user'] == new_user
-    assert queued_object['invite_link'] == url_for('account.join_from_invite',
-                                                   user_id=new_user.id,
-                                                   token='token',
-                                                   _external=True)
+    assert queued_object['invite_link'] == url_for(
+        'account.join_from_invite',
+        user_id=new_user.id,
+        token='token',
+        _external=True)
 
 
 def test_get_user_info(client, admin):
     login(client, admin)
 
     with captured_templates(client.application) as templates:
-        assert client.get(url_for('admin.user_info', user_id=str(admin.id))).status_code == 200
+        assert client.get(url_for('admin.user_info',
+                                  user_id=str(admin.id))).status_code == 200
         template, context = templates.pop()
         assert template.name == 'admin/manage_user.html'
         assert context['user'] == admin
 
-    assert client.get(url_for('admin.user_info', user_id=INVALID_OBJECT_ID)).status_code == 404
+    assert client.get(url_for('admin.user_info',
+                              user_id=INVALID_OBJECT_ID)).status_code == 404
 
 
 def test_post_change_user_email(client, admin):
@@ -72,7 +77,9 @@ def test_post_change_user_email(client, admin):
     data = {'email': 'new@admin.com'}
 
     with captured_templates(client.application) as templates:
-        assert client.post(url_for('admin.change_user_email', user_id=str(admin.id)), data=data).status_code == 200
+        assert client.post(
+            url_for('admin.change_user_email', user_id=str(admin.id)),
+            data=data).status_code == 200
         template, context = templates.pop()
         assert template.name == 'admin/manage_user.html'
         assert context['user'] == admin
@@ -80,7 +87,9 @@ def test_post_change_user_email(client, admin):
         admin.reload()
         assert admin.email == data['email']
 
-    assert client.post(url_for('admin.change_user_email', user_id=INVALID_OBJECT_ID)).status_code == 404
+    assert client.post(
+        url_for('admin.change_user_email',
+                user_id=INVALID_OBJECT_ID)).status_code == 404
 
 
 def test_post_change_account_type(client, admin, user):
@@ -89,7 +98,9 @@ def test_post_change_account_type(client, admin, user):
     data = {'role': str(admin_role.id)}
 
     with captured_templates(client.application) as templates:
-        assert client.post(url_for('admin.change_account_type', user_id=str(user.id)), data=data).status_code == 200
+        assert client.post(
+            url_for('admin.change_account_type', user_id=str(user.id)),
+            data=data).status_code == 200
         template, context = templates.pop()
         assert template.name == 'admin/manage_user.html'
         assert context['user'] == user
@@ -100,19 +111,25 @@ def test_post_change_account_type(client, admin, user):
     assert redirect_to(client.post(url_for('admin.change_account_type', user_id=str(admin.id)), data=data)) == \
            real_url('admin.user_info', user_id=admin.id)
 
-    assert client.post(url_for('admin.change_account_type', user_id=INVALID_OBJECT_ID), data=data).status_code == 404
+    assert client.post(
+        url_for('admin.change_account_type', user_id=INVALID_OBJECT_ID),
+        data=data).status_code == 404
 
 
 def test_get_delete_user_request(client, admin):
     login(client, admin)
 
     with captured_templates(client.application) as templates:
-        assert client.get(url_for('admin.delete_user_request', user_id=str(admin.id))).status_code == 200
+        assert client.get(
+            url_for('admin.delete_user_request',
+                    user_id=str(admin.id))).status_code == 200
         template, context = templates.pop()
         assert template.name == 'admin/manage_user.html'
         assert context['user'] == admin
 
-    assert client.get(url_for('admin.delete_user_request', user_id=INVALID_OBJECT_ID)).status_code == 404
+    assert client.get(
+        url_for('admin.delete_user_request',
+                user_id=INVALID_OBJECT_ID)).status_code == 404
 
 
 def test_get_delete_user(client, admin, user):
@@ -130,10 +147,7 @@ def test_get_delete_user(client, admin, user):
 
 def test_get_update_editor_contents(client, admin):
     login(client, admin)
-    data = {
-        'edit_data': 'test',
-        'editor_name': 'admin'
-    }
+    data = {'edit_data': 'test', 'editor_name': 'admin'}
 
     client.post(url_for('admin.update_editor_contents'), data=data)
     editor_contents = EditableHTML.objects(editor_name='admin').first()

@@ -96,8 +96,8 @@ def run_worker():
 @manager.command
 def format():
     """Runs the yapf and isort formatters over the project."""
-    isort = 'isort -rc *.py app/'
-    yapf = 'yapf -r -i *.py app/'
+    isort = 'isort -rc app/ tests/'
+    yapf = 'yapf -r -i *.py app/ tests/'
 
     print('Running {}'.format(isort))
     subprocess.call(isort, shell=True)

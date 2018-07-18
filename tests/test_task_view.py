@@ -2,9 +2,9 @@ import pytest
 from flask import url_for
 
 from app.models import Category, DocumentMeta
-from app.utils import INVALID_OBJECT_ID
 from app.task.forms import DocMetaForm
-from utils import captured_templates, login, redirect_to, real_url
+from app.utils import INVALID_OBJECT_ID
+from utils import captured_templates, login, real_url, redirect_to
 
 
 @pytest.mark.usefixtures('doc')
@@ -16,7 +16,8 @@ def test_get_my_doc_meta(client, admin):
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
         assert context['categories'] == Category
-        assert list(context['documents']) == list(DocumentMeta.objects(create_by=admin).all())
+        assert list(context['documents']) == list(
+            DocumentMeta.objects(create_by=admin).all())
 
 
 @pytest.mark.usefixtures('doc')
@@ -28,7 +29,8 @@ def test_post_new_doc_meta_success(client, admin):
         'url': 'https://www.helloword.com',
     }
 
-    assert redirect_to(client.post(url_for('task.new_doc_meta'), data=data)) == real_url('task.new_doc_meta')
+    assert redirect_to(client.post(url_for('task.new_doc_meta'),
+                                   data=data)) == real_url('task.new_doc_meta')
     assert DocumentMeta.objects.get(theme=data['theme']).url == data['url']
     assert DocumentMeta.objects(theme=data['theme']).first()
 
@@ -49,7 +51,9 @@ def test_post_update_doc_meta_success(client, admin, doc):
     login(client, admin)
 
     with captured_templates(client.application) as templates:
-        assert client.get(url_for('task.update_doc_meta', doc_meta_id=str(doc.id))).status_code == 200
+        assert client.get(
+            url_for('task.update_doc_meta',
+                    doc_meta_id=str(doc.id))).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/manage_document.html'
         assert context['action'] == 'Update'
@@ -79,12 +83,16 @@ def test_post_update_doc_meta_failure(client, admin, doc):
         'priority': 1
     }
 
-    assert client.post(url_for('task.update_doc_meta', doc_meta_id=INVALID_OBJECT_ID), data=data).status_code == 404
+    assert client.post(
+        url_for('task.update_doc_meta', doc_meta_id=INVALID_OBJECT_ID),
+        data=data).status_code == 404
     doc.reload()
     assert doc.url == 'https://www.test.com'
 
     with captured_templates(client.application) as templates:
-        assert client.post(url_for('task.update_doc_meta', doc_meta_id=str(doc.id)), data=data).status_code == 200
+        assert client.post(
+            url_for('task.update_doc_meta', doc_meta_id=str(doc.id)),
+            data=data).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/manage_document.html'
         form = context['form']
@@ -96,24 +104,30 @@ def test_post_update_doc_meta_failure(client, admin, doc):
 def test_post_delete_doc_meta_success_for_admin(client, admin, doc):
     login(client, admin)
 
-    assert redirect_to(client.post(url_for('task.delete_doc_meta', doc_meta_id=str(doc.id)))) == real_url(
-        'task.my_doc_meta')
+    assert redirect_to(
+        client.post(url_for('task.delete_doc_meta', doc_meta_id=str(
+            doc.id)))) == real_url('task.my_doc_meta')
     assert not DocumentMeta.objects(theme=doc.theme).first()
 
 
 def test_post_delete_doc_meta_success_for_author(client, user, doc):
     login(client, user)
 
-    assert redirect_to(client.post(url_for('task.delete_doc_meta', doc_meta_id=str(doc.id)))) == real_url(
-        'task.my_doc_meta')
+    assert redirect_to(
+        client.post(url_for('task.delete_doc_meta', doc_meta_id=str(
+            doc.id)))) == real_url('task.my_doc_meta')
     assert not DocumentMeta.objects(theme=doc.theme).first()
 
 
 def test_post_delete_doc_meta_failure(client, another_user, doc):
     login(client, another_user)
 
-    assert client.post(url_for('task.delete_doc_meta', doc_meta_id=INVALID_OBJECT_ID)).status_code == 404
+    assert client.post(
+        url_for('task.delete_doc_meta',
+                doc_meta_id=INVALID_OBJECT_ID)).status_code == 404
     assert DocumentMeta.objects(theme=doc.theme).first()
 
-    assert client.post(url_for('task.delete_doc_meta', doc_meta_id=str(doc.id))).status_code == 401
+    assert client.post(
+        url_for('task.delete_doc_meta',
+                doc_meta_id=str(doc.id))).status_code == 401
     assert DocumentMeta.objects(theme=doc.theme).first()

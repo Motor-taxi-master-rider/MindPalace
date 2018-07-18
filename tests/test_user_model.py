@@ -119,8 +119,7 @@ def test_make_administrator():
     Role.insert_roles()
     u = User(email='user@example.com', password='password')
     assert not u.can(Permission.ADMINISTER.value)
-    u.role = Role.objects(
-        permissions=Permission.ADMINISTER.value).first()
+    u.role = Role.objects(permissions=Permission.ADMINISTER.value).first()
     assert u.can(Permission.ADMINISTER.value)
 
 
@@ -143,9 +142,11 @@ def test_anonymous():
 def test_last_seen(client, user):
     user.last_seen = datetime.datetime.utcfromtimestamp(1000000000)
     user.save()
-    assert user.last_seen.timestamp() != pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
+    assert user.last_seen.timestamp() != pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)
 
     login(client, user)
     client.get(url_for('main.index'))
     user.reload()
-    assert user.last_seen.timestamp() == pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
+    assert user.last_seen.timestamp() == pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)

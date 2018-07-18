@@ -1,7 +1,9 @@
-from app.models import Category, DocumentCache, DocumentMeta, User
-import pytest
 import datetime
+
+import pytest
 from mongoengine.errors import ValidationError
+
+from app.models import Category, DocumentCache, DocumentMeta, User
 
 
 @pytest.mark.usefixtures('db')
@@ -10,8 +12,10 @@ def test_update_time_init():
     dc = DocumentCache(content='test content')
     dm.save()
     dc.save()
-    assert dm.update_at.timestamp() == pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
-    assert dc.update_at.timestamp() == pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
+    assert dm.update_at.timestamp() == pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)
+    assert dc.update_at.timestamp() == pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)
 
 
 @pytest.mark.usefixtures('db')
@@ -20,13 +24,17 @@ def test_update_time_change():
     dm.update_at = datetime.datetime.utcfromtimestamp(1000000000)
     dc = DocumentCache(content='test content')
     dc.update_at = datetime.datetime.utcfromtimestamp(1000000000)
-    assert dm.update_at.timestamp() != pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
-    assert dc.update_at.timestamp() != pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
+    assert dm.update_at.timestamp() != pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)
+    assert dc.update_at.timestamp() != pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)
 
     dm.save()
     dc.save()
-    assert dm.update_at.timestamp() == pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
-    assert dc.update_at.timestamp() == pytest.approx(datetime.datetime.utcnow().timestamp(), abs=1)
+    assert dm.update_at.timestamp() == pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)
+    assert dc.update_at.timestamp() == pytest.approx(
+        datetime.datetime.utcnow().timestamp(), abs=1)
 
 
 @pytest.mark.usefixtures('db')
@@ -63,7 +71,8 @@ def test_large_document_cache_content():
 def test_create_by_user():
     u = User(email='test', password='password')
     u.save()
-    dm = DocumentMeta(theme='valid', category=Category.REVIEWED.value, create_by=u)
+    dm = DocumentMeta(
+        theme='valid', category=Category.REVIEWED.value, create_by=u)
     dm.save()
     assert dm.create_by == u
     assert dm.create_by.email == 'test'
