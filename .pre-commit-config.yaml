@@ -1,9 +1,9 @@
+exclude: 'venv/'
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v1.3.0
     hooks:
     -   id: trailing-whitespace
-    -   id: end-of-file-fixer
     -   id: check-yaml
     -   id: check-json
     -   id: check-merge-conflict
@@ -31,5 +31,6 @@ repos:
     -   id: pytest
         name: pytest
         description: This hook triggers pytest.
-        entry: pytest -n 4
+        entry: pytest -n 4  --maxfail=10  --result-log .logs/pytest.log
         language: python
+        pass_filenames: false
