@@ -1,8 +1,10 @@
 #custom
+.coverage
 .isort.cfg
 .mypy_cache/
 .pytest_cache/
 .logs/
+htmlcov/
 app/static/scripts/*
 app/static/styles/vendor.css
 

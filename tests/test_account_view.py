@@ -5,7 +5,9 @@ from utils import (MockRedisQueue, captured_templates, login, logout, real_url,
                    redirect_to)
 
 import app.account.views
-from app.account.forms import ChangePasswordForm, LoginForm
+from app.account.forms import (ChangePasswordForm, CreatePasswordForm,
+                               LoginForm, RegistrationForm,
+                               RequestResetPasswordForm, ResetPasswordForm)
 from app.models import User
 from app.utils import INVALID_OBJECT_ID
 
@@ -42,8 +44,16 @@ def test_login_with_valid_next_endpoint(client, admin):
             })) == real_url('task.my_doc_meta')
 
 
+def test_get_register(client):
+    with captured_templates(client.application) as templates:
+        assert client.get(url_for('account.register')).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/register.html'
+        assert isinstance(context['form'], RegistrationForm)
+
+
 @pytest.mark.usefixtures('db')
-def test_register(client, monkeypatch):
+def test_post_register(client, monkeypatch):
     mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_confirmation_token', lambda s: 'token')
     monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
@@ -77,6 +87,28 @@ def test_logout(client, admin):
     assert current_user.is_anonymous
 
 
+def test_get_manage(client, admin):
+    login(client, admin)
+
+    with captured_templates(client.application) as templates:
+        assert client.get(url_for('account.manage')).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/manage.html'
+        assert context['user'] == admin
+        assert context['form'] is None
+
+
+def test_get_reset_password_request(client, admin):
+    login(client, admin)
+
+    with captured_templates(client.application) as templates:
+        assert client.get(
+            url_for('account.reset_password_request')).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/reset_password.html'
+        assert isinstance(context['form'], RequestResetPasswordForm)
+
+
 def test_post_reset_password_request_success(client, admin, monkeypatch):
     login(client, admin)
     mock_queue = MockRedisQueue()
@@ -96,6 +128,9 @@ def test_post_reset_password_request_success(client, admin, monkeypatch):
 
 
 def test_post_reset_password_request_failure(client, admin, monkeypatch):
+    assert redirect_to(client.post(
+        url_for('account.reset_password_request'))) == real_url('main.index')
+
     login(client, admin)
     mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_password_reset_token',
@@ -106,6 +141,15 @@ def test_post_reset_password_request_failure(client, admin, monkeypatch):
         client.post(
             url_for('account.reset_password_request'),
             data={'email': 'not@valid.com'})) == real_url('account.login')
+
+
+def test_get_reset_password(client):
+    with captured_templates(client.application) as templates:
+        assert client.get(url_for('account.reset_password',
+                                  token='valid')).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/reset_password.html'
+        assert isinstance(context['form'], ResetPasswordForm)
 
 
 def test_post_reset_password_success(client, admin):
@@ -130,9 +174,16 @@ def test_post_reset_password_failure(client, admin):
         'new_password2': '54321t'
     }
 
+    login(client, admin)
     assert redirect_to(
         client.post(
-            url_for('account.reset_password', token='notvalid'),
+            url_for('account.reset_password', token='valid'),
+            data=data)) == real_url('main.index')
+    logout(client)
+
+    assert redirect_to(
+        client.post(
+            url_for('account.reset_password', token='not valid'),
             data=data)) == real_url('main.index')
     admin.reload()
     assert not admin.verify_password(data['new_password'])
@@ -279,6 +330,30 @@ def test_get_confirm_failure(client, admin):
     admin.reload()
     assert not admin.confirmed
 
+    admin.confirmed = True
+    admin.save()
+    assert redirect_to(
+        client.get(url_for('account.confirm',
+                           token='invalid'))) == real_url('main.index')
+
+
+def test_get_join_from_invite(client):
+    new_user = User(email='user@user.com')
+    new_user.save()
+    token = new_user.generate_confirmation_token()
+
+    with captured_templates(client.application) as templates:
+        assert client.get(
+            url_for(
+                'account.join_from_invite',
+                user_id=str(new_user.id),
+                token=token)).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'account/join_invite.html'
+        assert isinstance(context['form'], CreatePasswordForm)
+
+    new_user.delete()
+
 
 @pytest.mark.usefixtures('db')
 def test_post_join_from_invite_success(client):
@@ -296,6 +371,8 @@ def test_post_join_from_invite_success(client):
             data=data)) == real_url('account.login')
     new_user.reload()
     assert new_user.verify_password('t12345')
+
+    new_user.delete()
 
 
 @pytest.mark.usefixtures('db')

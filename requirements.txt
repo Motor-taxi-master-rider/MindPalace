@@ -26,6 +26,7 @@ packaging==16.8
 pre-commit
 psycopg2==2.7
 pyparsing==2.1.10
+pytest-cov
 pytest-flask
 pytest-xdist
 python-dateutil==2.6.0
