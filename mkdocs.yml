@@ -1,5 +1,5 @@
 site_name: Flask-Base Documentation
-pages: 
+pages:
   - Home: index.md
   - Setup: setup.md
   - Commands: manage_commands.md

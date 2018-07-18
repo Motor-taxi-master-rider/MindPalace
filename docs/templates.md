@@ -16,7 +16,7 @@ This will cover various methods used in our jinja templates.
     </head>
     <body>
       {# Example dropdown menu setup. Uncomment lines to view
-        {% set dropdown = 
+        {% set dropdown =
           [
             ('account stuff',
               [
@@ -98,7 +98,7 @@ Parameters:
     method        – <form> method attribute (default 'POST')
     extra_classes – The classes to add to the <form>.
     enctype       – <form> enctype attribute. If None, will automatically be set to
-                    multipart/form-data if a FileField is present in the form. 
+                    multipart/form-data if a FileField is present in the form.
 ```
 
    Render Form renders a form object. It calls the begin form macro. Initially
@@ -106,10 +106,10 @@ Parameters:
    have values gathered from the get_flashed_messages method from flask. Note
    that all flashes are stored in SESSIOn with a category type. For most of our
    purposes, we only have form-error and form-success as our flash types (the
-   second parameter in the flash function call seen in the views. 
+   second parameter in the flash function call seen in the views.
 
    Then the begin_form macro is called and for each form field in the provided
-   form render_form_field macro is called with the field. 
+   form render_form_field macro is called with the field.
    All hidden fields (i.e. the CSRF field) and all submit fields is not rendered
    at this fime in render_form_field. In the render_form_field
    method, render_form_input is called for each input in the form field.
@@ -123,7 +123,7 @@ Parameters:
 
 Set up the form, including hidden fields and error states.
 begin_form is called from render_form. First a check is performed to check
-if there exists a field within the form with type equal to FileField. This 
+if there exists a field within the form with type equal to FileField. This
 check is performed via filter ("|") in Jinja. This initial check produces a
 filtered object, the 'list' filter creates a iterable list which we can then
 check the length of with 'length > 0'. So if this check passes, then the enctype
@@ -131,20 +131,20 @@ must be set to multipart/form-data to accomodate a file upload. Otherwise, there
 is no enctype.
 
 Then the form tag is created with a method default of POST, enctype decided by the
-check explained above. If there are errors (by field specific validator errors or 
-if the flashes.error, flashes.warning, flashes.info, flashes.success is not None, 
+check explained above. If there are errors (by field specific validator errors or
+if the flashes.error, flashes.warning, flashes.info, flashes.success is not None,
 then that class is added to the overall class of the form (along with any specified
-extra_classes, default = ''). 
+extra_classes, default = '').
 
 Lastly the hidden_tags are rendered. WTForms includes in this method the rendering of
-the hidden CSRF field. We don't have to worry about that. 
+the hidden CSRF field. We don't have to worry about that.
 
 Example output:
 
 ```html
 <form action="" method="POST" enctype="multipart/form-data" class="ui form">
   <div style="display:none;">
-    <input id="csrf_token" name="csrf_token" type="hidden" value="SOME_CSRF_TOKEN_HERE"> 
+    <input id="csrf_token" name="csrf_token" type="hidden" value="SOME_CSRF_TOKEN_HERE">
 ```
 
 ## Macros: Flash message to Form (`form_message`)
@@ -152,7 +152,7 @@ Example output:
 Render a message for the form. This is called from the render_form macro.
 
 Recall the get_flashed_messages method. It will get the flash message from
-the SESSION object with a given cateogory_filter. Within the render_form 
+the SESSION object with a given cateogory_filter. Within the render_form
 macro, the flashes variable is set with attributes 'errors', 'success',
 'info', and 'warning'. The messages parameter for form_message contains the
 flash messages for the respective attribute specified in flashes['some_attr'].
@@ -178,19 +178,19 @@ Example Output:
 ## Macros: Render a form field (`render_form_field`)
 
 Render a field for the form. This is rather self explanatory.
- If the field is 
+ If the field is
    a radio field (RadioField WTForms object) extra_classes has an added class of
    'grouped fields' since all the options of a Radio Field must be styled in this
    way to display together.
    If there is a validation error on the form field, a error class is added to the
-   field div (to make the field colored red). Then the render_form_input macro is 
+   field div (to make the field colored red). Then the render_form_input macro is
    called with field object itself as a parameter. Any validation errors are then
    added with a sub-dev with content field.errors (we only show the first validation
    error for the given error for simplicity) and filter for HTML safe chars.
 
 ## Partials: `_flashes`
 
-See the macros/form_macros for extended explanation of the 
+See the macros/form_macros for extended explanation of the
    get_flashed_messages(category_filter) method. This macro renders
    general flash methods that appear at the top of the page. We render
    by flash type and create a separate 'ui {{ class }} message' div

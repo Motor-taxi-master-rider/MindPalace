@@ -1,4 +1,4 @@
-# Assets 
+# Assets
 
 (refer to `flask-base/app/assets.py`)
 

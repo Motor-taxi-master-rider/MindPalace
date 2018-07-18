@@ -4,7 +4,7 @@ The aim of this guide is to walk you through launching our basic `flask-base` re
 
 ## What is Heroku and Why are we using it?
 
-To get started we are going to cover what heroku is and how to set it up. 
+To get started we are going to cover what heroku is and how to set it up.
 
 Just a little bit of background. Currently, when you run your app with `python manage.py runserver` or `honcho start -f Local` you are running on your computer only (on something like `localhost:5000`). Of course this means that if anyone tries to access your application, they will be stuck with a `404 not found` error. Thus we must put your application onto a publicly accessible computer that is constantly running. This is exactly what a server does. When you type in something like `hack4impact.org`, a request is first sent to a Domain Name Server or _DNS_ which then maps the domain name `hack4impact.org` to an IP Address which points to the server which then renders pages and serves them over to you, the client. Seems simple. But how do you get a server?
 
@@ -16,13 +16,13 @@ Now that we have a good understanding of what heroku is and why we want to use i
 
 Head over to [https://signup.heroku.com](https://signup.heroku.com) to set up an account. Once you are set up, confirm your email and set up your password.
 
-Next, install the heroku command line interface (CLI) for your operating system at [https://devcenter.heroku.com/articles/heroku-cli](https://devcenter.heroku.com/articles/heroku-cli). 
+Next, install the heroku command line interface (CLI) for your operating system at [https://devcenter.heroku.com/articles/heroku-cli](https://devcenter.heroku.com/articles/heroku-cli).
 
 ## Heroku Dyno Creation and Initial Setup
 
-Go to the directory containing the application you wish to launch. For demo purposes, we will be using the `flask-base` repository which you can clone from [https://www.github.com/hack4impact/flask-base](https://www.github.com/hack4impact/flask-base). This is a python application that has a SQLite database and a Redis Task Queue. 
+Go to the directory containing the application you wish to launch. For demo purposes, we will be using the `flask-base` repository which you can clone from [https://www.github.com/hack4impact/flask-base](https://www.github.com/hack4impact/flask-base). This is a python application that has a SQLite database and a Redis Task Queue.
 
-Go to your terminal and type in `heroku login`. If you have set up everything correctly with the CLI installation in the previous section, you should be prompted for your Heroku account credentials (from the previous section as well). 
+Go to your terminal and type in `heroku login`. If you have set up everything correctly with the CLI installation in the previous section, you should be prompted for your Heroku account credentials (from the previous section as well).
 
 ```sh
 $ heroku login
@@ -33,9 +33,9 @@ Authentication successful.
 ```
 Before creating a heroku dyno, make sure you are at the root directory of your application. Next make sure your application is a git repository (you can do `git init` to make it one), and make sure the current git branch you are on is **master** since heroku only pushes changes from that branch. Also make sure that your `requirements.txt` file contains all the pip modules to work (you can do `pip freeze > requirements.txt` to place all your installed pip modules in `requirements.txt`).
 
-To create the dyno, run in the terminal `heroku create <app-name>`. 
+To create the dyno, run in the terminal `heroku create <app-name>`.
 
-_Note that I use `<variable>` to indicate that the variable is optional and the carats should be excluded. E.g. a valid interpretation of the above would be `heroku create` or `heroku create myappname` but NOT `heroku create <myappname>`_. 
+_Note that I use `<variable>` to indicate that the variable is optional and the carats should be excluded. E.g. a valid interpretation of the above would be `heroku create` or `heroku create myappname` but NOT `heroku create <myappname>`_.
 
 Heroku will create an empty dyno with name you specified with `app-name` or a random name which it will output to the terminal.
 
@@ -45,7 +45,7 @@ Creating ⬢ flask-base-demo... done
 https://flask-base-demo.herokuapp.com/ | https://git.heroku.com/flask-base-demo.git
 ```
 
-Your application will be accessible at _https://flask-base-demo.herokuapp.com_ (per the example above) and the remote github repository you push your code to is at `https://git.heroku.com/flask-base-demo.git`. 
+Your application will be accessible at _https://flask-base-demo.herokuapp.com_ (per the example above) and the remote github repository you push your code to is at `https://git.heroku.com/flask-base-demo.git`.
 
 Next we can run `git push heroku master`. This will push all your existing code to the heroku repository. Additionally, heroku will run commands found in your `Procfile` which has the following contents:
 
@@ -53,7 +53,7 @@ Next we can run `git push heroku master`. This will push all your existing code 
 web: gunicorn manage:app
 worker: python -u manage.py run_worker
 ```
-This specifies that there is will be a `web` dyno (a server that serves pages to clients) and a `worker` dyno (in the case of flask-base, a server that handles methods equeued to the Redis task queue). 
+This specifies that there is will be a `web` dyno (a server that serves pages to clients) and a `worker` dyno (in the case of flask-base, a server that handles methods equeued to the Redis task queue).
 
 If all goes well, you should see an output something similar to this:
 
@@ -116,7 +116,7 @@ And also set, `SSL_DISABLE` to `False`
 heroku config:set SSL_DISABLE=False
 ```
 
-If you plan to use redis, go to [https://elements.heroku.com/addons/redistogo?app=flask-base-demo](https://elements.heroku.com/addons/redistogo?app=flask-base-demo) and follow the onscreen steps to provision a redis instance. 
+If you plan to use redis, go to [https://elements.heroku.com/addons/redistogo?app=flask-base-demo](https://elements.heroku.com/addons/redistogo?app=flask-base-demo) and follow the onscreen steps to provision a redis instance.
 
 Also if you have a Raygun API Key, add the config variable `RAYGUN_APIKEY` in a similar fashion  to above. This will enable error reporting.
 
@@ -126,21 +126,21 @@ First run `heroku ps:scale web=1 worker=1`. You may need to add a credit card fo
 
 Next run `heroku run python manage.py recreate_db` to create your database.
 
-Lastly, run the command to add an admin user for you app. In flask base it will be the following `heroku run python manage.py setup_dev`. 
+Lastly, run the command to add an admin user for you app. In flask base it will be the following `heroku run python manage.py setup_dev`.
 
-In general if you want to run a command on the app it will be in the format of `heroku run <full command here>`. Additionally you can access the file system with `heroku run bash`. 
+In general if you want to run a command on the app it will be in the format of `heroku run <full command here>`. Additionally you can access the file system with `heroku run bash`.
 
 You can now access your app at the URL from earlier and log in with the default user.
 
 ## Domain Name + HTTPS Setup
 
-This guide encompasses all you need to get set up with SSL [https://support.cloudflare.com/hc/en-us/articles/205893698-Configure-CloudFlare-and-Heroku-over-HTTPS](https://support.cloudflare.com/hc/en-us/articles/205893698-Configure-CloudFlare-and-Heroku-over-HTTPS). 
+This guide encompasses all you need to get set up with SSL [https://support.cloudflare.com/hc/en-us/articles/205893698-Configure-CloudFlare-and-Heroku-over-HTTPS](https://support.cloudflare.com/hc/en-us/articles/205893698-Configure-CloudFlare-and-Heroku-over-HTTPS).
 
 ## Debugging
 
-`heroku logs --tail` will open up a running log of anything that happens on your heroku dyno. 
+`heroku logs --tail` will open up a running log of anything that happens on your heroku dyno.
 
-Additionally, if you have Raygun configured, you'll get error reports (otherwise, you can look at older versions of flask base where we sent errors to the main administrator email). 
+Additionally, if you have Raygun configured, you'll get error reports (otherwise, you can look at older versions of flask base where we sent errors to the main administrator email).
 
 Lastly, you can use an application like **[Postico](https://eggerapps.at/postico/)** to actually look at your database in production. To get the credentials for the application to work with Postico, do the following:
 
@@ -158,8 +158,8 @@ Lastly, you can use an application like **[Postico](https://eggerapps.at/postico
 
 If your application uses file uploads, **Heroku does not have a persistent file system**, thus you need to set up a Amazon S3 Bucket to upload your file to. This heroku guide has a nice way to upload files with AJAX on the frontend [https://devcenter.heroku.com/articles/s3](https://devcenter.heroku.com/articles/s3). You can also view the [Reading Terminal Market](https://github.com/hack4impact/reading-terminal-market) Repo for an example of how to use file uploads
 
-Heroku has a limit of 30 seconds on processing a request. This means that once a user submits a request to a URL Endpoint, a response must be sent back in 30 seconds, otherwise the request will abort and the user will get a timeout error. You should explore using a Redis queue to process requests in the background if they require more than a few seconds to run. Or you can issue AJAX requests on the frontend to a URL (at least this will just silently fail). 
+Heroku has a limit of 30 seconds on processing a request. This means that once a user submits a request to a URL Endpoint, a response must be sent back in 30 seconds, otherwise the request will abort and the user will get a timeout error. You should explore using a Redis queue to process requests in the background if they require more than a few seconds to run. Or you can issue AJAX requests on the frontend to a URL (at least this will just silently fail).
 
-Heroku postgresQL has a limit of about 10k rows. If your application will use more than that, then you should follow [this guide](https://devcenter.heroku.com/articles/upgrading-heroku-postgres-databases). 
+Heroku postgresQL has a limit of about 10k rows. If your application will use more than that, then you should follow [this guide](https://devcenter.heroku.com/articles/upgrading-heroku-postgres-databases).
 
 Also you should upgrade your heroku instance to the `hobby` tier to ensure that it will be working 24 hrs. The free tier will only work 18 hrs a day and will _sleep_ the application after 5 minutes if inactive (meaning that it will take a while to start up again from a sleep state). You can change this on the heroku dashboard [https://dashboard.heroku.com/apps/](https://dashboard.heroku.com/apps/).

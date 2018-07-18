@@ -1,5 +1,5 @@
 # Manage.py and Commands
- 
+
 ## `python manage.py runserver`
 
 A note about python manage.py runserver. Runserver is
@@ -31,7 +31,7 @@ if os.path.exists('.env'):
 
 ## Config and `create_app`
 
-Refer to `manage.py` for more details. 
+Refer to `manage.py` for more details.
 
 ```python
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
@@ -46,7 +46,7 @@ move to the 'default' configuration which is the DevelopmentConfig
 `create_app` method found in `app/__init__.py`. This method takes in a
 name of a configuration and finds the configuration settings in
 config.py. In heroku this will be set to 'production' i.e.
-ProductionConfig. 
+ProductionConfig.
 
 Next a `Manager` instance is created. Manager
 is basically a nice plugin(?) that will allow us to get some useful

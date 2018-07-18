@@ -6,7 +6,7 @@ See [the Github repository](http://github.com/hack4impact/flask-base)
 
 ## Purpose
 
-This guide is meant to be a mix between formal and explanatory documentation. 
+This guide is meant to be a mix between formal and explanatory documentation.
 
 ## Synopsis
 

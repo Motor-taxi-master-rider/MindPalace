@@ -57,7 +57,7 @@ creation of users such as a general user and an administrator
 
 `name` is the name of the role itself (expects unique String len 64)
 
-`index` is the name of the index route for the route 
+`index` is the name of the index route for the route
 
 `default` is a T/F value that determines whether a new user created
   has that permission or note (ref insert_roles()). This is indexed
