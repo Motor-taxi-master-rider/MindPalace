@@ -1,4 +1,6 @@
 #custom
+.isort.cfg
+.mypy_cache/
 .pytest_cache/
 app/static/scripts/*
 app/static/styles/vendor.css

@@ -44,8 +44,7 @@ class Config(ABC):
 
     # Admin account
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD') or 'test'
-    ADMIN_EMAIL = os.environ.get(
-        'ADMIN_EMAIL') or 'admin@admin.com'
+    ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL') or 'admin@admin.com'
     EMAIL_SUBJECT_PREFIX = '[{}]'.format(APP_NAME)
     EMAIL_SENDER = '{app_name} Admin <{email}>'.format(
         app_name=APP_NAME, email=MAIL_USERNAME)
@@ -89,9 +88,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     MOCK_MONGO = 'mongomock'
-    MONGODB_SETTINGS = {
-        'host': f'mongomock://localhost/{MOCK_MONGO}'
-    }
+    MONGODB_SETTINGS = {'host': f'mongomock://localhost/{MOCK_MONGO}'}
     WTF_CSRF_ENABLED = False
 
     @classmethod

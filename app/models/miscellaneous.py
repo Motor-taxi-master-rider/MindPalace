@@ -1,7 +1,7 @@
 from .. import db
 
 
-class EditableHTML(db.Document):
+class EditableHTML(db.Document):  # type: ignore
     editor_name = db.StringField(max_length=100, unique=True)
     value = db.StringField()
 

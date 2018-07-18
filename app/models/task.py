@@ -22,7 +22,7 @@ class Category(enum.Enum):
 
 
 @update_modified.apply
-class DocumentCache(db.Document):
+class DocumentCache(db.Document):  # type: ignore
     content = db.StringField()
     update_at = db.DateTimeField(default=datetime.datetime.utcnow)
     meta = {
@@ -31,7 +31,7 @@ class DocumentCache(db.Document):
 
 
 @update_modified.apply
-class DocumentMeta(db.DynamicDocument):
+class DocumentMeta(db.DynamicDocument):  # type: ignore
     theme = db.StringField(max_length=256, required=True, unique=True)
     category = db.StringField(
         max_length=64,

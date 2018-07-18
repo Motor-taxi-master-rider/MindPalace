@@ -1,13 +1,13 @@
 import pytest
 from flask import url_for
 from mongoengine import DoesNotExist
+from utils import (MockRedisQueue, captured_templates, login, real_url,
+                   redirect_to)
 
 import app.admin.views
 from app.admin.forms import ChangeAccountTypeForm, ChangeUserEmailForm
 from app.models import EditableHTML, Role, User
 from app.utils import INVALID_OBJECT_ID
-from utils import (MockRedisQueue, captured_templates, login, real_url,
-                   redirect_to)
 
 
 def test_post_new_user(client, admin):

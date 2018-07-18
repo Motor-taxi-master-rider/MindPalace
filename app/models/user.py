@@ -15,7 +15,7 @@ class Permission(enum.Enum):
     ADMINISTER = 0xff
 
 
-class Role(db.Document):
+class Role(db.Document):  # type: ignore
     name = db.StringField(max_length=64, unique=True)
     index = db.StringField(max_length=64)
     default = db.BooleanField(default=False)
@@ -45,7 +45,7 @@ class Role(db.Document):
         return '<Role \'%s\'>' % self.name
 
 
-class User(UserMixin, db.DynamicDocument):
+class User(UserMixin, db.DynamicDocument):  # type: ignore
     confirmed = db.BooleanField(default=False)
     first_name = db.StringField(max_length=64)
     last_name = db.StringField(max_length=64)

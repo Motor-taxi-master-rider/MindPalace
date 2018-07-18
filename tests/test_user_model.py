@@ -3,9 +3,9 @@ import time
 
 import pytest
 from flask import url_for
+from utils import login
 
 from app.models import AnonymousUser, Permission, Role, User
-from utils import login
 
 
 @pytest.mark.usefixtures('app')

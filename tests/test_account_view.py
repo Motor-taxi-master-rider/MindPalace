@@ -1,13 +1,13 @@
 import pytest
 from flask import url_for
 from flask_login import current_user
+from utils import (MockRedisQueue, captured_templates, login, logout, real_url,
+                   redirect_to)
 
 import app.account.views
 from app.account.forms import ChangePasswordForm, LoginForm
 from app.models import User
 from app.utils import INVALID_OBJECT_ID
-from utils import (MockRedisQueue, captured_templates, login, logout, real_url,
-                   redirect_to)
 
 
 def test_login_success(client, admin):

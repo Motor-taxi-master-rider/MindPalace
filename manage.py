@@ -7,7 +7,7 @@ from redis import Redis
 from rq import Connection, Queue, Worker
 
 from app import create_app, db
-from app.models import Role, User, DocumentCache, DocumentMeta
+from app.models import DocumentCache, DocumentMeta, Role, User
 from config import Config
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
@@ -15,7 +15,13 @@ manager = Manager(app)
 
 
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, DocumentCache=DocumentCache, DocumentMeta=DocumentMeta)
+    return dict(
+        app=app,
+        db=db,
+        User=User,
+        Role=Role,
+        DocumentCache=DocumentCache,
+        DocumentMeta=DocumentMeta)
 
 
 manager.add_command('shell', Shell(make_context=make_shell_context))

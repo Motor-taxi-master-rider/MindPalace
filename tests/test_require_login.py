@@ -1,6 +1,5 @@
 import pytest
 from flask import url_for
-
 from utils import login, real_url, redirect_to
 
 
