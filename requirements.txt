@@ -38,3 +38,4 @@ pytest-flask
 pytest-xdist
 isort
 yapf
+pre-commit
