@@ -16,7 +16,7 @@ def test_get_my_doc_meta(client, admin):
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
         assert context['categories'] == Category
-        assert list(context['documents']) == list(
+        assert list(context['documents'].items) == list(
             DocumentMeta.objects(create_by=admin).all())
 
 

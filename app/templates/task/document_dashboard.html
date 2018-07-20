@@ -1,5 +1,6 @@
 {% extends 'layouts/base.html' %}
 {% import 'macros/form_macros.html' as f %}
+{% import 'macros/nav_macros.html' as n %}
 {% block content %}
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
@@ -10,7 +11,7 @@
         <div class="ui vertical animated right floated button" tabindex="0">
             <a class="item" href="{{ url_for('task.new_doc_meta') }}">
                 <div class="hidden content">New</div>
-                <div class="visible content">
+                <div test_get_my_doc_metaclass="visible content">
                     <i class="large plus circle icon"></i>
                 </div>
             </a>
@@ -31,7 +32,7 @@
             </div>
             <div class="ui right search item">
                 <div class="ui transparent icon input">
-                    <input id="search-doc" type="text" placeholder="Search users…">
+                    <input id="search-doc" type="text" placeholder="Search documents…">
                     <i class="search icon"></i>
                 </div>
             </div>
@@ -59,7 +60,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for d in documents | sort(attribute='category') %}
+                {% for d in documents.items | sort(attribute='category') %}
                 <tr>
                     <td>
                         <a href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
@@ -83,6 +84,8 @@
                 {% endfor %}
                 </tbody>
             </table>
+
+            {{ n.render_navigation(documents, 'task.my_doc_meta') }}
         </div>
     </div>
 </div>
@@ -109,6 +112,7 @@
             }
         });
     });
+
 
 
 

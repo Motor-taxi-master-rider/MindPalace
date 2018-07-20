@@ -1,9 +1,12 @@
-from flask import Blueprint, abort, flash, redirect, render_template, url_for
+from flask import (Blueprint, abort, flash, redirect, render_template, request,
+                   url_for)
 from flask_login import current_user, login_required
 from mongoengine.errors import NotUniqueError
 
-from app.models import Category, DocumentMeta, Permission, User
+from app.models import Category, DocumentMeta, Permission
 from app.task.forms import DocMetaForm
+
+DOCUMENT_PER_PAGE = 15
 
 task = Blueprint('task', __name__)
 
@@ -12,8 +15,9 @@ task = Blueprint('task', __name__)
 @login_required
 def my_doc_meta():
     """Get all documents meta data of user"""
-    user = User.objects.get_or_404(id=current_user.id)
-    documents = DocumentMeta.objects(create_by=user).all()
+    page = request.args.get('page', 1, type=int)
+    documents = DocumentMeta.objects(create_by=current_user.id).paginate(
+        page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
         categories=Category,
