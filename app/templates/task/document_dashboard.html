@@ -5,13 +5,14 @@
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
         <h2 class="ui header">
-            My Documents
+            <i class="book icon"></i>
+            <div class="content">My Documents <div class="sub header">Manage your documents</div></div>
         </h2>
 
-        <div class="ui vertical animated right floated button" tabindex="0">
+        <div class="ui basic vertical animated right floated button" tabindex="0">
             <a class="item" href="{{ url_for('task.new_doc_meta') }}">
                 <div class="hidden content">New</div>
-                <div test_get_my_doc_metaclass="visible content">
+                <div class="visible content">
                     <i class="large plus circle icon"></i>
                 </div>
             </a>
@@ -49,8 +50,7 @@
         {{ f.form_message(flashes['info'], header='Information', class='info') }}
         {{ f.form_message(flashes['success'], header='Success!', class='success') }}
 
-        {# Use overflow-x: scroll so that mobile views don't freak out # when the table is too wide #}
-        <div style="overflow-x: scroll;">
+        <div style="overflow-x: auto;">
             <table class="ui searchable sortable unstackable selectable celled table">
                 <thead>
                 <tr>

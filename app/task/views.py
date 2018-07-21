@@ -6,7 +6,7 @@ from mongoengine.errors import NotUniqueError
 from app.models import Category, DocumentMeta, Permission
 from app.task.forms import DocMetaForm
 
-DOCUMENT_PER_PAGE = 15
+DOCUMENT_PER_PAGE = 10
 
 task = Blueprint('task', __name__)
 

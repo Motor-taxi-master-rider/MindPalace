@@ -104,16 +104,16 @@
 
 {# Macro for creating navigation links #}
 {% macro render_navigation(pagination, endpoint) %}
-<div class=pagination>
+<div class="ui pagination menu">
     {% for page in pagination.iter_pages() %}
         {% if page %}
             {% if page != pagination.page %}
-                <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+                <a class="item" href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
             {% else %}
-                <strong>{{ page }}</strong>
+                <a class="active item">{{ page }}</a>
             {% endif %}
         {% else %}
-            <span class=ellipsis>…</span>
+            <span class="disabled item">...</span>
         {% endif %}
     {% endfor %}
 </div>
