@@ -8,8 +8,9 @@ from app.utils import INVALID_OBJECT_ID
 
 
 @pytest.mark.usefixtures('doc')
-def test_get_my_doc_meta(client, admin):
-    login(client, admin)
+def test_get_my_doc_meta(client, user, monkeypatch):
+    login(client, user)
+    monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 1)
 
     with captured_templates(client.application) as templates:
         assert client.get(url_for('task.my_doc_meta')).status_code == 200
@@ -17,7 +18,14 @@ def test_get_my_doc_meta(client, admin):
         assert template.name == 'task/document_dashboard.html'
         assert context['categories'] == Category
         assert list(context['documents'].items) == list(
-            DocumentMeta.objects(create_by=admin).all())
+            DocumentMeta.objects(create_by=user).all()[:1])
+
+        assert client.get(url_for('task.my_doc_meta', page=2)).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'task/document_dashboard.html'
+        assert context['categories'] == Category
+        assert list(context['documents'].items) == list(
+            DocumentMeta.objects(create_by=user).all()[1:])
 
 
 @pytest.mark.usefixtures('doc')
