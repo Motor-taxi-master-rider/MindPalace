@@ -8,7 +8,15 @@
             <span class="cinema">{{ d.category }}</span>
         </div>
         <div class="description">
-            {% if d.comments %}{% endif %}
+            <div class="ui middle aligned divided list">
+                {% for c in d.comment %}
+                    <div class="item">
+                        <div class="content">
+                            <span class="header">{{ c }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
         <div class="extra">
             <div class="ui basic animated right floated buttons" tabindex="0">
