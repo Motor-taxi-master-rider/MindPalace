@@ -1,0 +1,36 @@
+<div class="item">
+    <div class="ui middle aligned tiny image">
+        <img src="{{ url_for('static', filename='images/task/default_type.png') }}">
+    </div>
+    <div class="content">
+        <a class="header" href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
+        <div class="meta">
+            <span class="cinema">{{ d.category }}</span>
+        </div>
+        <div class="description">
+            {% if d.comments %}{% endif %}
+        </div>
+        <div class="extra">
+            <div class="ui basic animated right floated buttons" tabindex="0">
+                <div class="ui vertical animated button " tabindex="0">
+                    <a class="item" href="{{ url_for('task.update_doc_meta', doc_meta_id= d.id|string) }}">
+                        <div class="hidden content">Edit</div>
+                        <div class="visible content">
+                            <i class="write icon"></i>
+                        </div>
+                    </a>
+
+                </div>
+                <div class="ui vertical animated button" tabindex="0">
+                    <a class="item" href="{{ url_for('task.delete_doc_meta', doc_meta_id= d.id|string) }}">
+                        <div class="hidden content">Delete</div>
+                        <div class="visible content">
+                            <i class="trash outline icon"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="ui label">Tag</div>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,5 @@
 {% extends 'layouts/base.html' %}
 {% import 'macros/form_macros.html' as f %}
-{% import 'macros/nav_macros.html' as n %}
 {% block content %}
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
@@ -50,42 +49,14 @@
         {{ f.form_message(flashes['info'], header='Information', class='info') }}
         {{ f.form_message(flashes['success'], header='Success!', class='success') }}
 
-        <div style="overflow-x: auto;">
-            <table class="ui searchable sortable unstackable selectable celled table">
-                <thead>
-                <tr>
-                    <th>Theme</th>
-                    <th class="sorted descending">Category</th>
-                    <th>Operation</th>
-                </tr>
-                </thead>
-                <tbody>
+        <div style="overflow-x: auto;margin-top:20px;">
+            <div class="ui divided items">
                 {% for d in documents.items | sort(attribute='category') %}
-                <tr>
-                    <td>
-                        <a href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
-                    </td>
-                    <td class="doc category">{{ d.category }}</td>
-                    <td>
-                        <div class="ui small basic icon buttons">
-                            <button class="ui button">
-                                <a class="item" href="{{ url_for('task.update_doc_meta', doc_meta_id= d.id|string) }}">
-                                    <i class="edit outline icon"></i>
-                                </a>
-                            </button>
-                            <button class="ui button">
-                                <a class="item" href="{{ url_for('task.delete_doc_meta', doc_meta_id= d.id|string) }}">
-                                    <i class="trash outline icon"></i>
-                                </a>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                    {% include 'task/_document.html' %}
                 {% endfor %}
-                </tbody>
-            </table>
+            </div>
 
-            {{ n.render_navigation(documents, 'task.my_doc_meta') }}
+            {{ nav.render_navigation(documents, 'task.my_doc_meta') }}
         </div>
     </div>
 </div>
