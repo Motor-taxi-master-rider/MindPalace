@@ -1,5 +1,6 @@
 {% extends 'layouts/base.html' %}
 {% import 'macros/form_macros.html' as f %}
+{% import 'task/task_macros.html' as m %}
 {% block content %}
 <div class="ui stackable grid container">
     <div class="sixteen wide tablet twelve wide computer centered column">
@@ -20,13 +21,13 @@
         <div class="ui menu">
             <div id="select-category" class="ui dropdown item">
                 <div class="text">
-                    All categories
+                    {{ beautify_static(current_category) }}
                 </div>
                 <i class="dropdown icon"></i>
                 <div class="menu">
-                    <div class="item" data-value="">All categories</div>
+                    <div class="item" data-value="">{{ all_category }}</div>
                     {% for c in categories %}
-                    <div class="item" data-value="{{ c.value }}">{{ c.value }}</div>
+                    <div class="item" data-value="{{ c.name }}">{{ beautify_static(c.name) }}</div>
                     {% endfor %}
                 </div>
             </div>
@@ -56,7 +57,7 @@
                 {% endfor %}
             </div>
 
-            {{ nav.render_navigation(documents, 'task.my_doc_meta') }}
+            {{ m.render_navigation(documents, 'task.my_doc_meta', current_category) }}
         </div>
     </div>
 </div>
@@ -78,8 +79,7 @@
 
         $('#select-category').dropdown({
             onChange: function (value, text, $selectedItem) {
-                $('td.doc.category:contains(' + value + ')').closest('tr').removeClass('hidden').show();
-                $('td.doc.category').not(':contains(' + value + ')').closest('tr').addClass('hidden').hide();
+                window.location.href = "{{ url_for('task.my_doc_meta') }}?category="+value;
             }
         });
     });

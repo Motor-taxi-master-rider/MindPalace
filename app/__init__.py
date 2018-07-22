@@ -75,4 +75,8 @@ def create_app(config_name):
     from .task import task as task_blueprint
     app.register_blueprint(task_blueprint, url_prefix='/task')
 
+    @app.template_global()
+    def beautify_static(name: str) -> str:
+        return name.lower().replace('_', ' ').capitalize()
+
     return app

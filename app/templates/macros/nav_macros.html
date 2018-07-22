@@ -23,10 +23,10 @@
     {% set endpoints = [
       ('task.my_doc_meta', config.APP_NAME, 'home'),
       ('main.about', 'About', 'info')
-    ]%}
+    ] %}
     {% set user = [] %}
     {% if current_user.is_authenticated %}
-      {% set user = ([(current_user.role.index + '.index', current_user.role.name + ' Dashboard', 'user')]) %}
+        {% set user = ([(current_user.role.index + '.index', current_user.role.name + ' Dashboard', 'user')]) %}
     {% endif %}
     {{ render_menu_items( endpoints +  user ) }}
 {% endmacro %}
@@ -36,17 +36,17 @@
 #}
 {% macro account_items(current_user) %}
     {% if current_user.is_authenticated %}
-      {% set endpoints = [
+        {% set endpoints = [
         ('account.manage', 'Your Account', 'settings'),
         ('account.logout', 'Log out', 'sign out')
       ] %}
-      {{ render_menu_items(endpoints) }}
+        {{ render_menu_items(endpoints) }}
     {% else %}
-      {% set endpoints = [
+        {% set endpoints = [
         ('account.register', 'Register', 'list layout'),
         ('account.login', 'Log In', 'sign in')
       ] %}
-      {{ render_menu_items(endpoints) }}
+        {{ render_menu_items(endpoints) }}
     {% endif %}
 {% endmacro %}
 
@@ -61,24 +61,24 @@
 
         {# The menu items which will be shown when open-nav is clicked #}
         <div class="ui fixed vertical fluid menu">
-          {{ account_items(current_user) }}
-          {{ create_dropdown(dropdown) }}
+            {{ account_items(current_user) }}
+            {{ create_dropdown(dropdown) }}
         </div>
     </div>
 {% endmacro %}
 
 {% macro create_dropdown(dropdown) %}
-  {% for item in dropdown %}
-    {% if item | length == 3 %}
-      {{ render_menu_items([item]) }}
-    {% elif item | length == 2 %}
-      <div class="ui dropdown item" onClick="changeMenu(this)">{{ item[0] }} <i class="dropdown icon"></i>
-        <div class="inverted black menu">
-          {{ create_dropdown(item[1]) }}
-        </div>
-      </div>
-    {% endif %}
-  {% endfor %}
+    {% for item in dropdown %}
+        {% if item | length == 3 %}
+            {{ render_menu_items([item]) }}
+        {% elif item | length == 2 %}
+            <div class="ui dropdown item" onClick="changeMenu(this)">{{ item[0] }} <i class="dropdown icon"></i>
+                <div class="inverted black menu">
+                    {{ create_dropdown(item[1]) }}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
 {% endmacro %}
 
 {% macro desktop_nav(current_user, dropdown=None) %}
@@ -100,21 +100,4 @@
         {{ mobile_nav(current_user, dropdown=dropdown) }}
         {{ desktop_nav(current_user, dropdown=dropdown) }}
     </nav>
-{% endmacro %}
-
-{# Macro for creating navigation links #}
-{% macro render_navigation(pagination, endpoint) %}
-<div class="ui pagination menu">
-    {% for page in pagination.iter_pages() %}
-        {% if page %}
-            {% if page != pagination.page %}
-                <a class="item" href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
-            {% else %}
-                <a class="active item">{{ page }}</a>
-            {% endif %}
-        {% else %}
-            <span class="disabled item">...</span>
-        {% endif %}
-    {% endfor %}
-</div>
 {% endmacro %}

@@ -1,7 +1,4 @@
-import datetime
-
 from flask import render_template
-from flask_login import current_user
 
 from app.main.views import main
 
@@ -24,11 +21,3 @@ def page_not_found(_):
 @main.app_errorhandler(500)
 def internal_server_error(_):
     return render_template('errors/500.html'), 500
-
-
-@main.before_request
-def modify_last_seen():
-    if current_user.is_authenticated:
-        if (datetime.datetime.utcnow() - current_user.last_seen).seconds > 100:
-            current_user.last_seen = datetime.datetime.utcnow()
-            current_user.save()

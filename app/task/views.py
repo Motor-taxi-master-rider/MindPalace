@@ -7,6 +7,7 @@ from app.models import Category, DocumentMeta, Permission
 from app.task.forms import DocMetaForm
 
 DOCUMENT_PER_PAGE = 10
+ALL_CATEGORY = 'All categories'
 
 task = Blueprint('task', __name__)
 
@@ -16,11 +17,18 @@ task = Blueprint('task', __name__)
 def my_doc_meta():
     """Get all documents meta data of user"""
     page = request.args.get('page', 1, type=int)
-    documents = DocumentMeta.objects(create_by=current_user.id).paginate(
-        page=page, per_page=DOCUMENT_PER_PAGE)
+    category = request.args.get('category', ALL_CATEGORY, type=str)
+    if category == ALL_CATEGORY:
+        documents = DocumentMeta.objects(create_by=current_user.id).paginate(
+            page=page, per_page=DOCUMENT_PER_PAGE)
+    else:
+        documents = DocumentMeta.objects(
+            create_by=current_user.id,
+            category=Category[category].value).paginate(
+                page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
-        categories=Category,
+        current_category=category,
         documents=documents)
 
 
@@ -91,3 +99,8 @@ def delete_doc_meta(doc_meta_id):
     flash(f'Document {str(doc_meta.theme)} is successfully deleted.',
           'form-success')
     return redirect(url_for('task.my_doc_meta'))
+
+
+@task.context_processor
+def inject_template_global():
+    return {'categories': Category, 'all_category': ALL_CATEGORY}
