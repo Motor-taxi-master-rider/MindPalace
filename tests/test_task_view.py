@@ -20,7 +20,8 @@ def test_get_my_doc_meta(client, user, monkeypatch):
         assert list(context['documents'].items) == list(
             DocumentMeta.objects(create_by=user).all()[:1])
 
-        assert client.get(url_for('task.my_doc_meta', page=2)).status_code == 200
+        assert client.get(url_for('task.my_doc_meta',
+                                  page=2)).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
         assert context['categories'] == Category

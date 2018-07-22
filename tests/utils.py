@@ -10,6 +10,8 @@ from app.models import User
 
 @contextmanager
 def captured_templates(app):
+    """Context manger to capture all rendered templates into a list."""
+
     def record(sender, template, context, **extra):
         nonlocal recorded
         recorded.append((template, context))
@@ -23,6 +25,7 @@ def captured_templates(app):
 
 
 def login(client: FlaskClient, user: User, password: str = 'test') -> Response:
+    """Login a user."""
     return client.post(
         url_for('account.login'),
         data={
@@ -32,6 +35,7 @@ def login(client: FlaskClient, user: User, password: str = 'test') -> Response:
 
 
 def logout(client: FlaskClient) -> Response:
+    """Log out current user."""
     return client.get(url_for('account.logout'))
 
 
@@ -43,6 +47,7 @@ def redirect_to(response: Response) -> str:
 
 
 def real_url(route: str, **arguments) -> str:
+    """Return full url of given endpoint."""
     return url_for(route, **arguments, _external=True)
 
 
