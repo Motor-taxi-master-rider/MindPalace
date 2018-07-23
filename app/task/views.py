@@ -23,7 +23,7 @@ def my_doc_meta():
     else:
         documents = DocumentMeta.objects(
             create_by=current_user.id, category=Category[category].value)
-    documents = documents.order_by('-update_at').paginate(
+    documents = documents.order_by('-priority', '-update_at').paginate(
         page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',

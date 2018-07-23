@@ -3,18 +3,19 @@
         <img src="{{ url_for('static', filename='images/task/default_type.png') }}">
     </div>
     <div class="content">
-        <a class="header" href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
+        <a class="ui header{% if d.priority == 3 %} red {% elif d.priority == 2 %} blue {% endif %}"
+           href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
         <div class="meta">
             <span class="cinema">{{ d.category }}</span>
         </div>
         <div class="description">
             <div class="ui middle aligned divided list">
                 {% for c in d.comment %}
-                    <div class="item">
-                        <div class="content">
-                            <span class="header">{{ c }}</span>
-                        </div>
+                <div class="item">
+                    <div class="content">
+                        <span class="header">{{ c }}</span>
                     </div>
+                </div>
                 {% endfor %}
             </div>
         </div>

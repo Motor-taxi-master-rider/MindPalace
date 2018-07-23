@@ -20,8 +20,8 @@ def test_get_my_doc_meta(client, admin, doc_list, monkeypatch):
         assert context['categories'] == Category
         assert context['current_category'] == ALL_CATEGORY
         assert list(context['documents'].items) == list(
-            DocumentMeta.objects(
-                create_by=admin).order_by('-update_at').all()[:3])
+            DocumentMeta.objects(create_by=admin).order_by(
+                '-priority', '-update_at').all()[:3])
 
         assert client.get(url_for('task.my_doc_meta',
                                   page=2)).status_code == 200
@@ -29,8 +29,8 @@ def test_get_my_doc_meta(client, admin, doc_list, monkeypatch):
         assert template.name == 'task/document_dashboard.html'
         assert context['current_category'] == ALL_CATEGORY
         assert list(context['documents'].items) == list(
-            DocumentMeta.objects(
-                create_by=admin).order_by('-update_at').all()[3:6])
+            DocumentMeta.objects(create_by=admin).order_by(
+                '-priority', '-update_at').all()[3:6])
 
 
 @pytest.mark.usefixtures('doc_list')
@@ -47,8 +47,8 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
         assert context['current_category'] == Category.FLIP.name
         assert list(context['documents'].items) == list(
             DocumentMeta.objects(
-                create_by=admin,
-                category=Category.FLIP.value).order_by('-update_at').all())
+                create_by=admin, category=Category.FLIP.value).order_by(
+                    '-priority', '-update_at').all())
 
         assert client.get(
             url_for(
@@ -60,7 +60,7 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
         assert list(context['documents'].items) == list(
             DocumentMeta.objects(
                 create_by=admin, category=Category.REVIEWED.value).order_by(
-                    '-update_at').all()[3:6])
+                    '-priority', '-update_at').all()[3:6])
 
 
 @pytest.mark.usefixtures('doc')
