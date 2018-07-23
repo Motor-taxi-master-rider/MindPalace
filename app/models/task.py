@@ -44,11 +44,19 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
     create_by = db.ReferenceField(User)
     cache = db.ReferenceField(DocumentCache)
     meta = {
-        'collection': 'document_meta',
+        'collection':
+        'document_meta',
         'indexes': [{
             'fields': ['theme']
         }, {
             'fields': ['category']
+        }, {
+            'fields': ['$theme', "$comment"],
+            'default_language': 'english',
+            'weights': {
+                'theme': 8,
+                'comment': 5
+            }
         }]
     }
 

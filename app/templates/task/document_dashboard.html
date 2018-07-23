@@ -57,24 +57,17 @@
                 {% endfor %}
             </div>
 
-            {{ m.render_navigation(documents, 'task.my_doc_meta', current_category) }}
+            {{ m.render_navigation(documents, 'task.my_doc_meta', current_category, current_search) }}
         </div>
     </div>
 </div>
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $('#search-doc').keyup(function () {
+        $('#search-doc').keypress(function (event) {
+            if(event.keyCode != "13") return;
             var searchText = $(this).val();
-            if (searchText.length > 0) {
-                $('tbody td:icontains(' + searchText + ')').addClass('positive');
-                $('td.positive').not(':icontains(' + searchText + ')').removeClass('positive');
-                $('tbody td').not(':icontains(' + searchText + ')').closest('tr').addClass('hidden').hide();
-                $('tr.hidden:icontains(' + searchText + ')').removeClass('hidden').show();
-            } else {
-                $('td.positive').removeClass('positive');
-                $('tr.hidden').removeClass('hidden').show();
-            }
+            window.location.href = "{{ url_for('task.my_doc_meta') }}?category={{ current_category }}&search="+searchText;
         });
 
         $('#select-category').dropdown({

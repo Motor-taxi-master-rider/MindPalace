@@ -18,16 +18,23 @@ def my_doc_meta():
     """Get all documents meta data of user"""
     page = request.args.get('page', 1, type=int)
     category = request.args.get('category', ALL_CATEGORY, type=str)
+    search = request.args.get('search', None)
+
     if category == ALL_CATEGORY:
         documents = DocumentMeta.objects(create_by=current_user.id)
     else:
         documents = DocumentMeta.objects(
             create_by=current_user.id, category=Category[category].value)
+
+    if search:
+        documents = documents.search_text(search).order_by('$text_score')
+
     documents = documents.order_by('-priority', '-update_at').paginate(
         page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
         current_category=category,
+        current_search=search,
         documents=documents)
 
 
