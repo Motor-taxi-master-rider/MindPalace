@@ -4,29 +4,63 @@ from utils import captured_templates, login, real_url, redirect_to
 
 from app.models import Category, DocumentMeta
 from app.task.forms import DocMetaForm
+from app.task.views import ALL_CATEGORY
 from app.utils import INVALID_OBJECT_ID
 
 
-@pytest.mark.usefixtures('doc')
-def test_get_my_doc_meta(client, user, monkeypatch):
-    login(client, user)
-    monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 1)
+@pytest.mark.usefixtures('doc_list')
+def test_get_my_doc_meta(client, admin, doc_list, monkeypatch):
+    login(client, admin)
+    monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 3)
 
     with captured_templates(client.application) as templates:
         assert client.get(url_for('task.my_doc_meta')).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
         assert context['categories'] == Category
+        assert context['current_category'] == ALL_CATEGORY
         assert list(context['documents'].items) == list(
-            DocumentMeta.objects(create_by=user).all()[:1])
+            DocumentMeta.objects(
+                create_by=admin).order_by('-update_at').all()[:3])
 
         assert client.get(url_for('task.my_doc_meta',
                                   page=2)).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
-        assert context['categories'] == Category
+        assert context['current_category'] == ALL_CATEGORY
         assert list(context['documents'].items) == list(
-            DocumentMeta.objects(create_by=user).all()[1:])
+            DocumentMeta.objects(
+                create_by=admin).order_by('-update_at').all()[3:6])
+
+
+@pytest.mark.usefixtures('doc_list')
+def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
+    login(client, admin)
+    monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 3)
+
+    with captured_templates(client.application) as templates:
+        assert client.get(
+            url_for('task.my_doc_meta',
+                    category=Category.FLIP.name)).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'task/document_dashboard.html'
+        assert context['current_category'] == Category.FLIP.name
+        assert list(context['documents'].items) == list(
+            DocumentMeta.objects(
+                create_by=admin,
+                category=Category.FLIP.value).order_by('-update_at').all())
+
+        assert client.get(
+            url_for(
+                'task.my_doc_meta', category=Category.REVIEWED.name,
+                page=2)).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'task/document_dashboard.html'
+        assert context['current_category'] == Category.REVIEWED.name
+        assert list(context['documents'].items) == list(
+            DocumentMeta.objects(
+                create_by=admin, category=Category.REVIEWED.value).order_by(
+                    '-update_at').all()[3:6])
 
 
 @pytest.mark.usefixtures('doc')

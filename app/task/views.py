@@ -19,13 +19,12 @@ def my_doc_meta():
     page = request.args.get('page', 1, type=int)
     category = request.args.get('category', ALL_CATEGORY, type=str)
     if category == ALL_CATEGORY:
-        documents = DocumentMeta.objects(create_by=current_user.id).paginate(
-            page=page, per_page=DOCUMENT_PER_PAGE)
+        documents = DocumentMeta.objects(create_by=current_user.id)
     else:
         documents = DocumentMeta.objects(
-            create_by=current_user.id,
-            category=Category[category].value).paginate(
-                page=page, per_page=DOCUMENT_PER_PAGE)
+            create_by=current_user.id, category=Category[category].value)
+    documents = documents.order_by('-update_at').paginate(
+        page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
         current_category=category,

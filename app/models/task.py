@@ -14,11 +14,11 @@ def update_modified(sender, document):
 
 
 class Category(enum.Enum):
+    FLIP = 'FLIP'
     SHORT_TERM = 'STERM'
     LONG_TERM = 'LTERM'
     HIGHLIGHT = 'INTEREST'
     REVIEWED = 'REVIEWED'
-    FLIP = 'FLIP'
 
 
 @update_modified.apply

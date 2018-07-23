@@ -4,7 +4,7 @@
         {% for page in pagination.iter_pages() %}
             {% if page %}
                 {% if page != pagination.page %}
-                    <a class="item" href="{{ url_for(endpoint, page=page, category=arguments) }}">{{ page }}</a>
+                    <a class="item" href="{{ url_for(endpoint, category=arguments, page=page) }}">{{ page }}</a>
                 {% else %}
                     <a class="active item">{{ page }}</a>
                 {% endif %}

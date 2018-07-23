@@ -1,6 +1,11 @@
+import itertools
+from typing import List
 from urllib.parse import urljoin, urlparse
 
+from faker import Faker
 from flask import Response, redirect, request, url_for
+
+from app.models import Category, DocumentMeta, User
 
 INVALID_OBJECT_ID = '1' * 24
 
@@ -22,6 +27,23 @@ def register_template_utils(app):
 
 def index_for_role(role):
     return url_for(role.index)
+
+
+def generate_documents_for_user(user: User) -> List[DocumentMeta]:
+    """Generate document list for given user."""
+    faker = Faker()
+    doc_list = []
+    for category, doc_amount in zip(Category, range(1, len(Category) + 1)):
+        for _ in itertools.repeat(None, doc_amount):
+            doc_meta = DocumentMeta(
+                theme=faker.sentence(),
+                category=category.value,
+                url=faker.url(),
+                priority=1,
+                create_by=user)
+            doc_meta.save()
+            doc_list.append(doc_meta)
+    return doc_list
 
 
 def is_safe_url(target: str) -> bool:

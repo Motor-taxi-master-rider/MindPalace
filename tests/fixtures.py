@@ -3,6 +3,7 @@ from mongoengine import connect
 
 from app import create_app
 from app.models import Category, DocumentMeta, Role, User
+from app.utils import generate_documents_for_user
 
 
 @pytest.fixture(scope='module')
@@ -84,3 +85,11 @@ def doc(db, user):
     yield doc_meta
     doc_meta.delete()
     dup_doc_meta.delete()
+
+
+@pytest.fixture(scope='function')
+def doc_list(db, admin):
+    doc_list = generate_documents_for_user(admin)
+    yield list(reversed(doc_list))
+    for doc in doc_list:
+        doc.delete()
