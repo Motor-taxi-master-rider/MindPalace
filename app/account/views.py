@@ -48,8 +48,7 @@ def register():
             template='account/email/confirm',
             user=user,
             confirm_link=confirm_link)
-        flash('A confirmation link has been sent to {}.'.format(user.email),
-              'warning')
+        flash(f'A confirmation link has been sent to {user.email}.', 'warning')
         return redirect(url_for('main.index'))
     return render_template('account/register.html', form=form)
 
@@ -154,7 +153,7 @@ def change_email_request():
                 # object
                 user=current_user._get_current_object(),
                 change_email_link=change_email_link)
-            flash('A confirmation link has been sent to {}.'.format(new_email),
+            flash(f'A confirmation link has been sent to {new_email}.',
                   'warning')
             return redirect(url_for('main.index'))
         else:

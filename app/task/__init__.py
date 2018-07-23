@@ -1,1 +1,1 @@
-from app.task.views import task  # noqa
+from app.task.views import task

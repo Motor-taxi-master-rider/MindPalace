@@ -26,6 +26,15 @@ repos:
     rev: v0.22.0
     hooks:
     -   id: yapf
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v1.4.0
+    hooks:
+    -   id: pyupgrade
+        args: [--py36-plus]
+-   repo: https://github.com/asottile/yesqa
+    rev: v0.0.7
+    hooks:
+    -   id: yesqa
 -   repo: local
     hooks:
     -   id: pytest
