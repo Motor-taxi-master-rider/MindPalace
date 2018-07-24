@@ -66,31 +66,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('#search-doc').keypress(function (event) {
-            if(event.keyCode != "13") return;
-            var searchText = $(this).val();
-            window.location.href = "{{ url_for('task.my_doc_meta') }}?category={{ current_category }}&search="+searchText;
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#search-doc').keypress(function (event) {
+                if(event.keyCode != "13") return;
+                var searchText = $(this).val();
+                window.location.href = "{{ url_for('task.my_doc_meta') }}?category={{ current_category }}&search="+searchText;
+            });
+
+            $('#select-category').dropdown({
+                onChange: function (value, text, $selectedItem) {
+                    window.location.href = "{{ url_for('task.my_doc_meta') }}?category="+value;
+                }
+            });
         });
-
-        $('#select-category').dropdown({
-            onChange: function (value, text, $selectedItem) {
-                window.location.href = "{{ url_for('task.my_doc_meta') }}?category="+value;
-            }
-        });
-    });
-
-
-
-
-
-
-
-
-
-
-
-
-</script> {% endblock %}
+    </script>
+{% endblock %}

@@ -3,8 +3,11 @@
         <img src="{{ url_for('static', filename='images/task/default_type.png') }}">
     </div>
     <div class="content">
-        <a class="ui header{% if d.priority == 3 %} red {% elif d.priority == 2 %} blue {% endif %}"
-           href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
+        <div>
+            <a class="ui header{% if d.priority == 3 %} red {% elif d.priority == 2 %} blue {% endif %}"
+            href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
+            <div class="ui right floated">{{ moment(d.update_at).fromNow() }}</div>
+        </div>
         <div class="meta">
             <span class="cinema">{{ beautify_static(categories[d.category]) }}</span>
         </div>

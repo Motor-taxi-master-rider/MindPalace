@@ -4,8 +4,9 @@
 <html>
     <head>
         {% include 'partials/_head.html' %}
-        {# Any templates that extend this template can set custom_head_tags to add scripts to their page #}
-        {% block custom_head_tags %}{% endblock %}
+        {% block scripts %}
+            {{ moment.include_moment() }}
+        {% endblock %}
     </head>
     <body>
       {# Example dropdown menu setup. Uncomment lines to view
