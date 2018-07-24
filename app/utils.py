@@ -39,7 +39,7 @@ def generate_documents_for_user(user: User) -> List[DocumentMeta]:
                 theme=faker.sentence(),
                 category=category.value,
                 url=faker.url(),
-                priority=1,
+                priority=0,
                 create_by=user)
             doc_meta.save()
             doc_list.append(doc_meta)

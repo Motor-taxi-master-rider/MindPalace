@@ -6,7 +6,7 @@
         <a class="ui header{% if d.priority == 3 %} red {% elif d.priority == 2 %} blue {% endif %}"
            href="{{ d.url }}" target="_blank">{{ d.theme }}</a>
         <div class="meta">
-            <span class="cinema">{{ d.category }}</span>
+            <span class="cinema">{{ beautify_static(categories[d.category]) }}</span>
         </div>
         <div class="description">
             <div class="ui middle aligned divided list">

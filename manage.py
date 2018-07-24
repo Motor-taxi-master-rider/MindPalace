@@ -71,20 +71,21 @@ def setup_general():
     Role.insert_roles()
     admin_query = Role.objects(name='Administrator')
     if admin_query.first() is not None:
-        if User.objects(email=Config.ADMIN_EMAIL).first() is None:
-            user = User(
+        admin = User.objects(email=Config.ADMIN_EMAIL).first()
+        if not admin:
+            admin = User(
                 first_name='Admin',
                 last_name='Account',
                 password=Config.ADMIN_PASSWORD,
                 confirmed=True,
                 email=Config.ADMIN_EMAIL)
-            user.save()
-            print('Added administrator {}'.format(user.full_name()))
+            admin.save()
+            print('Added administrator {}'.format(admin.full_name()))
 
-            for document in DocumentMeta.objects().all():
-                document.create_by = user
-                document.save()
-            print('Assigned documents to {}'.format(user.full_name()))
+        for document in DocumentMeta.objects(create_by__exists=False).all():
+            document.create_by = admin
+            document.save()
+        print('Assigned documents to {}'.format(admin.full_name()))
 
 
 @manager.command

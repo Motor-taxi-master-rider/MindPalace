@@ -26,8 +26,8 @@
                 <i class="dropdown icon"></i>
                 <div class="menu">
                     <div class="item" data-value="{{ all_category }}">{{ all_category }}</div>
-                    {% for c in categories %}
-                    <div class="item" data-value="{{ c.name }}">{{ beautify_static(c.name) }}</div>
+                    {% for cname in categories.values() %}
+                    <div class="item" data-value="{{ cname }}">{{ beautify_static(cname) }}</div>
                     {% endfor %}
                 </div>
             </div>
@@ -50,14 +50,19 @@
         {{ f.form_message(flashes['info'], header='Information', class='info') }}
         {{ f.form_message(flashes['success'], header='Success!', class='success') }}
 
-        <div style="overflow-x: auto;margin-top:20px;">
-            <div class="ui divided items">
-                {% for d in documents.items | sort(attribute='category') %}
-                    {% include 'task/_document.html' %}
-                {% endfor %}
-            </div>
+        <h4 class="ui section divider"></h4>
+        <div style="overflow-x: auto;">
+            {% if documents.items %}
+                <div class="ui divided items">
+                    {% for d in documents.items %}
+                        {% include 'task/_document.html' %}
+                    {% endfor %}
+                </div>
 
-            {{ m.render_navigation(documents, 'task.my_doc_meta', current_category, current_search) }}
+                {{ m.render_navigation(documents, 'task.my_doc_meta', current_category, current_search) }}
+            {% else %}
+                <h1  class="ui disabled header centered">No Document Found</h1 >
+            {% endif %}
         </div>
     </div>
 </div>

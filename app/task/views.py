@@ -109,4 +109,8 @@ def delete_doc_meta(doc_meta_id):
 
 @task.context_processor
 def inject_template_global():
-    return {'categories': Category, 'all_category': ALL_CATEGORY}
+    return {
+        'categories': {c.value: c.name
+                       for c in Category},
+        'all_category': ALL_CATEGORY
+    }

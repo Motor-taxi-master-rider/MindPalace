@@ -17,7 +17,7 @@ def test_get_my_doc_meta(client, admin, doc_list, monkeypatch):
         assert client.get(url_for('task.my_doc_meta')).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
-        assert context['categories'] == Category
+        assert context['categories'] == {c.value: c.name for c in Category}
         assert context['current_category'] == ALL_CATEGORY
         assert list(context['documents'].items) == list(
             DocumentMeta.objects(create_by=admin).order_by(
@@ -61,6 +61,23 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
             DocumentMeta.objects(
                 create_by=admin, category=Category.REVIEWED.value).order_by(
                     '-priority', '-update_at').all()[3:6])
+
+
+@pytest.mark.usefixtures('doc_list')
+def test_get_my_doc_meta_with_search(client, admin, monkeypatch):
+    login(client, admin)
+    monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 3)
+
+    with captured_templates(client.application) as templates:
+        # search empty string to return all documents
+        assert client.get(url_for('task.my_doc_meta',
+                                  search='')).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'task/document_dashboard.html'
+        assert context['current_search'] == ''
+        assert list(context['documents'].items) == list(
+            DocumentMeta.objects(create_by=admin).order_by(
+                '-priority', '-update_at').all()[:3])
 
 
 @pytest.mark.usefixtures('doc')
