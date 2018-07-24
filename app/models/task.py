@@ -21,13 +21,9 @@ class Category(enum.Enum):
     REVIEWED = 'REVIEWED'
 
 
-@update_modified.apply
-class DocumentCache(db.Document):  # type: ignore
+class DocumentCache(db.EmbeddedDocument):  # type: ignore
     content = db.StringField()
     update_at = db.DateTimeField(default=datetime.datetime.utcnow)
-    meta = {
-        'collection': 'document_cache',
-    }
 
 
 @update_modified.apply
@@ -42,7 +38,7 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
     comment = db.ListField(db.StringField())
     update_at = db.DateTimeField(default=datetime.datetime.utcnow)
     create_by = db.ReferenceField(User)
-    cache = db.ReferenceField(DocumentCache)
+    cache = db.EmbeddedDocumentField(DocumentCache)
     meta = {
         'collection':
         'document_meta',
@@ -51,11 +47,12 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
         }, {
             'fields': ['category']
         }, {
-            'fields': ['$theme', "$comment"],
+            'fields': ['$theme', "$comment", "$cache.content"],
             'default_language': 'english',
             'weights': {
                 'theme': 8,
-                'comment': 5
+                'comment': 5,
+                'cache.content': 3
             }
         }]
     }

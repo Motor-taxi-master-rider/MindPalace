@@ -8,13 +8,12 @@ from app.models import Category, DocumentCache, DocumentMeta, User
 
 @pytest.mark.usefixtures('db')
 def test_update_time_init():
-    dm = DocumentMeta(theme='test', category=Category.REVIEWED.value)
     dc = DocumentCache(content='test content')
+    dm = DocumentMeta(theme='test', category=Category.REVIEWED.value, cache=dc)
     dm.save()
-    dc.save()
     assert dm.update_at.timestamp() == pytest.approx(
         datetime.datetime.utcnow().timestamp(), abs=1)
-    assert dc.update_at.timestamp() == pytest.approx(
+    assert dm.cache.update_at.timestamp() == pytest.approx(
         datetime.datetime.utcnow().timestamp(), abs=1)
 
 
@@ -22,18 +21,11 @@ def test_update_time_init():
 def test_update_time_change():
     dm = DocumentMeta(theme='test', category=Category.REVIEWED.value)
     dm.update_at = datetime.datetime.utcfromtimestamp(1000000000)
-    dc = DocumentCache(content='test content')
-    dc.update_at = datetime.datetime.utcfromtimestamp(1000000000)
     assert dm.update_at.timestamp() != pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
-    assert dc.update_at.timestamp() != pytest.approx(
         datetime.datetime.utcnow().timestamp(), abs=1)
 
     dm.save()
-    dc.save()
     assert dm.update_at.timestamp() == pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
-    assert dc.update_at.timestamp() == pytest.approx(
         datetime.datetime.utcnow().timestamp(), abs=1)
 
 
@@ -63,8 +55,10 @@ def test_large_document_theme():
 @pytest.mark.usefixtures('db')
 def test_large_document_cache_content():
     dc = DocumentCache(content='test content' * 1000)
-    dc.save()
-    assert dc.content == 'test content' * 1000
+    dm = DocumentMeta(theme='test', category=Category.REVIEWED.value, cache=dc)
+
+    dm.save()
+    assert dm.cache.content == 'test content' * 1000
 
 
 @pytest.mark.usefixtures('db')
