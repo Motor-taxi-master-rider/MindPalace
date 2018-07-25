@@ -1,23 +1,11 @@
 import os
-import sys
+import urllib.parse
 from abc import ABC, abstractmethod
 
+from dotenv import load_dotenv
 from raygun4py.middleware import flask as flask_raygun
 
-PYTHON_VERSION = sys.version_info[0]
-if PYTHON_VERSION == 3:
-    import urllib.parse
-else:
-    import urlparse
-
-basedir = os.path.abspath(os.path.dirname(__file__))
-
-if os.path.exists('config.env'):
-    print('Importing environment from .env file')
-    for line in open('config.env'):
-        var = line.strip().split('=')
-        if len(var) == 2:
-            os.environ[var[0]] = var[1].replace("\"", "")
+load_dotenv(verbose=True)
 
 
 class Config(ABC):
@@ -54,12 +42,8 @@ class Config(ABC):
     RAYGUN_APIKEY = os.environ.get('RAYGUN_APIKEY')
 
     # Parse the REDIS_URL to set RQ config variables
-    if PYTHON_VERSION == 3:
-        urllib.parse.uses_netloc.append('redis')
-        url = urllib.parse.urlparse(REDIS_URL)
-    else:
-        urlparse.uses_netloc.append('redis')
-        url = urlparse.urlparse(REDIS_URL)
+    urllib.parse.uses_netloc.append('redis')
+    url = urllib.parse.urlparse(REDIS_URL)
 
     RQ_DEFAULT_HOST = url.hostname
     RQ_DEFAULT_PORT = url.port

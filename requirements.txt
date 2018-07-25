@@ -31,6 +31,7 @@ pytest-cov
 pytest-flask
 pytest-xdist
 python-dateutil==2.6.0
+python-dotenv
 python-editor==1.0.3
 raygun4py==3.1.4
 redis==2.10.5
