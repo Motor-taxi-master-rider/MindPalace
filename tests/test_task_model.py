@@ -12,9 +12,9 @@ def test_update_time_init():
     dm = DocumentMeta(theme='test', category=Category.REVIEWED.value, cache=dc)
     dm.save()
     assert dm.update_at.timestamp() == pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
+        datetime.datetime.utcnow().timestamp(), abs=2)
     assert dm.cache.update_at.timestamp() == pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
+        datetime.datetime.utcnow().timestamp(), abs=2)
 
 
 @pytest.mark.usefixtures('db')
@@ -22,11 +22,11 @@ def test_update_time_change():
     dm = DocumentMeta(theme='test', category=Category.REVIEWED.value)
     dm.update_at = datetime.datetime.utcfromtimestamp(1000000000)
     assert dm.update_at.timestamp() != pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
+        datetime.datetime.utcnow().timestamp(), abs=2)
 
     dm.save()
     assert dm.update_at.timestamp() == pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
+        datetime.datetime.utcnow().timestamp(), abs=2)
 
 
 @pytest.mark.usefixtures('db')

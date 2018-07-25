@@ -143,10 +143,10 @@ def test_last_seen(client, user):
     user.last_seen = datetime.datetime.utcfromtimestamp(1000000000)
     user.save()
     assert user.last_seen.timestamp() != pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
+        datetime.datetime.utcnow().timestamp(), abs=2)
 
     login(client, user)
     client.get(url_for('main.index'))
     user.reload()
     assert user.last_seen.timestamp() == pytest.approx(
-        datetime.datetime.utcnow().timestamp(), abs=1)
+        datetime.datetime.utcnow().timestamp(), abs=2)
