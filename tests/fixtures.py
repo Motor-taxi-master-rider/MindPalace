@@ -3,7 +3,6 @@ from unittest.mock import patch
 import pytest
 from mongoengine import connect
 
-import app
 from app import create_app
 from app.models import Category, DocumentMeta, Role, User
 from app.utils import generate_documents_for_user
