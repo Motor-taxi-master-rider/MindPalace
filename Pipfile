@@ -1,0 +1,42 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+click = "*"
+flask-mongoengine = "*"
+itsdangerous = "*"
+mongomock = "*"
+python-dotenv = "*"
+"raygun4py" = "*"
+redis = "*"
+requests = "*"
+rq = "*"
+six = "*"
+webassets = "*"
+Flask = "*"
+Flask-Assets = "*"
+Flask-Compress = "*"
+Flask-Login = "*"
+Flask-Mail = "*"
+Flask-Script = "*"
+Flask-SSLify = "*"
+Flask-WTF = "*"
+Flask-Moment = "*"
+pyyaml = "*"
+pipenv = "*"
+"flask-rq2" = "*"
+flask-rq = "*"
+
+[dev-packages]
+isort = "*"
+pre_commit = "*"
+pytest-cov = "*"
+pytest-flask = "*"
+pytest-xdist = "*"
+yapf = "*"
+Faker = "*"
+
+[requires]
+python_version = "3.6"

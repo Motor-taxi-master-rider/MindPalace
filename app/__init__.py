@@ -7,7 +7,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_moment import Moment
 from flask_mongoengine import MongoEngine
-from flask_rq import RQ
+from flask_rq2 import RQ
 from flask_wtf import CSRFProtect
 
 from app.assets import app_css, app_js, vendor_css, vendor_js
@@ -20,6 +20,7 @@ db = MongoEngine()
 csrf = CSRFProtect()
 compress = Compress()
 moment = Moment()
+rq = RQ()
 
 # Set up Flask-Login
 login_manager = LoginManager()
@@ -42,7 +43,7 @@ def create_app(config_name):
     csrf.init_app(app)
     compress.init_app(app)
     moment.init_app(app)
-    RQ(app)
+    rq.init_app(app)
 
     # Register Jinja template functions
     from .utils import register_template_utils

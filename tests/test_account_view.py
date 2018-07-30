@@ -1,15 +1,13 @@
 import pytest
 from flask import url_for
 from flask_login import current_user
-from utils import (MockRedisQueue, captured_templates, login, logout, real_url,
-                   redirect_to)
+from utils import captured_templates, login, logout, real_url, redirect_to
 
-import app.account.views
 from app.account.forms import (ChangePasswordForm, CreatePasswordForm,
                                LoginForm, RegistrationForm,
                                RequestResetPasswordForm, ResetPasswordForm)
 from app.models import User
-from app.utils import INVALID_OBJECT_ID
+from app.utils import INVALID_OBJECT_ID, get_queue
 
 
 def test_login_success(client, admin):
@@ -54,9 +52,7 @@ def test_get_register(client):
 
 @pytest.mark.usefixtures('db')
 def test_post_register(client, monkeypatch):
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_confirmation_token', lambda s: 'token')
-    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
 
     data = {
         'first_name': 'first',
@@ -72,7 +68,7 @@ def test_post_register(client, monkeypatch):
     assert user.last_name == data['last_name']
     assert user.verify_password(data['password'])
 
-    queued_object = mock_queue.get(False)
+    queued_object = get_queue('email').dequeue()
     assert queued_object['recipient'] == data['email']
     assert queued_object['user'] == user
     assert queued_object['confirm_link'] == url_for(
@@ -111,16 +107,14 @@ def test_get_reset_password_request(client, admin):
 
 def test_post_reset_password_request_success(client, admin, monkeypatch):
     login(client, admin)
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_password_reset_token',
                         lambda s: 'token')
-    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
 
     assert redirect_to(
         client.post(
             url_for('account.reset_password_request'),
             data={'email': admin.email})) == real_url('account.login')
-    queued_object = mock_queue.get(False)
+    queued_object = get_queue('email').dequeue()
     assert queued_object['recipient'] == admin.email
     assert queued_object['user'] == admin
     assert queued_object['reset_link'] == url_for(
@@ -132,10 +126,8 @@ def test_post_reset_password_request_failure(client, admin, monkeypatch):
         url_for('account.reset_password_request'))) == real_url('main.index')
 
     login(client, admin)
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_password_reset_token',
                         lambda s: 'token')
-    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
 
     assert redirect_to(
         client.post(
@@ -225,10 +217,8 @@ def test_post_change_password_failure(client, admin):
 
 def test_post_change_email_request_success(client, admin, monkeypatch):
     login(client, admin)
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_email_change_token',
                         lambda s, e: 'token')
-    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
     data = {
         'email': 'new@admin.com',
         'password': 'test',
@@ -238,7 +228,7 @@ def test_post_change_email_request_success(client, admin, monkeypatch):
         client.post(url_for('account.change_email_request'),
                     data=data)) == real_url('main.index')
     admin.reload()
-    queued_object = mock_queue.get(False)
+    queued_object = get_queue('email').dequeue()
     assert queued_object['recipient'] == data['email']
     assert queued_object['user'] == admin
     assert queued_object['change_email_link'] == url_for(
@@ -247,10 +237,8 @@ def test_post_change_email_request_success(client, admin, monkeypatch):
 
 def test_post_change_email_request_failure(client, admin, monkeypatch):
     login(client, admin)
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_email_change_token',
                         lambda s, e: 'token')
-    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
     duplicate_email = {
         'email': 'admin@admin.com',
         'password': 'test',
@@ -293,13 +281,11 @@ def test_get_change_email_failure(client, admin):
 
 def test_get_confirm_request(client, admin, monkeypatch):
     login(client, admin)
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_confirmation_token', lambda s: 'token')
-    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
 
     assert redirect_to(client.get(
         url_for('account.confirm_request'))) == real_url('main.index')
-    queued_object = mock_queue.get(False)
+    queued_object = get_queue('email').dequeue()
     assert queued_object['recipient'] == admin.email
     assert queued_object['user'] == admin
     assert queued_object['confirm_link'] == url_for(
@@ -401,17 +387,15 @@ def test_post_join_from_invite_failure(client, admin, monkeypatch):
                 'account.join_from_invite', user_id=str(admin.id),
                 token=token))) == real_url('main.index')
 
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_confirmation_token',
                         lambda s: 'new_token')
-    monkeypatch.setattr(app.account.views, 'get_queue', lambda: mock_queue)
     assert redirect_to(
         client.post(
             url_for(
                 'account.join_from_invite',
                 user_id=str(new_user.id),
                 token='invalid'))) == real_url('main.index')
-    queued_object = mock_queue.get(False)
+    queued_object = get_queue('email').dequeue()
     assert queued_object['recipient'] == new_user.email
     assert queued_object['user'] == new_user
     assert queued_object['invite_link'] == url_for(

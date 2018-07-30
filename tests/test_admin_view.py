@@ -1,13 +1,11 @@
 import pytest
 from flask import url_for
 from mongoengine import DoesNotExist
-from utils import (MockRedisQueue, captured_templates, login, real_url,
-                   redirect_to)
+from utils import captured_templates, login, real_url, redirect_to
 
-import app.admin.views
 from app.admin.forms import ChangeAccountTypeForm, ChangeUserEmailForm
 from app.models import EditableHTML, Role, User
-from app.utils import INVALID_OBJECT_ID
+from app.utils import INVALID_OBJECT_ID, get_queue
 
 
 def test_post_new_user(client, admin):
@@ -31,9 +29,7 @@ def test_post_new_user(client, admin):
 
 def test_post_invite_user(client, admin, monkeypatch):
     login(client, admin)
-    mock_queue = MockRedisQueue()
     monkeypatch.setattr(User, 'generate_confirmation_token', lambda s: 'token')
-    monkeypatch.setattr(app.admin.views, 'get_queue', lambda: mock_queue)
     user_role = Role.objects(name='User').first()
     data = {
         'role': str(user_role.id),
@@ -48,7 +44,7 @@ def test_post_invite_user(client, admin, monkeypatch):
     assert new_user is not None
     assert new_user.role == user_role
 
-    queued_object = mock_queue.get(False)
+    queued_object = get_queue('email').dequeue()
     assert queued_object['recipient'] == data['email']
     assert queued_object['user'] == new_user
     assert queued_object['invite_link'] == url_for(

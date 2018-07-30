@@ -54,3 +54,6 @@ def real_url(route: str, **arguments) -> str:
 class MockRedisQueue(Queue):
     def enqueue(self, _, **kwargs):
         return self.put(kwargs)
+
+    def dequeue(self):
+        return self.get(False)

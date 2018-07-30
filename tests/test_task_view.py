@@ -9,7 +9,7 @@ from app.utils import INVALID_OBJECT_ID
 
 
 @pytest.mark.usefixtures('doc_list')
-def test_get_my_doc_meta(client, admin, doc_list, monkeypatch):
+def test_get_my_doc_meta(client, admin, monkeypatch):
     login(client, admin)
     monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 3)
 

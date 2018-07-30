@@ -1,13 +1,12 @@
-from flask import (Blueprint, abort, flash, redirect, render_template, request,
-                   url_for)
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-from flask_rq import get_queue
 
 from app.admin.forms import (ChangeAccountTypeForm, ChangeUserEmailForm,
                              InviteUserForm, NewUserForm)
 from app.decorators import admin_required
 from app.email import send_email
 from app.models import EditableHTML, Role, User
+from app.utils import get_queue
 
 admin = Blueprint('admin', __name__)
 
@@ -58,7 +57,7 @@ def invite_user():
             user_id=user.id,
             token=token,
             _external=True)
-        get_queue().enqueue(
+        get_queue('email').enqueue(
             send_email,
             recipient=user.email,
             subject='You Are Invited To Join',

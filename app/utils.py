@@ -1,9 +1,10 @@
 import itertools
-from typing import List
+from typing import Dict, List
 from urllib.parse import urljoin, urlparse
 
 from faker import Faker
 from flask import Response, redirect, request, url_for
+from rq.queue import Queue
 
 from app.models import Category, DocumentMeta, User
 
@@ -60,3 +61,17 @@ def redirect_back(endpoint: str, **values) -> Response:
     if not target or not is_safe_url(target):
         target = url_for(endpoint, **values)
     return redirect(target)
+
+
+def get_queue(queue_name: str) -> Queue:
+    from app import rq
+
+    def _get_queue():
+        nonlocal queues, queue_name
+        if queue_name not in queues:
+            queues[queue_name] = rq.get_queue(queue_name)
+        return queues[queue_name]
+
+    queues: Dict[str, Queue] = {}
+
+    return _get_queue()

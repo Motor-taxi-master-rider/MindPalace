@@ -1,16 +1,21 @@
+from unittest.mock import patch
+
 import pytest
 from mongoengine import connect
 
+import app
 from app import create_app
 from app.models import Category, DocumentMeta, Role, User
 from app.utils import generate_documents_for_user
+from tests.utils import MockRedisQueue
 
 
 @pytest.fixture(scope='module')
 def app():
-    app = create_app('testing')
-    with app.app_context():
-        yield app
+    with patch('app.rq.get_queue', return_value=MockRedisQueue()):
+        app = create_app('testing')
+        with app.app_context():
+            yield app
 
 
 @pytest.fixture(scope='function')
