@@ -27,7 +27,6 @@ Flask-Moment = "*"
 pyyaml = "*"
 pipenv = "*"
 "flask-rq2" = "*"
-flask-rq = "*"
 
 [dev-packages]
 isort = "*"
