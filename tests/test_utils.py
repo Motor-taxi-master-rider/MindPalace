@@ -11,7 +11,6 @@ def test_generate_documents_for_user(admin):
     assert len(doc_list) == sum(range(1, len(Category) + 1))
 
 
-@pytest.mark.xfail
 def test_get_queue():
     queue_boy = get_queue('boy')
     queuer_same_boy = get_queue('boy')
