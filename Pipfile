@@ -36,6 +36,7 @@ pytest-flask = "*"
 pytest-xdist = "*"
 yapf = "*"
 Faker = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.6"
