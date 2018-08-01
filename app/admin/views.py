@@ -4,7 +4,7 @@ from flask_login import current_user, login_required
 from app.admin.forms import (ChangeAccountTypeForm, ChangeUserEmailForm,
                              InviteUserForm, NewUserForm)
 from app.decorators import admin_required
-from app.email import send_email
+from app.jobs.email import send_email
 from app.models import EditableHTML, Role, User
 
 admin = Blueprint('admin', __name__)

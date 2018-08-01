@@ -4,7 +4,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from app.account.forms import (ChangeEmailForm, ChangePasswordForm,
                                CreatePasswordForm, LoginForm, RegistrationForm,
                                RequestResetPasswordForm, ResetPasswordForm)
-from app.email import send_email
+from app.jobs.email import send_email
 from app.models import User
 from app.utils import redirect_back
 
