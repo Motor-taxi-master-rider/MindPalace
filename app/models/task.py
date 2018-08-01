@@ -1,5 +1,5 @@
 import datetime
-import enum
+from enum import Enum
 
 from mongoengine import signals
 
@@ -13,7 +13,7 @@ def update_modified(sender, document):
     document.update_at = datetime.datetime.utcnow()
 
 
-class Category(enum.Enum):
+class Category(Enum):
     FLIP = 'FLIP'
     SHORT_TERM = 'STERM'
     LONG_TERM = 'LTERM'

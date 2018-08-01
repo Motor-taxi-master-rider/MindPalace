@@ -3,12 +3,12 @@ from flask import url_for
 from flask_login import current_user
 from utils import captured_templates, login, logout, real_url, redirect_to
 
-from app import MessageQueue
+from app import MessageQueue, rq
 from app.account.forms import (ChangePasswordForm, CreatePasswordForm,
                                LoginForm, RegistrationForm,
                                RequestResetPasswordForm, ResetPasswordForm)
 from app.models import User
-from app.utils import INVALID_OBJECT_ID, get_queue
+from app.utils import INVALID_OBJECT_ID
 
 
 def test_login_success(client, admin):
@@ -69,7 +69,7 @@ def test_post_register(client, monkeypatch):
     assert user.last_name == data['last_name']
     assert user.verify_password(data['password'])
 
-    queued_object = get_queue(MessageQueue.email.value).dequeue()
+    queued_object = rq.get_queue(MessageQueue.email).get_kwargs()
     assert queued_object['recipient'] == data['email']
     assert queued_object['user'] == user
     assert queued_object['confirm_link'] == url_for(
@@ -115,7 +115,7 @@ def test_post_reset_password_request_success(client, admin, monkeypatch):
         client.post(
             url_for('account.reset_password_request'),
             data={'email': admin.email})) == real_url('account.login')
-    queued_object = get_queue(MessageQueue.email.value).dequeue()
+    queued_object = rq.get_queue(MessageQueue.email).get_kwargs()
     assert queued_object['recipient'] == admin.email
     assert queued_object['user'] == admin
     assert queued_object['reset_link'] == url_for(
@@ -229,7 +229,7 @@ def test_post_change_email_request_success(client, admin, monkeypatch):
         client.post(url_for('account.change_email_request'),
                     data=data)) == real_url('main.index')
     admin.reload()
-    queued_object = get_queue(MessageQueue.email.value).dequeue()
+    queued_object = rq.get_queue(MessageQueue.email).get_kwargs()
     assert queued_object['recipient'] == data['email']
     assert queued_object['user'] == admin
     assert queued_object['change_email_link'] == url_for(
@@ -286,7 +286,7 @@ def test_get_confirm_request(client, admin, monkeypatch):
 
     assert redirect_to(client.get(
         url_for('account.confirm_request'))) == real_url('main.index')
-    queued_object = get_queue(MessageQueue.email.value).dequeue()
+    queued_object = rq.get_queue(MessageQueue.email).get_kwargs()
     assert queued_object['recipient'] == admin.email
     assert queued_object['user'] == admin
     assert queued_object['confirm_link'] == url_for(
@@ -396,7 +396,7 @@ def test_post_join_from_invite_failure(client, admin, monkeypatch):
                 'account.join_from_invite',
                 user_id=str(new_user.id),
                 token='invalid'))) == real_url('main.index')
-    queued_object = get_queue(MessageQueue.email.value).dequeue()
+    queued_object = rq.get_queue(MessageQueue.email).get_kwargs()
     assert queued_object['recipient'] == new_user.email
     assert queued_object['user'] == new_user
     assert queued_object['invite_link'] == url_for(

@@ -1,5 +1,4 @@
 from collections import defaultdict
-from operator import itemgetter
 from unittest.mock import patch
 
 import pytest
@@ -14,7 +13,7 @@ from tests.utils import MockRedisQueue
 @pytest.fixture(scope='module')
 def app():
     queues = defaultdict(MockRedisQueue)
-    with patch('app.rq.get_queue', lambda name: queues[name]):
+    with patch('flask_rq2.RQ.get_queue', lambda _, name: queues[name]):
         app = create_app('testing')
         with app.app_context():
             yield app

@@ -4,6 +4,7 @@ from urllib.parse import urlparse, urlunparse
 
 from flask import Response, template_rendered, url_for
 from flask.testing import FlaskClient
+from mock import MagicMock
 
 from app.models import User
 
@@ -52,8 +53,11 @@ def real_url(route: str, **arguments) -> str:
 
 
 class MockRedisQueue(Queue):
-    def enqueue(self, _, **kwargs):
+    def enqueue_call(self, _, **kwargs):
         return self.put(kwargs)
 
-    def dequeue(self):
-        return self.get(False)
+    def get_kwargs(self):
+        return self.get(False)['kwargs']
+
+    def __getattr__(self, item):
+        return MagicMock()

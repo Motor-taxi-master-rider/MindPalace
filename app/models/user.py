@@ -1,5 +1,5 @@
 import datetime
-import enum
+from enum import Enum
 
 from flask import current_app
 from flask_login import AnonymousUserMixin, UserMixin
@@ -10,7 +10,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from .. import db, login_manager
 
 
-class Permission(enum.Enum):
+class Permission(Enum):
     GENERAL = 0x01
     ADMINISTER = 0xff
 
@@ -54,8 +54,7 @@ class User(UserMixin, db.DynamicDocument):  # type: ignore
     _password = db.StringField(max_length=128, db_field='password_hash')
     role = db.ReferenceField(Role)
     meta = {
-        'collection':
-        'users',
+        'collection':'users',
         'indexes': [{
             'fields': ['first_name']
         }, {
@@ -63,7 +62,7 @@ class User(UserMixin, db.DynamicDocument):  # type: ignore
         }, {
             'fields': ['email']
         }]
-    }
+    } # yapf: disable
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -80,7 +79,7 @@ class User(UserMixin, db.DynamicDocument):  # type: ignore
 
     def can(self, permissions):
         return self.role is not None and \
-            (self.role.permissions & permissions) == permissions
+               (self.role.permissions & permissions) == permissions
 
     def is_admin(self):
         return self.can(Permission.ADMINISTER.value)

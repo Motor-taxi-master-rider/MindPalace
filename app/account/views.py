@@ -1,13 +1,12 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
-from app import MessageQueue
 from app.account.forms import (ChangeEmailForm, ChangePasswordForm,
                                CreatePasswordForm, LoginForm, RegistrationForm,
                                RequestResetPasswordForm, ResetPasswordForm)
 from app.email import send_email
 from app.models import User
-from app.utils import get_queue, redirect_back
+from app.utils import redirect_back
 
 account = Blueprint('account', __name__)
 
@@ -41,8 +40,7 @@ def register():
         user.save()
         token = user.generate_confirmation_token()
         confirm_link = url_for('account.confirm', token=token, _external=True)
-        get_queue(MessageQueue.email.value).enqueue(
-            send_email,
+        send_email.queue(
             recipient=user.email,
             subject='Confirm Your Account',
             template='account/email/confirm',
@@ -81,8 +79,7 @@ def reset_password_request():
             token = user.generate_password_reset_token()
             reset_link = url_for(
                 'account.reset_password', token=token, _external=True)
-            get_queue(MessageQueue.email.value).enqueue(
-                send_email,
+            send_email.queue(
                 recipient=user.email,
                 subject='Reset Your Password',
                 template='account/email/reset_password',
@@ -144,8 +141,7 @@ def change_email_request():
             token = current_user.generate_email_change_token(new_email)
             change_email_link = url_for(
                 'account.change_email', token=token, _external=True)
-            get_queue(MessageQueue.email.value).enqueue(
-                send_email,
+            send_email.queue(
                 recipient=new_email,
                 subject='Confirm Your New Email',
                 template='account/email/change_email',
@@ -178,8 +174,7 @@ def confirm_request():
     """Respond to new user's request to confirm their account."""
     token = current_user.generate_confirmation_token()
     confirm_link = url_for('account.confirm', token=token, _external=True)
-    get_queue(MessageQueue.email.value).enqueue(
-        send_email,
+    send_email.queue(
         recipient=current_user.email,
         subject='Confirm Your Account',
         template='account/email/confirm',
@@ -243,8 +238,7 @@ def join_from_invite(user_id, token):
             user_id=user_id,
             token=token,
             _external=True)
-        get_queue(MessageQueue.email.value).enqueue(
-            send_email,
+        send_email.queue(
             recipient=new_user.email,
             subject='You Are Invited To Join',
             template='account/email/invite',
