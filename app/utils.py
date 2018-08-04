@@ -1,4 +1,6 @@
 import itertools
+import re
+from collections import namedtuple
 from typing import List
 from urllib.parse import urljoin, urlparse
 
@@ -8,6 +10,9 @@ from flask import Response, redirect, request, url_for
 from app.models import Category, DocumentMeta, User
 
 INVALID_OBJECT_ID = '1' * 24
+CONTENT_TYPE_REG = re.compile(
+    '(?P<type>\w+/\w+)(;\s*charset=(?P<encoding>[\w-]+))?')
+ContentType = namedtuple('ContentType', ['type', 'encoding'])
 
 
 def register_template_utils(app):
@@ -22,11 +27,11 @@ def register_template_utils(app):
         from wtforms.fields import HiddenField
         return isinstance(field, HiddenField)
 
-    app.add_template_global(index_for_role)
+    app.add_template_global(beautify_static)
 
 
-def index_for_role(role):
-    return url_for(role.index)
+def beautify_static(name: str) -> str:
+    return name.lower().replace('_', ' ').capitalize()
 
 
 def generate_documents_for_user(user: User) -> List[DocumentMeta]:
@@ -52,6 +57,15 @@ def is_safe_url(target: str) -> bool:
     test_url = urlparse(urljoin(request.host_url, target))
     return test_url.scheme in ('http', 'https') and \
            ref_url.netloc == test_url.netloc
+
+
+def parse_content_type(content_type: str) -> ContentType:
+    parse = CONTENT_TYPE_REG.match(content_type)
+    if parse:
+        match = parse.groupdict()
+    else:
+        raise TypeError(f'Invalid header content type {content_type}.')
+    return ContentType(match.get('type'), match.get('encoding'))
 
 
 def redirect_back(endpoint: str, **values) -> Response:
