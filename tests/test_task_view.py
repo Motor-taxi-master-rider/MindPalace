@@ -2,10 +2,9 @@ import pytest
 from flask import url_for
 from utils import captured_templates, login, real_url, redirect_to
 
+from app.globals import ALL_CATEGORY, INVALID_OBJECT_ID
 from app.models import Category, DocumentMeta
 from app.task.forms import DocMetaForm
-from app.task.views import ALL_CATEGORY
-from app.utils import INVALID_OBJECT_ID
 
 
 @pytest.mark.usefixtures('doc_list')

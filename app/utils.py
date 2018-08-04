@@ -1,5 +1,4 @@
 import itertools
-import re
 from collections import namedtuple
 from typing import List
 from urllib.parse import urljoin, urlparse
@@ -7,11 +6,10 @@ from urllib.parse import urljoin, urlparse
 from faker import Faker
 from flask import Response, redirect, request, url_for
 
+from app.exceptions import InvalidContentType
+from app.globals import CONTENT_TYPE_REG
 from app.models import Category, DocumentMeta, User
 
-INVALID_OBJECT_ID = '1' * 24
-CONTENT_TYPE_REG = re.compile(
-    '(?P<type>\w+/\w+)(;\s*charset=(?P<encoding>[\w-]+))?')
 ContentType = namedtuple('ContentType', ['type', 'encoding'])
 
 
@@ -60,11 +58,13 @@ def is_safe_url(target: str) -> bool:
 
 
 def parse_content_type(content_type: str) -> ContentType:
+    """Parse web page's 'Content-Type' in headers."""
     parse = CONTENT_TYPE_REG.match(content_type)
     if parse:
         match = parse.groupdict()
     else:
-        raise TypeError(f'Invalid header content type {content_type}.')
+        raise InvalidContentType(
+            f'Invalid header content type to parse: {content_type}.')
     return ContentType(match.get('type'), match.get('encoding'))
 
 

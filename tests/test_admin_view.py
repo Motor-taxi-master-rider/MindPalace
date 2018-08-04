@@ -5,8 +5,8 @@ from utils import captured_templates, login, real_url, redirect_to
 
 from app import MessageQueue, rq
 from app.admin.forms import ChangeAccountTypeForm, ChangeUserEmailForm
+from app.globals import INVALID_OBJECT_ID
 from app.models import EditableHTML, Role, User
-from app.utils import INVALID_OBJECT_ID
 
 
 def test_post_new_user(client, admin):

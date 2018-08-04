@@ -40,6 +40,6 @@ repos:
     -   id: pytest
         name: pytest
         description: This hook triggers pytest.
-        entry: pytest -n 4  --maxfail=10  --result-log .logs/pytest.log
+        entry: pytest -n 4  --maxfail=10
         language: python
         pass_filenames: false

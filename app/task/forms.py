@@ -4,8 +4,8 @@ from wtforms import HiddenField, SelectField, StringField, SubmitField
 from wtforms.fields.html5 import URLField
 from wtforms.validators import URL, InputRequired, Length, ValidationError
 
+from app.globals import INVALID_OBJECT_ID
 from app.models import Category, DocumentMeta
-from app.utils import INVALID_OBJECT_ID
 
 
 class DocMetaForm(FlaskForm):

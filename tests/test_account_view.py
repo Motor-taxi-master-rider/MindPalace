@@ -7,8 +7,8 @@ from app import MessageQueue, rq
 from app.account.forms import (ChangePasswordForm, CreatePasswordForm,
                                LoginForm, RegistrationForm,
                                RequestResetPasswordForm, ResetPasswordForm)
+from app.globals import INVALID_OBJECT_ID
 from app.models import User
-from app.utils import INVALID_OBJECT_ID
 
 
 def test_login_success(client, admin):

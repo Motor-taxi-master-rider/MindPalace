@@ -3,11 +3,9 @@ from flask import (Blueprint, abort, flash, redirect, render_template, request,
 from flask_login import current_user, login_required
 from mongoengine.errors import NotUniqueError
 
+from app.globals import ALL_CATEGORY, DOCUMENT_PER_PAGE
 from app.models import Category, DocumentMeta, Permission
 from app.task.forms import DocMetaForm
-
-DOCUMENT_PER_PAGE = 10
-ALL_CATEGORY = 'All categories'
 
 task = Blueprint('task', __name__)
 
