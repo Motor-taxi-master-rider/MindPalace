@@ -22,7 +22,7 @@ def my_doc_meta():
         documents = DocumentMeta.objects(create_by=current_user.id)
     else:
         documents = DocumentMeta.objects(
-            create_by=current_user.id, category=Category[category].value)
+            create_by=current_user.id, category=category)
 
     if search:
         documents = documents.search_text(search).order_by('$text_score')
@@ -74,6 +74,7 @@ def update_doc_meta(doc_meta_id):
             doc_meta.theme = form.theme.data
             doc_meta.category = form.category.data
             doc_meta.url = form.url.data
+            doc_meta.tags = form.tags.data
             doc_meta.priority = form.priority.data
             doc_meta.save()
         except NotUniqueError:
@@ -108,7 +109,6 @@ def delete_doc_meta(doc_meta_id):
 @task.context_processor
 def inject_template_global():
     return {
-        'categories': {c.value: c.name
-                       for c in Category},
+        'categories': [c.value for c in Category],
         'all_category': ALL_CATEGORY
     }

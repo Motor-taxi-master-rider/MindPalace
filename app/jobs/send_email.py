@@ -3,7 +3,8 @@ import os
 from flask import render_template
 from flask_mail import Message
 
-from app import MessageQueue, create_app, mail, rq
+from app import create_app, mail, rq
+from app.globals import MessageQueue
 
 
 @rq.job(MessageQueue.email, timeout=120)

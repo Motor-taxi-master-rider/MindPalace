@@ -16,7 +16,7 @@ def test_get_my_doc_meta(client, admin, monkeypatch):
         assert client.get(url_for('task.my_doc_meta')).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
-        assert context['categories'] == {c.value: c.name for c in Category}
+        assert context['categories'] == [c.value for c in Category]
         assert context['current_category'] == ALL_CATEGORY
         assert list(context['documents'].items) == list(
             DocumentMeta.objects(create_by=admin).order_by(
@@ -40,10 +40,10 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
     with captured_templates(client.application) as templates:
         assert client.get(
             url_for('task.my_doc_meta',
-                    category=Category.FLIP.name)).status_code == 200
+                    category=Category.FLIP.value)).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
-        assert context['current_category'] == Category.FLIP.name
+        assert context['current_category'] == Category.FLIP.value
         assert list(context['documents'].items) == list(
             DocumentMeta.objects(
                 create_by=admin, category=Category.FLIP.value).order_by(
@@ -51,14 +51,14 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
 
         assert client.get(
             url_for(
-                'task.my_doc_meta', category=Category.REVIEWED.name,
+                'task.my_doc_meta', category=Category.SHORT_TERM.value,
                 page=2)).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
-        assert context['current_category'] == Category.REVIEWED.name
+        assert context['current_category'] == Category.SHORT_TERM.value
         assert list(context['documents'].items) == list(
             DocumentMeta.objects(
-                create_by=admin, category=Category.REVIEWED.value).order_by(
+                create_by=admin, category=Category.SHORT_TERM.value).order_by(
                     '-priority', '-update_at').all()[3:6])
 
 
@@ -84,7 +84,7 @@ def test_post_new_doc_meta_success(client, admin):
     login(client, admin)
     data = {
         'theme': 'whats up',
-        'category': Category.REVIEWED.value,
+        'category': Category.SHORT_TERM.value,
         'url': 'https://www.helloword.com',
     }
 
@@ -121,14 +121,14 @@ def test_post_update_doc_meta_success(client, admin, doc):
         assert isinstance(form, DocMetaForm)
 
     form.theme.data = 'new theme'
-    form.category.data = Category.HIGHLIGHT.value
+    form.category.data = Category.LONG_TERM.value
     form.url.data = 'https://www.newtest.com'
     form.priority.data = 3
     assert redirect_to(client.post(url_for('task.update_doc_meta', doc_meta_id=str(doc.id)), data=form.data)) == \
            real_url('task.update_doc_meta', doc_meta_id=str(doc.id))
     doc.reload()
     assert doc.theme == 'new theme'
-    assert doc.category == Category.HIGHLIGHT.value
+    assert doc.category == Category.LONG_TERM.value
     assert doc.url == 'https://www.newtest.com'
     assert doc.priority == 3
 
@@ -137,7 +137,7 @@ def test_post_update_doc_meta_failure(client, admin, doc):
     login(client, admin)
     data = {
         'theme': 'duplicate',
-        'category': Category.REVIEWED.value,
+        'category': Category.SHORT_TERM.value,
         'url': 'https://www.helloword.com',
         'priority': 1
     }

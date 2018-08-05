@@ -1,3 +1,4 @@
+import datetime
 import itertools
 from collections import namedtuple
 from typing import List
@@ -36,13 +37,14 @@ def generate_documents_for_user(user: User) -> List[DocumentMeta]:
     """Generate document list for given user."""
     faker = Faker()
     doc_list = []
-    for category, doc_amount in zip(Category, range(1, len(Category) + 1)):
-        for _ in itertools.repeat(None, doc_amount):
+    for category, i in zip(Category, range(1, len(Category) + 1)):
+        for _ in itertools.repeat(None, 3 * i):
             doc_meta = DocumentMeta(
                 theme=faker.sentence(),
                 category=category.value,
                 url=faker.url(),
                 priority=0,
+                update_at=datetime.datetime.utcnow(),
                 create_by=user)
             doc_meta.save()
             doc_list.append(doc_meta)

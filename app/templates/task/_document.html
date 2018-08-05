@@ -9,7 +9,7 @@
             <div class="ui right floated">{{ moment(d.update_at).fromNow() }}</div>
         </div>
         <div class="meta">
-            <span class="cinema">{{ beautify_static(categories[d.category]) }}</span>
+            <span class="cinema">{{ beautify_static(d.category) }}</span>
         </div>
         <div class="description">
             <div class="ui middle aligned divided list">
@@ -42,7 +42,9 @@
                     </a>
                 </div>
             </div>
-            <div class="ui label">Tag</div>
+            {% for tag in d.tags %}
+                <div class="ui label blue">{{ beautify_static(tag) }}</div>
+            {% endfor %}
         </div>
     </div>
 </div>

@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import os
 from contextlib import closing
-from pprint import pprint
 from typing import AsyncGenerator, Dict
 
 import aiohttp
@@ -11,30 +10,48 @@ from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 
 from app import create_app
-from app.exceptions import (DocCacheException, InvalidContentType,
-                            MindPalaceException)
+from app.exceptions import (DataBaseException, DocCacheException,
+                            InvalidContentType, MindPalaceException)
 from app.globals import ENABLED_CACHE_TYPE
-from app.models import DocumentCache, DocumentMeta
+from app.models import DocumentCache, DocumentMeta, SystemTag, UserTag
 from app.utils import parse_content_type
+
+
+def _check_update_one(result):
+    if result.modified_count != 1:
+        raise DataBaseException(
+            f'Updated row count is {result.modified_count}.')
 
 
 async def get_document(collection: AsyncIOMotorCollection,
                        **options) -> AsyncGenerator:
     """Async generator to  pop up fulfilled documents from db"""
+
     default_filter = {
-        'cache.update_at': {
+        '$and': [{
+            DocumentMeta.tags.db_field: UserTag.cache.value
+        }, {
+            DocumentMeta.tags.db_field: {
+                '$ne': SystemTag.cached.value
+            }
+        }],
+        '.'.join([
+            DocumentMeta.cache.db_field, DocumentCache.update_at.db_field
+        ]): {
             '$not': {
-                '$gt': datetime.datetime.utcnow() - datetime.timedelta(days=1)
+                '$gt': datetime.datetime.utcnow() - datetime.timedelta(hours=1)
             }
         }
     }
-    row_limit = options.get('limit', 10)
+    row_limit = options.get('limit', 2)
     filter = options.get('filter', default_filter)
     async for document in collection.find(filter).limit(row_limit):
         yield document
 
 
 async def fetch_content(session: ClientSession, url: str) -> str:
+    """Crawl text data from given web page."""
+
     async with session.get(url) as response:
         print(url)
         headers = response.headers
@@ -50,41 +67,93 @@ async def fetch_content(session: ClientSession, url: str) -> str:
 
 
 async def save_content(collection: AsyncIOMotorCollection, id: ObjectId,
-                       content: str) -> int:
+                       content: str):
+    """Add crawled cache to database and add cached tag to document."""
+
     result = await collection.update_one({
         '_id': id
     }, {
         '$set': {
-            'cache': {
+            DocumentMeta.cache.db_field: {
                 DocumentCache.content.db_field: content,
                 DocumentCache.update_at.db_field: datetime.datetime.utcnow()
             }
+        },
+        '$push': {
+            DocumentMeta.tags.db_field: SystemTag.cached.value
         }
     })
-    return result.modified_count
+    _check_update_one(result)
+    await remove_cache_tag(collection, id)
+
+
+async def add_unable_cache_tag(collection: AsyncIOMotorCollection,
+                               id: ObjectId):
+    """Append unable to cache tag to document if it is unable to be cached."""
+
+    result = await collection.update_one({
+        '_id': id
+    }, {
+        '$push': {
+            DocumentMeta.tags.db_field: SystemTag.unable_to_cache.value
+        },
+    })
+    _check_update_one(result)
+    await remove_cache_tag(collection, id)
+
+
+async def remove_cache_tag(collection: AsyncIOMotorCollection, id: ObjectId):
+    """Remove original cache tag of an document."""
+
+    result = await collection.update_one({
+        '_id': id
+    }, {'$pull': {
+        DocumentMeta.tags.db_field: UserTag.cache.value
+    }})
+    _check_update_one(result)
 
 
 async def crawl_and_cache(collection: AsyncIOMotorCollection,
                           session: ClientSession, document: Dict) -> bool:
+    """
+    Crawl html from document's url, then save cache to database.
+
+    :param collection: database collection
+    :param session: http request session
+    :param document: document meta data
+    :return: True if success, False if fail
+    """
+
+    url = document[DocumentMeta.url.db_field]
     try:
-        content = await fetch_content(session, document['url'])
+        content = await fetch_content(session, url)
     except aiohttp.client_exceptions.ClientConnectionError:
-        raise DocCacheException(f'Enable to connect to {document["url"]}.',
-                                document)
+        raise DocCacheException(f'Enable to connect to {url}.', document)
     except asyncio.TimeoutError:
-        raise DocCacheException(
-            f'Time out when running task for {document["url"]}.', document)
+        raise DocCacheException(f'Time out when running task for {url}.',
+                                document)
+    except InvalidContentType as exe:
+        try:
+            await add_unable_cache_tag(collection, document['_id'])
+        except DataBaseException as another_exe:
+            raise DocCacheException(
+                f'Unable to add unable to cache tag to {url}.',
+                document) from another_exe
+        else:
+            raise exe
 
     update_row = await save_content(collection, document['_id'], content)
     if update_row != 1:
         raise DocCacheException(
-            f'Update for content ...{content[100:300]}... of {document["url"]} affected {update_row} row.',
+            f'Update for content ...{content[100:300]}... of {url} affected {update_row} row.',
             document)
 
     return True
 
 
 async def doc_cache_task(db_name, collection_name):
+    """Create database client and http session and start async crawl."""
+
     with closing(AsyncIOMotorClient()) as client:
         db = client[db_name]
         collection = db[collection_name]

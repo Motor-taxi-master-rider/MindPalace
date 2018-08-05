@@ -3,11 +3,11 @@ from flask import url_for
 from flask_login import current_user
 from utils import captured_templates, login, logout, real_url, redirect_to
 
-from app import MessageQueue, rq
+from app import rq
 from app.account.forms import (ChangePasswordForm, CreatePasswordForm,
                                LoginForm, RegistrationForm,
                                RequestResetPasswordForm, ResetPasswordForm)
-from app.globals import INVALID_OBJECT_ID
+from app.globals import INVALID_OBJECT_ID, MessageQueue
 from app.models import User
 
 

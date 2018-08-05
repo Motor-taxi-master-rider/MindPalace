@@ -3,9 +3,9 @@ from flask import url_for
 from mongoengine import DoesNotExist
 from utils import captured_templates, login, real_url, redirect_to
 
-from app import MessageQueue, rq
+from app import rq
 from app.admin.forms import ChangeAccountTypeForm, ChangeUserEmailForm
-from app.globals import INVALID_OBJECT_ID
+from app.globals import INVALID_OBJECT_ID, MessageQueue
 from app.models import EditableHTML, Role, User
 
 

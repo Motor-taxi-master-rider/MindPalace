@@ -1,4 +1,3 @@
-from enum import Enum
 import os
 
 from flask import Flask
@@ -13,11 +12,6 @@ from flask_wtf import CSRFProtect
 
 from app.assets import app_css, app_js, vendor_css, vendor_js
 from config import config
-
-
-class MessageQueue(Enum):
-    email = 'email'
-
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 

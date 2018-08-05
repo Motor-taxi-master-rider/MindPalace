@@ -1,4 +1,5 @@
 import datetime
+import itertools
 from enum import Enum
 
 from mongoengine import signals
@@ -14,11 +15,21 @@ def update_modified(sender, document):
 
 
 class Category(Enum):
-    FLIP = 'FLIP'
-    SHORT_TERM = 'STERM'
-    LONG_TERM = 'LTERM'
-    HIGHLIGHT = 'INTEREST'
-    REVIEWED = 'REVIEWED'
+    FLIP = 'flip'
+    SHORT_TERM = 'short term'
+    LONG_TERM = 'long term'
+
+
+class UserTag(Enum):
+    impressive = 'impressive'
+    reviewed = 'reviewed'
+    to_do = 'to do'
+    cache = 'cache'
+
+
+class SystemTag(Enum):
+    cached = 'cached'
+    unable_to_cache = 'unable to cache'
 
 
 class DocumentCache(db.EmbeddedDocument):  # type: ignore
@@ -36,12 +47,15 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
     url = db.StringField(max_length=1024)
     priority = db.IntField()
     comment = db.ListField(db.StringField())
+    tags = db.ListField(
+        db.StringField(choices=[
+            tag.value for tag in iter(itertools.chain(UserTag, SystemTag))
+        ]))
     update_at = db.DateTimeField(default=datetime.datetime.utcnow)
     create_by = db.ReferenceField(User)
     cache = db.EmbeddedDocumentField(DocumentCache)
     meta = {
-        'collection':
-        'document_meta',
+        'collection': 'document_meta',
         'indexes': [{
             'fields': ['theme']
         }, {
@@ -55,7 +69,7 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
                 'cache.content': 3
             }
         }]
-    }
+    }  # yapf: disable
 
     def __repr__(self):
         return f'<Document \'{str(self)}\'>'

@@ -6,6 +6,10 @@ class AsyncJobException(MindPalaceException):
     pass
 
 
+class DataBaseException(MindPalaceException):
+    pass
+
+
 class DocCacheException(AsyncJobException):
     def __init__(self, msg, document):
         super().__init__(msg)

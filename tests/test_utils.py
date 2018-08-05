@@ -9,7 +9,7 @@ from app.utils import (beautify_static, generate_documents_for_user,
 def test_generate_documents_for_user(admin):
     doc_list = generate_documents_for_user(admin)
     assert set(doc_list) == set(DocumentMeta.objects(create_by=admin).all())
-    assert len(doc_list) == sum(range(1, len(Category) + 1))
+    assert len(doc_list) == sum(range(1, len(Category) + 1)) * 3
 
 
 def test_beautify_static():

@@ -76,13 +76,13 @@ def another_user(db):
 def doc(db, user):
     doc_meta = DocumentMeta(
         theme='hello world',
-        category=Category.REVIEWED.value,
+        category=Category.SHORT_TERM.value,
         url='https://www.test.com',
         priority=1,
         create_by=user)
     dup_doc_meta = DocumentMeta(
         theme='duplicate',
-        category=Category.REVIEWED.value,
+        category=Category.SHORT_TERM.value,
         url='https://www.duplicate.com',
         priority=1,
         create_by=user)
