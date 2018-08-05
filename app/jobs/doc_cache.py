@@ -5,6 +5,7 @@ from contextlib import closing
 from typing import AsyncGenerator, Dict
 
 import aiohttp
+import pymongo
 from aiohttp import ClientSession
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
@@ -17,7 +18,7 @@ from app.models import DocumentCache, DocumentMeta, SystemTag, UserTag
 from app.utils import parse_content_type
 
 
-def _check_update_one(result):
+def _check_update_one(result: pymongo.results.UpdateResult):
     if result.modified_count != 1:
         raise DataBaseException(
             f'Updated row count is {result.modified_count}.')
@@ -43,7 +44,7 @@ async def get_document(collection: AsyncIOMotorCollection,
             }
         }
     }
-    row_limit = options.get('limit', 2)
+    row_limit = options.get('limit', 10)
     filter = options.get('filter', default_filter)
     async for document in collection.find(filter).limit(row_limit):
         yield document
@@ -142,11 +143,7 @@ async def crawl_and_cache(collection: AsyncIOMotorCollection,
         else:
             raise exe
 
-    update_row = await save_content(collection, document['_id'], content)
-    if update_row != 1:
-        raise DocCacheException(
-            f'Update for content ...{content[100:300]}... of {url} affected {update_row} row.',
-            document)
+    await save_content(collection, document['_id'], content)
 
     return True
 
