@@ -2,10 +2,10 @@ from collections import defaultdict
 from unittest.mock import patch
 
 import pytest
-from mongoengine import connect
+from mongoengine import Q, connect
 
 from app import create_app
-from app.models import Category, DocumentMeta, Role, User
+from app.models import Category, DocumentMeta, Role, User, UserTag
 from app.utils import generate_documents_for_user
 from tests.utils import MockRedisQueue
 
@@ -99,3 +99,12 @@ def doc_list(db, admin):
     yield list(reversed(doc_list))
     for doc in doc_list:
         doc.delete()
+
+
+@pytest.fixture(scope='function')
+def tagged_docs(doc_list):
+    DocumentMeta.objects(
+        Q(category=Category.LONG_TERM.value)
+        | Q(category=Category.SHORT_TERM.value)).update(
+            push_tags=UserTag.cache.value)
+    yield

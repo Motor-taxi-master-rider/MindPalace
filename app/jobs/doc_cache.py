@@ -97,7 +97,7 @@ async def add_unable_cache_tag(collection: AsyncIOMotorCollection,
     }, {
         '$push': {
             DocumentMeta.tags.db_field: SystemTag.unable_to_cache.value
-        },
+        }
     })
     _check_update_one(result)
     await remove_cache_tag(collection, id)
