@@ -1,8 +1,10 @@
 from collections import defaultdict
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
+import motor
 import pytest
 from mongoengine import Q, connect
+from motor.core import AgnosticClient
 
 from app import create_app
 from app.models import Category, DocumentMeta, Role, User, UserTag
@@ -21,10 +23,10 @@ def app():
 
 @pytest.fixture(scope='function')
 def db(app):
-    connection = connect()
+    client = connect()
     Role.insert_roles()
-    yield connection
-    connection.drop_database(app.config['MOCK_MONGO'])
+    yield client
+    client.drop_database(app.config['MOCK_MONGO'])
 
 
 @pytest.fixture(scope='function')
@@ -103,8 +105,20 @@ def doc_list(db, admin):
 
 @pytest.fixture(scope='function')
 def tagged_docs(doc_list):
-    DocumentMeta.objects(
-        Q(category=Category.LONG_TERM.value)
-        | Q(category=Category.SHORT_TERM.value)).update(
-            push_tags=UserTag.cache.value)
-    yield
+    for document in DocumentMeta.objects(
+            Q(category=Category.LONG_TERM.value)
+            | Q(category=Category.SHORT_TERM.value)):
+        document.tags.append(UserTag.cache.value)
+        document.save()
+    document.reload()
+    yield document
+
+
+@pytest.fixture(scope='function')
+def motor_collection(app, db, doc_list):
+    with patch.object(AgnosticClient, '__delegate_class__', return_value=db):
+        client = motor.motor_asyncio.AsyncIOMotorClient()
+        collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
+            'collection']]
+        yield collection
+        client.close()

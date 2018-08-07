@@ -72,6 +72,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     MOCK_MONGO = 'mongomock'
+    MONGODB_DB = 'doc_search'
     MONGODB_SETTINGS = {'host': f'mongomock://localhost/{MOCK_MONGO}'}
     WTF_CSRF_ENABLED = False
 
