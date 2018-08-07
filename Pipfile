@@ -22,7 +22,6 @@ aiohttp = "*"
 motor = "*"
 cchardet = "*"
 aiodns = "*"
-pytest-asyncio = "*"
 
 [dev-packages]
 isort = "*"
@@ -33,6 +32,7 @@ pytest-xdist = "*"
 yapf = "*"
 Faker = "*"
 pytest = "*"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.6"
