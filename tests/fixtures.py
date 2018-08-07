@@ -115,9 +115,9 @@ def tagged_docs(doc_list):
 
 
 @pytest.fixture(scope='function')
-def motor_collection(app, db, doc_list):
+def motor_collection(app, db, doc_list, event_loop):
     with patch.object(AgnosticClient, '__delegate_class__', return_value=db):
-        client = motor.motor_asyncio.AsyncIOMotorClient()
+        client = motor.motor_asyncio.AsyncIOMotorClient(io_loop=event_loop)
         collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
             'collection']]
         yield collection

@@ -12,7 +12,7 @@ async def nottest_get_document(motor_collection):
     assert len(docs) > 1
 
 
-async def test_save_content(event_loop, tagged_docs, motor_collection):
+def test_save_content(event_loop, tagged_docs, motor_collection):
     event_loop.run_until_complete(
         save_content(motor_collection, tagged_docs.id, 'mock_content'))
     tagged_docs.reload()
