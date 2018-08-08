@@ -1,10 +1,11 @@
 from collections import defaultdict
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch,MagicMock
 
 import motor
 import pytest
 from mongoengine import Q, connect
 from motor.core import AgnosticClient
+import mongomock
 
 from app import create_app
 from app.models import Category, DocumentMeta, Role, User, UserTag
@@ -116,9 +117,12 @@ def tagged_docs(doc_list):
 
 @pytest.fixture(scope='function')
 def motor_collection(app, db, doc_list, event_loop):
-    with patch.object(AgnosticClient, '__delegate_class__', return_value=db):
-        client = motor.motor_asyncio.AsyncIOMotorClient(io_loop=event_loop)
-        collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
-            'collection']]
-        yield collection
-        client.close()
+    with patch('motor.motor_asyncio.AsyncIOMotorClient.__delegate_class__', return_value=db):
+        with patch('motor.core.Database', MagicMock()):
+            with patch('motor.core.Collection', MagicMock()):
+                with patch('motor.motor_asyncio.AsyncIOMotorCollection.__delegate_class__', mongomock.Collection):
+                    client = motor.motor_asyncio.AsyncIOMotorClient(io_loop=event_loop)
+                    collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
+                        'collection']]
+                    yield collection
+                    client.close()
