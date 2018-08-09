@@ -8,7 +8,7 @@ from app.jobs.doc_cache import get_document, save_content
 
 @pytest.mark.usefixtures('tagged_docs')
 async def nottest_get_document(motor_collection):
-    list = [document async for document in get_document(motor_collection)]
+    docs = [document async for document in get_document(motor_collection)]
     assert len(docs) > 1
 
 

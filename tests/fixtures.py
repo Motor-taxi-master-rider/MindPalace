@@ -1,11 +1,10 @@
 from collections import defaultdict
-from unittest.mock import Mock, patch,MagicMock
+from unittest.mock import Mock, patch, MagicMock
 
 import motor
 import pytest
 from mongoengine import Q, connect
-from motor.core import AgnosticClient
-import mongomock
+import motor
 
 from app import create_app
 from app.models import Category, DocumentMeta, Role, User, UserTag
@@ -117,12 +116,19 @@ def tagged_docs(doc_list):
 
 @pytest.fixture(scope='function')
 def motor_collection(app, db, doc_list, event_loop):
-    with patch('motor.motor_asyncio.AsyncIOMotorClient.__delegate_class__', return_value=db):
-        with patch('motor.core.Database', MagicMock()):
-            with patch('motor.core.Collection', MagicMock()):
-                with patch('motor.motor_asyncio.AsyncIOMotorCollection.__delegate_class__', mongomock.Collection):
-                    client = motor.motor_asyncio.AsyncIOMotorClient(io_loop=event_loop)
-                    collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
-                        'collection']]
-                    yield collection
-                    client.close()
+    motor.metaprogramming._class_cache={}
+    motor.core.AgnosticClient.__delegate_class__ = Mock(return_value=db)
+    motor.core.AgnosticDatabase.__delegate_class__ = Mock(return_value=db.get_database().get_collection('doc_meta'))
+    motor.motor_asyncio.AsyncIOMotorClient=motor.motor_asyncio.create_asyncio_class(motor.core.AgnosticClient)
+    motor.motor_asyncio.AsyncIOMotorDatabase = motor.motor_asyncio.create_asyncio_class(motor.core.AgnosticDatabase)
+    # patch('motor.motor_asyncio.AsyncIOMotorClient.__delegate_class__', return_value=db).start()
+    # patch('motor.motor_asyncio.AsyncIOMotorDatabase.__delegate_class__',
+    #       return_value=db.get_database().get_collection('doc_meta')).start()
+    patch('motor.core.Database', return_value=db.get_database()).start()
+    patch('motor.core.Collection', return_value=db.get_database().get_collection('document_meta')).start()
+
+    client = motor.motor_asyncio.AsyncIOMotorClient(io_loop=event_loop)
+    collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
+        'collection']]
+    yield collection
+    client.close()
