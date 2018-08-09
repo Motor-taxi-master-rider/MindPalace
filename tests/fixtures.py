@@ -116,19 +116,40 @@ def tagged_docs(doc_list):
 
 @pytest.fixture(scope='function')
 def motor_collection(app, db, doc_list, event_loop):
-    motor.metaprogramming._class_cache={}
-    motor.core.AgnosticClient.__delegate_class__ = Mock(return_value=db)
-    motor.core.AgnosticDatabase.__delegate_class__ = Mock(return_value=db.get_database().get_collection('doc_meta'))
-    motor.motor_asyncio.AsyncIOMotorClient=motor.motor_asyncio.create_asyncio_class(motor.core.AgnosticClient)
-    motor.motor_asyncio.AsyncIOMotorDatabase = motor.motor_asyncio.create_asyncio_class(motor.core.AgnosticDatabase)
-    # patch('motor.motor_asyncio.AsyncIOMotorClient.__delegate_class__', return_value=db).start()
-    # patch('motor.motor_asyncio.AsyncIOMotorDatabase.__delegate_class__',
-    #       return_value=db.get_database().get_collection('doc_meta')).start()
-    patch('motor.core.Database', return_value=db.get_database()).start()
-    patch('motor.core.Collection', return_value=db.get_database().get_collection('document_meta')).start()
+    motor.metaprogramming._class_cache = {}
+    client, database, collection = create_mock_db(db)
+    motor.core.AgnosticClient.__delegate_class__ = client
+    motor.core.AgnosticDatabase.__delegate_class__ = database
+    motor.core.AgnosticCollection.__delegate_class__ = collection
+    motor.motor_asyncio.AsyncIOMotorClient = motor.motor_asyncio.create_asyncio_class(
+        motor.core.AgnosticClient)
+    motor.motor_asyncio.AsyncIOMotorDatabase = motor.motor_asyncio.create_asyncio_class(
+        motor.core.AgnosticDatabase)
+    motor.motor_asyncio.AsyncIOMotorCollection = motor.motor_asyncio.create_asyncio_class(
+        motor.core.AgnosticCollection)
+    patch('motor.core.Database', database).start()
+    patch('motor.core.Collection',collection).start()
 
     client = motor.motor_asyncio.AsyncIOMotorClient(io_loop=event_loop)
     collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
         'collection']]
     yield collection
     client.close()
+
+
+def create_mock_db(db):
+    import pymongo
+    import mongomock
+
+    class MockClient(pymongo.MongoClient):
+        def __new__(cls, *args, **kwargs):
+            return db
+
+    class MockDatabse(pymongo.database.Database):
+        def __new__(cls, *args, **kwargs):
+            return db.get_database()
+
+    class MockCollection(mongomock.Collection,pymongo.collection.Collection):
+        def __new__(cls, *args, **kwargs):
+            return db.get_database().get_collection('document_meta')
+    return MockClient, MockDatabse, MockCollection
