@@ -1,10 +1,9 @@
 from collections import defaultdict
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 import motor
 import pytest
 from mongoengine import Q, connect
-import motor
 
 from app import create_app
 from app.models import Category, DocumentMeta, Role, User, UserTag
@@ -22,7 +21,7 @@ def app():
 
 
 @pytest.fixture(scope='function')
-def db(app):
+def mongo_client(app):
     client = connect()
     Role.insert_roles()
     yield client
@@ -30,7 +29,7 @@ def db(app):
 
 
 @pytest.fixture(scope='function')
-def admin(db):
+def admin(mongo_client):
     admin_role = Role.objects(name='Administrator').first()
     admin = User(
         first_name='Admin',
@@ -45,7 +44,7 @@ def admin(db):
 
 
 @pytest.fixture(scope='function')
-def user(db):
+def user(mongo_client):
     user_role = Role.objects(name='User').first()
     user = User(
         first_name='User',
@@ -60,7 +59,7 @@ def user(db):
 
 
 @pytest.fixture(scope='function')
-def another_user(db):
+def another_user(mongo_client):
     user_role = Role.objects(name='User').first()
     user = User(
         first_name='User another',
@@ -75,7 +74,7 @@ def another_user(db):
 
 
 @pytest.fixture(scope='function')
-def doc(db, user):
+def doc(mongo_client, user):
     doc_meta = DocumentMeta(
         theme='hello world',
         category=Category.SHORT_TERM.value,
@@ -96,7 +95,7 @@ def doc(db, user):
 
 
 @pytest.fixture(scope='function')
-def doc_list(db, admin):
+def doc_list(mongo_client, admin):
     doc_list = generate_documents_for_user(admin)
     yield list(reversed(doc_list))
     for doc in doc_list:
@@ -115,20 +114,21 @@ def tagged_docs(doc_list):
 
 
 @pytest.fixture(scope='function')
-def motor_collection(app, db, doc_list, event_loop):
-    motor.metaprogramming._class_cache = {}
-    client, database, collection = create_mock_db(db)
-    motor.core.AgnosticClient.__delegate_class__ = client
-    motor.core.AgnosticDatabase.__delegate_class__ = database
-    motor.core.AgnosticCollection.__delegate_class__ = collection
-    motor.motor_asyncio.AsyncIOMotorClient = motor.motor_asyncio.create_asyncio_class(
-        motor.core.AgnosticClient)
-    motor.motor_asyncio.AsyncIOMotorDatabase = motor.motor_asyncio.create_asyncio_class(
-        motor.core.AgnosticDatabase)
-    motor.motor_asyncio.AsyncIOMotorCollection = motor.motor_asyncio.create_asyncio_class(
-        motor.core.AgnosticCollection)
+def motor_collection(app, mongo_client, doc_list, event_loop):
+    patch('motor.metaprogramming._class_cache', {}).start()
+    client, database, collection = create_mock_db(mongo_client)
+    patch('motor.core.AgnosticClient.__delegate_class__', client).start()
+    # motor.core.AgnosticDatabase.__delegate_class__ = database
+    patch('motor.core.AgnosticCollection.__delegate_class__',
+          collection).start()
     patch('motor.core.Database', database).start()
-    patch('motor.core.Collection',collection).start()
+    patch('motor.core.Collection', collection).start()
+    # motor.motor_asyncio.AsyncIOMotorClient = motor.motor_asyncio.create_asyncio_class(
+    #     motor.core.AgnosticClient)
+    # motor.motor_asyncio.AsyncIOMotorDatabase = motor.motor_asyncio.create_asyncio_class(
+    #     motor.core.AgnosticDatabase)
+    # motor.motor_asyncio.AsyncIOMotorCollection = motor.motor_asyncio.create_asyncio_class(
+    #     motor.core.AgnosticCollection)
 
     client = motor.motor_asyncio.AsyncIOMotorClient(io_loop=event_loop)
     collection = client[app.config['MONGODB_DB']][DocumentMeta._meta[
@@ -145,11 +145,12 @@ def create_mock_db(db):
         def __new__(cls, *args, **kwargs):
             return db
 
-    class MockDatabse(pymongo.database.Database):
+    class MockDatabse(mongomock.Database):
         def __new__(cls, *args, **kwargs):
             return db.get_database()
 
-    class MockCollection(mongomock.Collection,pymongo.collection.Collection):
+    class MockCollection(mongomock.Collection, pymongo.collection.Collection):
         def __new__(cls, *args, **kwargs):
             return db.get_database().get_collection('document_meta')
+
     return MockClient, MockDatabse, MockCollection

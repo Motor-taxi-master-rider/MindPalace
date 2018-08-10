@@ -5,7 +5,7 @@ from app.utils import (beautify_static, generate_documents_for_user,
                        parse_content_type)
 
 
-@pytest.mark.usefixtures('db')
+@pytest.mark.usefixtures('mongo_client')
 def test_generate_documents_for_user(admin):
     doc_list = generate_documents_for_user(admin)
     assert set(doc_list) == set(DocumentMeta.objects(create_by=admin).all())
