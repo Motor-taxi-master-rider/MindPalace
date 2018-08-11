@@ -28,7 +28,7 @@ def test_password_salts_are_random():
     assert u1.password != u2.password
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_valid_confirmation_token():
     u = User(password='password')
     u.save()
@@ -36,7 +36,7 @@ def test_valid_confirmation_token():
     assert u.confirm_account(token)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_invalid_confirmation_token():
     u1 = User(email='user1@example.com', password='password')
     u2 = User(email='user2@example.com', password='notpassword')
@@ -46,7 +46,7 @@ def test_invalid_confirmation_token():
     assert not u2.confirm_account(token)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_expired_confirmation_token():
     u = User(password='password')
     u.save()
@@ -55,7 +55,7 @@ def test_expired_confirmation_token():
     assert not u.confirm_account(token)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_valid_reset_token():
     u = User(password='password')
     u.save()
@@ -64,7 +64,7 @@ def test_valid_reset_token():
     assert u.verify_password('notpassword')
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_invalid_reset_token():
     u1 = User(email='user1@example.com', password='password')
     u2 = User(email='user2@example.com', password='notpassword')
@@ -75,7 +75,7 @@ def test_invalid_reset_token():
     assert u2.verify_password('notpassword')
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_valid_email_change_token():
     u = User(email='user@example.com', password='password')
     u.save()
@@ -84,7 +84,7 @@ def test_valid_email_change_token():
     assert u.email == 'otheruser@example.org'
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_invalid_email_change_token():
     u1 = User(email='user@example.com', password='password')
     u2 = User(email='otheruser@example.org', password='notpassword')
@@ -95,7 +95,7 @@ def test_invalid_email_change_token():
     assert u2.email == 'otheruser@example.org'
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_duplicate_email_change_token():
     u1 = User(email='user@example.com', password='password')
     u2 = User(email='otheruser@example.org', password='notpassword')
@@ -106,7 +106,7 @@ def test_duplicate_email_change_token():
     assert u2.email == 'otheruser@example.org'
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_roles_and_permissions():
     Role.insert_roles()
     u = User(email='user@example.com', password='password')
@@ -114,7 +114,7 @@ def test_roles_and_permissions():
     assert not u.can(Permission.ADMINISTER.value)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_make_administrator():
     Role.insert_roles()
     u = User(email='user@example.com', password='password')
@@ -123,7 +123,7 @@ def test_make_administrator():
     assert u.can(Permission.ADMINISTER.value)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_administrator():
     Role.insert_roles()
     r = Role.objects(permissions=Permission.ADMINISTER.value).first()

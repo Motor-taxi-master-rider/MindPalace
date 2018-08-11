@@ -6,7 +6,7 @@ from mongoengine.errors import ValidationError
 from app.models import Category, DocumentCache, DocumentMeta, User
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_update_time_init():
     dc = DocumentCache(content='test content')
     dm = DocumentMeta(
@@ -18,7 +18,7 @@ def test_update_time_init():
         datetime.datetime.utcnow().timestamp(), abs=2)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_update_time_change():
     dm = DocumentMeta(theme='test', category=Category.SHORT_TERM.value)
     dm.update_at = datetime.datetime.utcfromtimestamp(1000000000)
@@ -30,21 +30,21 @@ def test_update_time_change():
         datetime.datetime.utcnow().timestamp(), abs=2)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_valid_document_category():
     dm = DocumentMeta(theme='valid', category=Category.SHORT_TERM.value)
     dm.save()
     assert dm.category == Category.SHORT_TERM.value
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_invalid_document_category():
     dm = DocumentMeta(theme='invalid', category='invalid')
     with pytest.raises(ValidationError):
         dm.save()
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_large_document_theme():
     long_string = "".join(str(i) for i in range(50))
     dm = DocumentMeta(theme=long_string, category=Category.SHORT_TERM.value)
@@ -53,7 +53,7 @@ def test_large_document_theme():
     assert len(str(dm)) < 35
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_large_document_cache_content():
     dc = DocumentCache(content='test content' * 1000)
     dm = DocumentMeta(
@@ -63,7 +63,7 @@ def test_large_document_cache_content():
     assert dm.cache.content == 'test content' * 1000
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_create_by_user():
     u = User(email='test', password='password')
     u.save()

@@ -44,7 +44,7 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
         assert context['current_category'] == Category.FLIP.value
-        assert list(context['documents'].items) == list(
+        assert set(context['documents'].items) == set(
             DocumentMeta.objects(
                 create_by=admin, category=Category.FLIP.value).order_by(
                     '-priority', '-update_at').all())

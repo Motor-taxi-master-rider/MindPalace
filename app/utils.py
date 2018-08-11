@@ -38,7 +38,7 @@ def generate_documents_for_user(user: User) -> List[DocumentMeta]:
     faker = Faker()
     doc_list = []
     for category, i in zip(Category, range(1, len(Category) + 1)):
-        for _ in itertools.repeat(None, 3 * i):
+        for _ in itertools.repeat(None, 5):
             doc_meta = DocumentMeta(
                 theme=faker.sentence(),
                 category=category.value,

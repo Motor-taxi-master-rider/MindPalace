@@ -51,7 +51,7 @@ def test_get_register(client):
         assert isinstance(context['form'], RegistrationForm)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_post_register(client, monkeypatch):
     monkeypatch.setattr(User, 'generate_confirmation_token', lambda s: 'token')
 
@@ -342,7 +342,7 @@ def test_get_join_from_invite(client):
     new_user.delete()
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_post_join_from_invite_success(client):
     new_user = User(email='user@user.com')
     new_user.save()
@@ -362,7 +362,7 @@ def test_post_join_from_invite_success(client):
     new_user.delete()
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_post_join_from_invite_failure(client, admin, monkeypatch):
     new_user = User(email='user@user.com')
     new_user.save()

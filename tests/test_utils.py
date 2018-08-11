@@ -5,11 +5,11 @@ from app.utils import (beautify_static, generate_documents_for_user,
                        parse_content_type)
 
 
-@pytest.mark.usefixtures('mongo_client')
+@pytest.mark.usefixtures('database')
 def test_generate_documents_for_user(admin):
     doc_list = generate_documents_for_user(admin)
     assert set(doc_list) == set(DocumentMeta.objects(create_by=admin).all())
-    assert len(doc_list) == sum(range(1, len(Category) + 1)) * 3
+    assert len(doc_list) == len(Category) * 5
 
 
 def test_beautify_static():
