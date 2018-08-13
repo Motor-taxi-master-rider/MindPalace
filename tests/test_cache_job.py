@@ -12,7 +12,7 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.mark.usefixtures('tagged_docs')
 async def test_get_document(motor_collection):
-    docs = [document async for document in get_document(motor_collection)]
+    docs = await get_document(motor_collection)
     assert len(docs) > 1
 
 

@@ -1,8 +1,6 @@
-import functools
 from collections import defaultdict
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
-import mongomock
 import motor
 import pytest
 from mongoengine import Q, connect
@@ -124,38 +122,102 @@ def tagged_docs(doc_list):
 @pytest.fixture(scope='module')
 def patch_motor(mongo_client):
     def create_mock_db(db):
-        import pymongo
         import mongomock
+        from collections import deque
 
-        class MockClient(pymongo.MongoClient):
+        class MockBaseBaseProperties(object):
+            codec_options = None
+            read_preference = None
+            read_concern = None
+            write_concern = None
+
+        class MockClient(mongomock.MongoClient):
             def __new__(cls, *args, **kwargs):
                 return db
 
         class MockDatabase(mongomock.Database):
             def __new__(cls, *args, **kwargs):
-                return db.get_database()
+                def _fix_outgoing(data, _):
+                    return data
 
-        class MockCollection(mongomock.Collection,
-                             pymongo.collection.Collection):
+                database_singleton = db.get_database()
+                database_singleton._fix_outgoing = _fix_outgoing
+                return database_singleton
+
+        class MockCollection(mongomock.Collection, MockBaseBaseProperties):
+            count_documents = lambda: True
+            create_indexes = lambda: True
+            estimated_document_count = lambda: True
+            find_one_and_update = lambda: True
+            full_name = lambda: True
+            name = lambda: True
+            options = lambda: True
+            aggregate_raw_batches = lambda: True
+
             def __new__(cls, *args, **kwargs):
-                return db.get_database().get_collection('document_meta')
+                def find(filter=None,
+                         projection=None,
+                         skip=0,
+                         limit=0,
+                         no_cursor_timeout=False,
+                         cursor_type=None,
+                         sort=None,
+                         allow_partial_results=False,
+                         oplog_replay=False,
+                         modifiers=None,
+                         batch_size=0,
+                         manipulate=True,
+                         collation=None,
+                         session=None):
+                    spec = filter
+                    if spec is None:
+                        spec = {}
+                    return Cursor(
+                        collection_singleton,
+                        spec,
+                        sort,
+                        projection,
+                        skip,
+                        limit,
+                        collation=collation)
 
-        class Cursor(mongomock.collection.Cursor, pymongo.collection.Cursor):
+                collection_singleton = db.get_database().get_collection(
+                    'document_meta')
+                collection_singleton.find = find
+                return collection_singleton
+
+        class Cursor(mongomock.collection.Cursor):
+            address = None
+            cursor_id = None
+            alive = True
+            session = lambda: True
+            collation = lambda: True
+            explain = lambda: True
+            add_option = lambda: True
+            remove_option = lambda: True
+            max_scan = lambda: True
+            hint = lambda: True
+            where = lambda: True
+            max_await_time_ms = lambda: True
+            max_time_ms = lambda: True
+            min = lambda: True
+            max = lambda: True
+            comment = lambda: True
+            _Cursor__die = lambda: False
+
             def __init__(self, *args, **kwargs):
-                pymongo.collection.Collection.__init__(*args, **kwargs)
-                mongomock.collection.Cursor.__init__(*args, **kwargs)
+                super().__init__(*args, **kwargs)
+                self.__data = deque()
+                self.__query_flags = 0
+
+            def _refresh(self):
+                try:
+                    self.__data.append(next(self))
+                except StopIteration:
+                    self.alive = False
+                return len(self.__data)
 
         return MockClient, MockDatabase, MockCollection, Cursor
-
-    def mock_cursor_data(self):
-        try:
-            data = next(self.delegate)
-            self.__class__.alive = True
-        except StopIteration:
-            data = {}
-            self.__class__.alive = False
-
-        return data
 
     client, database, collection, cursor = create_mock_db(mongo_client)
     patch_list = []
@@ -168,8 +230,6 @@ def patch_motor(mongo_client):
         patch('motor.core.AgnosticCursor.__delegate_class__', cursor))
     patch_list.append(patch('motor.core.Database', database))
     patch_list.append(patch('motor.core.Collection', collection))
-    patch_list.append(
-        patch('motor.core.AgnosticCursor._data', mock_cursor_data))
     for patch_item in patch_list:
         patch_item.start()
     yield

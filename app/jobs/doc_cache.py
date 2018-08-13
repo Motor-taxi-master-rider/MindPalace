@@ -2,13 +2,14 @@ import asyncio
 import datetime
 import os
 from contextlib import closing
-from typing import AsyncGenerator, Dict
+from typing import Dict, List
 
 import aiohttp
 import pymongo
 from aiohttp import ClientSession
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
+from pymongo.results import UpdateResult
 
 from app import create_app
 from app.exceptions import (DataBaseException, DocCacheException,
@@ -18,14 +19,13 @@ from app.models import DocumentCache, DocumentMeta, SystemTag, UserTag
 from app.utils import parse_content_type
 
 
-def _check_update_one(result: pymongo.results.UpdateResult):
+def _check_update_one(result: UpdateResult):
     if result.modified_count != 1:
         raise DataBaseException(
             f'Updated row count is {result.modified_count}.')
 
 
-async def get_document(collection: AsyncIOMotorCollection,
-                       **options) -> AsyncGenerator:
+async def get_document(collection: AsyncIOMotorCollection, **options) -> List:
     """Async generator to  pop up fulfilled documents from db"""
 
     default_filter = {
@@ -46,8 +46,8 @@ async def get_document(collection: AsyncIOMotorCollection,
     }
     row_limit = options.get('limit', 10)
     filter = options.get('filter', default_filter)
-    async for document in collection.find(filter).limit(row_limit):
-        yield document
+    return await collection.find(filter).limit(row_limit).to_list(
+        length=row_limit)
 
 
 async def fetch_content(session: ClientSession, url: str) -> str:

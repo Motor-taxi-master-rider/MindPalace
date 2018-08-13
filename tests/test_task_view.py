@@ -47,7 +47,7 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
         assert set(context['documents'].items) == set(
             DocumentMeta.objects(
                 create_by=admin, category=Category.FLIP.value).order_by(
-                    '-priority', '-update_at').all())
+                    '-priority', '-update_at').all()[:3])
 
         assert client.get(
             url_for(
