@@ -166,8 +166,6 @@ async def doc_cache_task(db_name, collection_name):
                     print(f'{exe.__class__.__name__}: {exe}')
                     if isinstance(exe, DocCacheException):
                         print('Should Requeue.')
-                    else:
-                        print('Add unable to queue tag.')
 
 
 def doc_cache():

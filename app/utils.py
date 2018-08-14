@@ -1,7 +1,7 @@
 import datetime
 import itertools
 from collections import namedtuple
-from typing import List
+from typing import List, TypeVar
 from urllib.parse import urljoin, urlparse
 
 from faker import Faker
@@ -12,6 +12,8 @@ from app.globals import CONTENT_TYPE_REG
 from app.models import Category, DocumentMeta, User
 
 ContentType = namedtuple('ContentType', ['type', 'encoding'])
+
+T = TypeVar('T')
 
 
 def register_template_utils(app):

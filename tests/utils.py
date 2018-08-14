@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from queue import Queue
-from typing import Tuple
+from typing import Any, Callable, Generic, Optional, Tuple, Type
 from urllib.parse import urlparse, urlunparse
 
 from flask import Response, template_rendered, url_for
@@ -9,6 +9,7 @@ from mock import MagicMock
 from mongomock import MongoClient
 
 from app.models import User
+from app.utils import T
 
 
 @contextmanager
@@ -151,6 +152,17 @@ def redirect_to(response: Response) -> str:
 def real_url(route: str, **arguments) -> str:
     """Return full url of given endpoint."""
     return url_for(route, **arguments, _external=True)
+
+
+async def mock_coroutine(return_value: Optional[T] = None,
+                         side_effect: Optional[Type] = None) -> Optional[T]:
+    if return_value:
+        return return_value
+
+    if side_effect:
+        if issubclass(side_effect, Exception):
+            raise side_effect()
+    return None
 
 
 class MockRedisQueue(Queue):
