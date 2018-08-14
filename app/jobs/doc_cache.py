@@ -115,14 +115,14 @@ async def remove_cache_tag(collection: AsyncIOMotorCollection, id: ObjectId):
 
 
 async def crawl_and_cache(collection: AsyncIOMotorCollection,
-                          session: ClientSession, document: Dict) -> bool:
+                          session: ClientSession, document: Dict) -> int:
     """
     Crawl html from document's url, then save cache to database.
 
     :param collection: database collection
     :param session: http request session
     :param document: document meta data
-    :return: True if success, False if fail
+    :return: Byte length of saved content
     """
 
     url = document[DocumentMeta.url.db_field]
@@ -145,7 +145,7 @@ async def crawl_and_cache(collection: AsyncIOMotorCollection,
 
     await save_content(collection, document['_id'], content)
 
-    return True
+    return len(content)
 
 
 async def doc_cache_task(db_name, collection_name):

@@ -9,7 +9,7 @@ CONTENT_TYPE_REG = re.compile(
 # Number of documents to show in my document page
 DOCUMENT_PER_PAGE = 10
 # Web page type which is enabled to store in the database, should be text like type
-ENABLED_CACHE_TYPE = ('text/html', )
+ENABLED_CACHE_TYPE = ('text/html', 'text/plain')
 # This object id should never appears in database, used in test
 INVALID_OBJECT_ID = '1' * 24
 

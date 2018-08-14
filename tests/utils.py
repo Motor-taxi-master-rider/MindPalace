@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from queue import Queue
-from typing import Any, Callable, Generic, Optional, Tuple, Type
+from typing import Any, Coroutine, Generic, List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse, urlunparse
 
 from flask import Response, template_rendered, url_for
@@ -52,14 +52,29 @@ def create_mock_motor_connection(db: MongoClient) -> Tuple:
             return database_singleton
 
     class MockCollection(mongomock.Collection, MockBaseBaseProperties):
-        count_documents = lambda: True
-        create_indexes = lambda: True
-        estimated_document_count = lambda: True
-        find_one_and_update = lambda: True
-        full_name = lambda: True
-        name = lambda: True
-        options = lambda: True
-        aggregate_raw_batches = lambda: True
+        def count_documents(mock):
+            return True
+
+        def create_indexes(mock):
+            return True
+
+        def estimated_document_count(mock):
+            return True
+
+        def find_one_and_update(mock):
+            return True
+
+        def full_name(mock):
+            return True
+
+        def name(mock):
+            return True
+
+        def options(mock):
+            return True
+
+        def aggregate_raw_batches(mock):
+            return True
 
         def __new__(cls, *args, **kwargs):
             def find(filter=None,
@@ -97,20 +112,48 @@ def create_mock_motor_connection(db: MongoClient) -> Tuple:
         address = None
         cursor_id = None
         alive = True
-        session = lambda: True
-        collation = lambda: True
-        explain = lambda: True
-        add_option = lambda: True
-        remove_option = lambda: True
-        max_scan = lambda: True
-        hint = lambda: True
-        where = lambda: True
-        max_await_time_ms = lambda: True
-        max_time_ms = lambda: True
-        min = lambda: True
-        max = lambda: True
-        comment = lambda: True
-        _Cursor__die = lambda: False
+
+        def session(mock):
+            return True
+
+        def collation(mock):
+            return True
+
+        def explain(mock):
+            return True
+
+        def add_option(mock):
+            return True
+
+        def remove_option(mock):
+            return True
+
+        def max_scan(mock):
+            return True
+
+        def hint(mock):
+            return True
+
+        def where(mock):
+            return True
+
+        def max_await_time_ms(mock):
+            return True
+
+        def max_time_ms(mock):
+            return True
+
+        def min(mock):
+            return True
+
+        def max(mock):
+            return True
+
+        def comment(mock):
+            return True
+
+        def _Cursor__die(mock):
+            return False
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
@@ -154,15 +197,23 @@ def real_url(route: str, **arguments) -> str:
     return url_for(route, **arguments, _external=True)
 
 
-async def mock_coroutine(return_value: Optional[T] = None,
-                         side_effect: Optional[Type] = None) -> Optional[T]:
-    if return_value:
-        return return_value
+def mock_coroutine(return_value: Optional[T] = None,
+                   side_effects: Optional[Union[List[Type], Type]] = None
+                   ) -> Coroutine[Any, Any, Optional[T]]:
+    async def _coroutine(*args, **kwargs) -> Optional[T]:
+        if return_value:
+            return return_value
 
-    if side_effect:
-        if issubclass(side_effect, Exception):
-            raise side_effect()
-    return None
+        if side_effects:
+            if isinstance(side_effects, list):
+                side_effect = side_effects.pop(0)
+            else:
+                side_effect = side_effects
+            if issubclass(side_effect, Exception):
+                raise side_effect()
+        return None
+
+    return _coroutine  # type: ignore
 
 
 class MockRedisQueue(Queue):

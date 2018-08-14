@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import motor
 import pytest
+from aioresponses import aioresponses
 from mongoengine import Q, connect
 
 from app import create_app
@@ -147,3 +148,9 @@ def motor_collection(app, patch_motor, doc_list, event_loop):
         'collection']]
     yield collection
     client.close()
+
+
+@pytest.fixture(scope='function')
+def aiohttp_response():
+    with aioresponses() as m:
+        yield m
