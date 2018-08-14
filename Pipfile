@@ -33,6 +33,7 @@ yapf = "*"
 Faker = "*"
 pytest = "*"
 pytest-asyncio = "*"
+aioresponses = "*"
 
 [requires]
 python_version = "3.6"
