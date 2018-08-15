@@ -46,8 +46,9 @@ async def get_document(collection: AsyncIOMotorCollection, **options) -> List:
     }
     row_limit = options.get('limit', 10)
     filter = options.get('filter', default_filter)
-    return await collection.find(filter).limit(row_limit).to_list(
-        length=row_limit)
+    return await collection.find(
+        filter, projection=['_id',
+                            'url']).limit(row_limit).to_list(length=row_limit)
 
 
 async def fetch_content(session: ClientSession, url: str) -> str:

@@ -17,17 +17,19 @@ def my_doc_meta():
     page = request.args.get('page', 1, type=int)
     category = request.args.get('category', ALL_CATEGORY, type=str)
     search = request.args.get('search', None)
+    filter = {'create_by': current_user.id}
+    order = ['-priority', '-update_at']
 
-    if category == ALL_CATEGORY:
-        documents = DocumentMeta.objects(create_by=current_user.id)
-    else:
-        documents = DocumentMeta.objects(
-            create_by=current_user.id, category=category)
+    if category != ALL_CATEGORY:
+        filter['category'] = category
+
+    documents = DocumentMeta.objects(**filter).exclude('cache')
 
     if search:
-        documents = documents.search_text(search).order_by('$text_score')
+        order.insert(0, '$text_score')
+        documents = documents.search_text(search)
 
-    documents = documents.order_by('-priority', '-update_at').paginate(
+    documents = documents.order_by(*order).paginate(
         page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
