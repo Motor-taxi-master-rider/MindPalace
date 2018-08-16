@@ -5,16 +5,16 @@ from contextlib import closing
 from typing import Dict, List
 
 import aiohttp
-import pymongo
 from aiohttp import ClientSession
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from pymongo.results import UpdateResult
 
-from app import create_app
+from app import create_app, rq
 from app.exceptions import (DataBaseException, DocCacheException,
                             InvalidContentType, MindPalaceException)
-from app.globals import ENABLED_CACHE_TYPE
+from app.globals import (DEFAULT_CACHE_BATCH_SIZE, ENABLED_CACHE_TYPE,
+                         MessageQueue)
 from app.models import DocumentCache, DocumentMeta, SystemTag, UserTag
 from app.utils import parse_content_type
 
@@ -44,7 +44,7 @@ async def get_document(collection: AsyncIOMotorCollection, **options) -> List:
             }
         }
     }
-    row_limit = options.get('limit', 10)
+    row_limit = options.get('limit', DEFAULT_CACHE_BATCH_SIZE)
     filter = options.get('filter', default_filter)
     return await collection.find(
         filter, projection=['_id',
@@ -149,7 +149,7 @@ async def crawl_and_cache(collection: AsyncIOMotorCollection,
     return len(content)
 
 
-async def doc_cache_task(db_name, collection_name):
+async def doc_cache_task(db_name, collection_name, batch):
     """Create database client and http session and start async crawl."""
 
     with closing(AsyncIOMotorClient()) as client:
@@ -158,7 +158,7 @@ async def doc_cache_task(db_name, collection_name):
         async with ClientSession() as session:
             tasks = [
                 crawl_and_cache(collection, session, document)
-                async for document in get_document(collection)
+                for document in await get_document(collection, limit=batch)
             ]
             for task_to_complete in asyncio.as_completed(tasks):
                 try:
@@ -169,14 +169,16 @@ async def doc_cache_task(db_name, collection_name):
                         print('Should Requeue.')
 
 
-def doc_cache():
+@rq.job(MessageQueue.cache, timeout=600)
+def doc_cache(batch=DEFAULT_CACHE_BATCH_SIZE):
     app = create_app(os.getenv('FLASK_CONFIG') or 'default')
     with app.app_context():
         asyncio.get_event_loop().run_until_complete(
             doc_cache_task(
                 db_name=app.config['MONGODB_DB'],
-                collection_name=DocumentMeta._meta['collection']))
+                collection_name=DocumentMeta._meta['collection'],
+                batch=batch))
 
 
 if __name__ == '__main__':
-    doc_cache()
+    doc_cache(10)

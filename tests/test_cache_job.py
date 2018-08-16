@@ -20,15 +20,13 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.mark.usefixtures('tagged_docs')
 async def test_get_document(motor_collection):
+    fulfilled_docs = DocumentMeta.objects(
+        Q(category=Category.LONG_TERM.value)
+        | Q(category=Category.SHORT_TERM.value)).all()
+
     docs = await get_document(motor_collection)
-    assert len(docs) == 10  # default limit
-    assert {doc['_id']
-            for doc in docs} <= {
-                doc.id
-                for doc in DocumentMeta.objects(
-                    Q(category=Category.LONG_TERM.value)
-                    | Q(category=Category.SHORT_TERM.value))
-            }
+    assert len(docs) == len(fulfilled_docs)
+    assert {doc['_id'] for doc in docs} <= {doc.id for doc in fulfilled_docs}
 
     docs = await get_document(motor_collection, limit=5)
     assert len(docs) == 5

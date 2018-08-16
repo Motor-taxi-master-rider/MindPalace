@@ -3,6 +3,7 @@ import datetime
 from flask import Blueprint, render_template
 from flask_login import current_user
 
+from app.jobs.doc_cache import doc_cache
 from app.models import EditableHTML
 
 main = Blueprint('main', __name__)
@@ -26,3 +27,7 @@ def modify_last_seen():
         if (datetime.datetime.utcnow() - current_user.last_seen).seconds > 100:
             current_user.last_seen = datetime.datetime.utcnow()
             current_user.save()
+
+
+# Create cron jobs
+doc_cache.schedule(datetime.timedelta(days=1))
