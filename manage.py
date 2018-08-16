@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import subprocess
 
 from flask_script import Manager, Shell
 from redis import Redis
