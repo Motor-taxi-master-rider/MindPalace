@@ -53,28 +53,25 @@ def create_mock_motor_connection(db: MongoClient) -> Tuple:
 
     class MockCollection(mongomock.Collection, MockBaseBaseProperties):
         def count_documents(mock):
-            return True
+            pass
 
         def create_indexes(mock):
-            return True
+            pass
 
         def estimated_document_count(mock):
-            return True
-
-        def find_one_and_update(mock):
-            return True
+            pass
 
         def full_name(mock):
-            return True
+            pass
 
         def name(mock):
-            return True
+            pass
 
         def options(mock):
-            return True
+            pass
 
         def aggregate_raw_batches(mock):
-            return True
+            pass
 
         def __new__(cls, *args, **kwargs):
             def find(filter=None,
@@ -114,46 +111,46 @@ def create_mock_motor_connection(db: MongoClient) -> Tuple:
         alive = True
 
         def session(mock):
-            return True
+            pass
 
         def collation(mock):
-            return True
+            pass
 
         def explain(mock):
-            return True
+            pass
 
         def add_option(mock):
-            return True
+            pass
 
         def remove_option(mock):
-            return True
+            pass
 
         def max_scan(mock):
-            return True
+            pass
 
         def hint(mock):
-            return True
+            pass
 
         def where(mock):
-            return True
+            pass
 
         def max_await_time_ms(mock):
-            return True
+            pass
 
         def max_time_ms(mock):
-            return True
+            pass
 
         def min(mock):
-            return True
+            pass
 
         def max(mock):
-            return True
+            pass
 
         def comment(mock):
-            return True
+            pass
 
         def _Cursor__die(mock):
-            return False
+            pass
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
