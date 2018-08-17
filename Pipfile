@@ -34,6 +34,7 @@ Faker = "*"
 pytest = "*"
 pytest-asyncio = "*"
 aioresponses = "*"
+pytest-randomly = "*"
 
 [requires]
 python_version = "3.6"

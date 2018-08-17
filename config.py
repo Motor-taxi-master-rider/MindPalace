@@ -1,3 +1,4 @@
+import datetime
 import os
 import urllib.parse
 from abc import ABC, abstractmethod
@@ -91,10 +92,14 @@ class ProductionConfig(Config):
 
     @classmethod
     def init_app(cls, app):
+        from app.jobs.doc_cache import doc_cache
         Config.init_app(app)
         assert os.environ.get('SECRET_KEY'), 'SECRET_KEY IS NOT SET!'
 
         flask_raygun.Provider(app, app.config['RAYGUN_APIKEY']).attach()
+
+        # Create cron jobs
+        doc_cache.schedule(datetime.timedelta(days=1))
 
 
 class HerokuConfig(ProductionConfig):
