@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from flask import Flask
@@ -76,5 +77,10 @@ def create_app(config_name):
 
     from .task import task as task_blueprint
     app.register_blueprint(task_blueprint, url_prefix='/task')
+
+    if config_name == 'production':
+        from app.jobs import doc_cache
+        # Create cron jobs
+        doc_cache.schedule(datetime.timedelta(days=1))
 
     return app

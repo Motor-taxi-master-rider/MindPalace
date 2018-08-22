@@ -37,18 +37,9 @@ class Config(ABC):
     EMAIL_SUBJECT_PREFIX = f'[{APP_NAME}]'
     EMAIL_SENDER = f'{APP_NAME} Admin <{MAIL_USERNAME}>'
 
-    REDIS_URL = os.getenv('REDISTOGO_URL') or 'http://localhost:6379'
+    RQ_REDIS_URL = os.getenv('RQ_REDIS_URL') or 'redis://localhost:6379/0'
 
     RAYGUN_APIKEY = os.environ.get('RAYGUN_APIKEY')
-
-    # Parse the REDIS_URL to set RQ config variables
-    urllib.parse.uses_netloc.append('redis')
-    url = urllib.parse.urlparse(REDIS_URL)
-
-    RQ_DEFAULT_HOST = url.hostname
-    RQ_DEFAULT_PORT = url.port
-    RQ_DEFAULT_PASSWORD = url.password
-    RQ_DEFAULT_DB = 0
 
     @classmethod
     @abstractmethod
@@ -97,9 +88,6 @@ class ProductionConfig(Config):
         assert os.environ.get('SECRET_KEY'), 'SECRET_KEY IS NOT SET!'
 
         flask_raygun.Provider(app, app.config['RAYGUN_APIKEY']).attach()
-
-        # Create cron jobs
-        doc_cache.schedule(datetime.timedelta(days=1))
 
 
 class HerokuConfig(ProductionConfig):
