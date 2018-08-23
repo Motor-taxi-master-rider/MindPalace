@@ -79,7 +79,7 @@ def create_app(config_name):
     app.register_blueprint(task_blueprint, url_prefix='/task')
 
     if config_name == 'production':
-        from app.jobs import doc_cache
+        from app.jobs.doc_cache import doc_cache
         # Create cron jobs
         doc_cache.schedule(datetime.timedelta(days=1))
 
