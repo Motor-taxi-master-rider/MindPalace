@@ -76,7 +76,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     MONGODB_DB = os.environ.get('MONGODB_DB')
     MONGODB_HOST = os.environ.get('MONGODB_HOST')
-    MONGODB_PORT = int(os.environ.get('MONGODB_PORT'))
+    MONGODB_PORT = int(os.environ.get('MONGODB_PORT', 0))
     MONGODB_USERNAME = os.environ.get('MONGODB_USERNAME')
     MONGODB_PASSWORD = os.environ.get('MONGODB_PASSWORD')
     SSL_DISABLE = (os.environ.get('SSL_DISABLE') or 'True') == 'True'
