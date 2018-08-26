@@ -169,7 +169,7 @@ async def doc_cache_task(db_name, collection_name, batch):
                         print('Should Requeue.')
 
 
-@rq.job(MessageQueue.cache, timeout=600)
+@rq.job(MessageQueue.cache.value, timeout=600)
 def doc_cache(batch=DEFAULT_CACHE_BATCH_SIZE):
     app = create_app(os.getenv('FLASK_CONFIG') or 'default')
     with app.app_context():

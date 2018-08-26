@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from typing import Dict
 
 from flask import current_app
 from flask_login import AnonymousUserMixin, UserMixin
@@ -8,6 +9,8 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .. import db, login_manager
+
+_token_cache: Dict = {}
 
 
 class Permission(Enum):
@@ -54,7 +57,7 @@ class User(UserMixin, db.DynamicDocument):  # type: ignore
     _password = db.StringField(max_length=128, db_field='password_hash')
     role = db.ReferenceField(Role)
     meta = {
-        'collection':'users',
+        'collection': 'users',
         'indexes': [{
             'fields': ['first_name']
         }, {
@@ -62,7 +65,7 @@ class User(UserMixin, db.DynamicDocument):  # type: ignore
         }, {
             'fields': ['email']
         }]
-    } # yapf: disable
+    }  # yapf: disable
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -97,21 +100,21 @@ class User(UserMixin, db.DynamicDocument):  # type: ignore
 
     def generate_confirmation_token(self, expiration=604800):
         """Generate a confirmation token to email a new user."""
-
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'confirm': str(self.id)})
+        data = {'confirm': str(self.id)}
+        return self._get_token(
+            type='confirm', data=data, expiration=expiration)
 
     def generate_email_change_token(self, new_email, expiration=3600):
         """Generate an email change token to email an existing user."""
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'change_email': str(self.id), 'new_email': new_email})
+        data = {'change_email': str(self.id), 'new_email': new_email}
+        return self._get_token(type='change', data=data, expiration=expiration)
 
     def generate_password_reset_token(self, expiration=3600):
         """
         Generate a password reset change token to email to an existing user.
         """
-        s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'reset': str(self.id)})
+        data = {'reset': str(self.id)}
+        return self._get_token(type='change', data=data, expiration=expiration)
 
     def confirm_account(self, token):
         """Verify that the provided token is for this user's id."""
@@ -177,6 +180,23 @@ class User(UserMixin, db.DynamicDocument):  # type: ignore
                 role=choice(roles),
                 **kwargs)
             u.save()
+
+    def _get_token(self, type, data, expiration):
+        """
+        Generate new token if:
+        1. first time 2. previous token is expired
+        Otherwise get token from cache.
+        """
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        cached_token = _token_cache.get((self, type))
+        header = s.make_header({})
+
+        if cached_token and header['exp'] >= s.now():
+            return cached_token
+
+        token = s.dumps(data)
+        _token_cache[(self, type)] = token
+        return token
 
     def __repr__(self):
         return '<User \'%s\'>' % self.full_name()

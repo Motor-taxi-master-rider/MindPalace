@@ -1,3 +1,4 @@
+from flask import url_for
 from flask_mongoengine.wtf.fields import ModelSelectField
 from flask_wtf import FlaskForm
 from wtforms.fields import PasswordField, StringField, SubmitField
@@ -48,8 +49,31 @@ class InviteUserForm(FlaskForm):
     submit = SubmitField('Invite')
 
     def validate_email(self, field):
-        if User.objects(email=field.data).first():
+        user = User.objects(email=field.data).first()
+
+        if not user:
+            return True
+
+        if user.confirmed:
             raise ValidationError('Email already registered.')
+        else:
+            # user is invited but not confirmed
+            from app.jobs.send_email import send_email
+            token = user.generate_confirmation_token()
+            invite_link = url_for(
+                'account.join_from_invite',
+                user_id=user.id,
+                token=token,
+                _external=True)
+            send_email.queue(
+                recipient=user.email,
+                subject='You Are Invited To Join',
+                template='account/email/invite',
+                user=user,
+                invite_link=invite_link,
+            )
+            raise ValidationError(
+                'Email is not confirmed, verification will resend to user.')
 
 
 class NewUserForm(InviteUserForm):

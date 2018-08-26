@@ -37,7 +37,11 @@ class Config(ABC):
     EMAIL_SUBJECT_PREFIX = f'[{APP_NAME}]'
     EMAIL_SENDER = f'{APP_NAME} Admin <{MAIL_USERNAME}>'
 
-    RQ_REDIS_URL = os.getenv('RQ_REDIS_URL') or 'redis://localhost:6379/0'
+    RQ_HOST = os.getenv('RQ_HOST') or '127.0.0.1'
+    RQ_PORT = os.getenv('RQ_PORT') or '6379'
+    RQ_DB = os.getenv('RQ_DB') or '0'
+    RQ_PASSWORD = os.getenv('RQ_PASSWORD')
+    RQ_REDIS_URL = f'redis://{RQ_HOST}:{RQ_PORT}/{RQ_DB}'
 
     RAYGUN_APIKEY = os.environ.get('RAYGUN_APIKEY')
 
@@ -76,7 +80,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     MONGODB_DB = os.environ.get('MONGODB_DB')
     MONGODB_HOST = os.environ.get('MONGODB_HOST')
-    MONGODB_PORT = int(os.environ.get('MONGODB_PORT', 0))
+    MONGODB_PORT = int(os.environ.get('MONGODB_PORT') or '27017')
     MONGODB_USERNAME = os.environ.get('MONGODB_USERNAME')
     MONGODB_PASSWORD = os.environ.get('MONGODB_PASSWORD')
     SSL_DISABLE = (os.environ.get('SSL_DISABLE') or 'True') == 'True'

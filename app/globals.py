@@ -17,5 +17,6 @@ INVALID_OBJECT_ID = '1' * 24
 
 
 class MessageQueue(Enum):
+    default = 'default'
     email = 'email'
     cache = 'cache'

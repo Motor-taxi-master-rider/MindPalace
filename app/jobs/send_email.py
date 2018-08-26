@@ -7,7 +7,7 @@ from app import create_app, mail, rq
 from app.globals import MessageQueue
 
 
-@rq.job(MessageQueue.email, timeout=120)
+@rq.job(MessageQueue.email.value, timeout=120)
 def send_email(recipient, subject, template, **kwargs):
     app = create_app(os.getenv('FLASK_CONFIG') or 'default')
     with app.app_context():

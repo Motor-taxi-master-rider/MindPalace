@@ -45,7 +45,7 @@ def test_post_invite_user(client, admin, monkeypatch):
     assert new_user is not None
     assert new_user.role == user_role
 
-    queued_object = rq.get_queue(MessageQueue.email).get_kwargs()
+    queued_object = rq.get_queue(MessageQueue.email.value).get_kwargs()
     assert queued_object['recipient'] == data['email']
     assert queued_object['user'] == new_user
     assert queued_object['invite_link'] == url_for(

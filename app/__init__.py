@@ -81,6 +81,11 @@ def create_app(config_name):
     if config_name == 'production':
         from app.jobs.doc_cache import doc_cache
         # Create cron jobs
-        doc_cache.schedule(datetime.timedelta(days=1))
+        doc_cache.cron('0 0 12 * * *', 'cache_job')
+
+        @rq.exception_handler
+        def send_alert_to_ops(job, *exc_info):
+            print(job)
+            print(exc_info)
 
     return app

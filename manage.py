@@ -6,6 +6,7 @@ from redis import Redis
 from rq import Connection, Queue, Worker
 
 from app import create_app, db
+from app.globals import MessageQueue
 from app.models import DocumentCache, DocumentMeta, Role, User
 from app.utils import generate_documents_for_user
 from config import Config
@@ -90,12 +91,12 @@ def setup_general():
 @manager.command
 def run_worker():
     """Initializes a slim rq task queue."""
-    listen = ['default']
+    listen = [queue.value for queue in MessageQueue]
     conn = Redis(
-        host=app.config['RQ_DEFAULT_HOST'],
-        port=app.config['RQ_DEFAULT_PORT'],
-        db=0,
-        password=app.config['RQ_DEFAULT_PASSWORD'])
+        host=app.config['RQ_HOST'],
+        port=app.config['RQ_PORT'],
+        db=app.config['RQ_DB'],
+        password=app.config['RQ_PASSWORD'])
 
     with Connection(conn):
         worker = Worker(map(Queue, listen))
