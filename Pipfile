@@ -23,6 +23,7 @@ motor = "*"
 cchardet = "*"
 aiodns = "*"
 jsmin = "*"
+gunicorn = "*"
 
 [dev-packages]
 isort = "*"
