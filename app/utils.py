@@ -4,7 +4,6 @@ from collections import namedtuple
 from typing import List, TypeVar
 from urllib.parse import urljoin, urlparse
 
-from faker import Faker
 from flask import Response, redirect, request, url_for
 
 from app.exceptions import InvalidContentType
@@ -37,6 +36,8 @@ def beautify_static(name: str) -> str:
 
 def generate_documents_for_user(user: User) -> List[DocumentMeta]:
     """Generate document list for given user."""
+
+    from faker import Faker
     faker = Faker()
     doc_list = []
     for category, i in zip(Category, range(1, len(Category) + 1)):
@@ -55,6 +56,7 @@ def generate_documents_for_user(user: User) -> List[DocumentMeta]:
 
 def is_safe_url(target: str) -> bool:
     """Verdict whether a url is safe to redirect to."""
+
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return test_url.scheme in ('http', 'https') and \
@@ -63,6 +65,7 @@ def is_safe_url(target: str) -> bool:
 
 def parse_content_type(content_type: str) -> ContentType:
     """Parse web page's 'Content-Type' in headers."""
+
     parse = CONTENT_TYPE_REG.match(content_type)
     if parse:
         match = parse.groupdict()
@@ -74,6 +77,7 @@ def parse_content_type(content_type: str) -> ContentType:
 
 def redirect_back(endpoint: str, **values) -> Response:
     """Redirect to next url if possible, else redirect to endpoint."""
+
     target = request.args.get('next')
     if not target or not is_safe_url(target):
         target = url_for(endpoint, **values)
