@@ -24,6 +24,9 @@ cchardet = "*"
 aiodns = "*"
 jsmin = "*"
 gunicorn = "*"
+rednose = "*"
+nose = "*"
+coverage = "*"
 
 [dev-packages]
 isort = "*"
