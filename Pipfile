@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask-mongoengine = "*"
 mongomock = "*"
 python-dotenv = "*"
 "raygun4py" = "*"
@@ -27,6 +26,7 @@ gunicorn = "*"
 rednose = "*"
 nose = "*"
 coverage = "*"
+flask-mongoengine = "*"
 
 [dev-packages]
 isort = "*"

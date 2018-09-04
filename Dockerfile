@@ -12,10 +12,10 @@ RUN pipenv install --ignore-pipfile -v --pypi-mirror https://pypi.tuna.tsinghua.
 
 COPY manage.py .env ./
 COPY app ./
-RUN chmod +x manage.py
+RUN chmod 777 manage.py
 
 RUN chown -R mindpalace:mindpalace ./
 USER mindpalace
 
 EXPOSE 8000
-ENTRYPOINT ["pipenv run python ./manager.py runserver"]
+ENTRYPOINT pipenv run python -m gunicorn -w 4 manage:app 
