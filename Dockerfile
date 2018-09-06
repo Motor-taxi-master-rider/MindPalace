@@ -5,6 +5,9 @@ RUN adduser -D mindpalace
 WORKDIR /home/mindpalace
 
 RUN apk add alpine-sdk
+RUN apk add --no-cache \
+    libsass \
+    sassc
 
 RUN pip install pipenv -i https://pypi.tuna.tsinghua.edu.cn/simple
 COPY Pipfile.lock Pipfile ./
@@ -18,4 +21,4 @@ RUN chown -R mindpalace:mindpalace ./
 USER mindpalace
 
 EXPOSE 8000
-ENTRYPOINT gunicorn -w 4 manage:app 
+ENTRYPOINT ["gunicorn", "-w", "4", "manage:app"]
