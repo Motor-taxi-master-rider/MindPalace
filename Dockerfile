@@ -21,4 +21,4 @@ RUN chown -R mindpalace:mindpalace ./
 USER mindpalace
 
 EXPOSE 8000
-ENTRYPOINT ["gunicorn", "-w", "4", "manage:app"]
+ENTRYPOINT ["gunicorn", "-w", "4", "manage:app", "-b", "0.0.0.0:8000"]
