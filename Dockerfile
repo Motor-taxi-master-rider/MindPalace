@@ -20,5 +20,7 @@ RUN chmod 777 manage.py
 RUN chown -R mindpalace:mindpalace ./
 USER mindpalace
 
+RUN python manage.py run_worker
+
 EXPOSE 8000
 ENTRYPOINT ["gunicorn", "-w", "4", "manage:app", "-b", "0.0.0.0:8000"]

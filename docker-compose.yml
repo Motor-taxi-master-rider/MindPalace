@@ -1,9 +1,17 @@
-version: '3'
+version: '3.7'
 services:
     webapp:
-        image: mindpalace
+        build: 
+            context: .
+            cache_from:
+                - python:3.6-alpine
+        image: mindpalace:latest
         ports:
             - '8000:8000'
+        depends_on:
+            - mongo
+            - redis
+        env_file: .env
 
     mongo:
         image: mongo:latest
@@ -15,4 +23,4 @@ services:
         image: redis:latest
         command: redis-server --appendonly yes
         ports:
-            - '6379:6379'
+            - '6300:6379'
