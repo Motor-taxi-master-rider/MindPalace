@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from dotenv import load_dotenv
 from raygun4py.middleware import flask as flask_raygun
 
-load_dotenv(verbose=True)
+load_dotenv()
 
 
 class Config(ABC):

@@ -1,26 +1,26 @@
 FROM python:3.6-alpine
 
-RUN adduser -D mindpalace 
+RUN adduser -D mindpalace
 
 WORKDIR /home/mindpalace
 
 RUN apk add alpine-sdk
 RUN apk add --no-cache \
     libsass \
-    sassc
+    sassc \
+    supervisor
 
 RUN pip install pipenv -i https://pypi.tuna.tsinghua.edu.cn/simple
 COPY Pipfile.lock Pipfile ./
 RUN pipenv install -v --deploy --system --ignore-pipfile --pypi-mirror https://pypi.tuna.tsinghua.edu.cn/simple
 
-COPY manage.py config.py .env ./
+COPY manage.py config.py ./
 COPY app app
 RUN chmod 777 manage.py
 
-RUN chown -R mindpalace:mindpalace ./
-USER mindpalace
+COPY supervisor/supervisord.conf ./supervisord.conf 
 
-RUN python manage.py run_worker
+RUN chown -R mindpalace:mindpalace ./
 
 EXPOSE 8000
-ENTRYPOINT ["gunicorn", "-w", "4", "manage:app", "-b", "0.0.0.0:8000"]
+ENTRYPOINT ["/usr/bin/supervisord", "-c", "/home/mindpalace/supervisord.conf"]

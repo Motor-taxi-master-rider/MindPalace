@@ -7,20 +7,24 @@ services:
                 - python:3.6-alpine
         image: mindpalace:latest
         ports:
-            - '8000:8000'
+            - '43960:8000'
         depends_on:
             - mongo
             - redis
-        env_file: .env
+        env_file: .compose_env
 
     mongo:
         image: mongo:latest
         command: mongod --port 27018
+        volumes:
+            - /data/db:/data/db
         ports:
-            - '27018:27018'
+            - '43961:27018'
 
     redis:
         image: redis:latest
         command: redis-server --appendonly yes
+        volumes:
+            - /data/db:/data
         ports:
-            - '6300:6379'
+            - '43962:6379'
