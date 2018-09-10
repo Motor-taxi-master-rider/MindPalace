@@ -11,20 +11,22 @@ services:
         depends_on:
             - mongo
             - redis
-        env_file: .compose_env
 
     mongo:
         image: mongo:latest
-        command: mongod --port 27018
         volumes:
-            - /data/db:/data/db
+            - mongo_data:/data/db
+        command: mongod -auth 
         ports:
-            - '43961:27018'
+            - '43961:27017'
 
     redis:
         image: redis:latest
         command: redis-server --appendonly yes
         volumes:
-            - /data/db:/data
+            - redis_data:/data
         ports:
             - '43962:6379'
+volumes:
+    mongo_data:
+    redis_data:
