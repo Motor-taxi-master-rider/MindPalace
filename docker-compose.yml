@@ -1,11 +1,8 @@
 version: '3.7'
 services:
     webapp:
-        build: 
-            context: .
-            cache_from:
-                - python:3.6-alpine
-        image: mindpalace:latest
+        image: losdetective/mindpalace:latest
+        env_file: .env
         ports:
             - '43960:8000'
         depends_on:
@@ -16,7 +13,7 @@ services:
         image: mongo:latest
         volumes:
             - mongo_data:/data/db
-        command: mongod -auth 
+        command: mongod
         ports:
             - '43961:27017'
 
