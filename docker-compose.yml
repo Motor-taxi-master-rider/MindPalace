@@ -34,7 +34,7 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf
             - /home/hzy/myfile/certs/cert.pem:/etc/cert.pem
             - /home/hzy/myfile/certs/key.pem:/etc/key.pem
-            - static_file:/static
+            - static_file:/home/mindpalace/static
         ports:
             - '80:80'
             - '443:443'
