@@ -31,7 +31,7 @@ services:
         environment:
             - APP_HOST=webapp
         volumes:
-            - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf
             - /home/hzy/myfile/certs/cert.pem:/etc/cert.pem
             - /home/hzy/myfile/certs/key.pem:/etc/key.pem
             - static_file:/home/mindpalace/static

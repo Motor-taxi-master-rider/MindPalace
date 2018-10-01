@@ -18,7 +18,7 @@ COPY manage.py config.py ./
 COPY app app
 RUN chmod 777 manage.py
 
-COPY supervisor/supervisord.conf ./supervisord.conf
+COPY deploy/supervisor/supervisord.conf ./supervisord.conf
 
 RUN chown -R mindpalace:mindpalace ./
 
