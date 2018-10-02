@@ -1080,11 +1080,11 @@
         },
         "pytest-flask": {
             "hashes": [
-                "sha256:be3551e5d8cccd2f26e51fa4268398619be18b9e2300fdab7f4b2aeaeee0a588",
-                "sha256:d240537c7cfce9f28d0cd2af30f3fb0f452813fbc73cb0518d2e81363ef46112"
+                "sha256:2e64ba176ccc00e84adb88b38a4a44a032a09f98992881f09b0baab9ab7d06a6",
+                "sha256:959f01a2e6121d4208263f571bf2de24aa89ebf2f752b15824e4e597fa35bb7e"
             ],
             "index": "pypi",
-            "version": "==0.12.0"
+            "version": "==0.13.0"
         },
         "pytest-forked": {
             "hashes": [
