@@ -1,6 +1,6 @@
 import os
 
-from fabric import Config, Connection
+from fabric import task
 
 from deploy.utils import DeployTask
 
@@ -16,7 +16,8 @@ def _load_env_file():
     load_dotenv(env_file)
 
 
-def SetupEnvironment(conn: Connection):
+@task
+def setup_environment(conn):
     """Install and setup all base packages.
 
     This task should be executed once for the first time.
@@ -41,18 +42,11 @@ def SetupEnvironment(conn: Connection):
         task.pip_install(package)
 
 
-def BuildApp(conn: Connection):
+@task
+def build_app(conn):
+    """Build and start up application."""
+
     task = DeployTask(conn)
     task.fetch_repo()
     task.copy_env_file()
     task.start_app()
-
-
-def main():
-    config = Config()
-    conn = Connection('192.168.226.130', config=config)
-    BuildApp(conn)
-
-
-if __name__ == '__main__':
-    main()

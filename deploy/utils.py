@@ -27,6 +27,12 @@ class DeployTask:
         raise NotImplemented(item)
 
     def apt_install(self, package: str, executable=None):
+        """Use apt-get to install packages in ubuntu.
+
+        Some packages may have a different executable name from the package name(e.g. ruby-sass),
+         then `executable` should be set.
+        """
+
         if not executable:
             executable = package
 
@@ -39,6 +45,11 @@ class DeployTask:
                 self.sudo(f'apt install {package} -y')
 
     def copy_env_file(self):
+        """Copy project environment file to remote server.
+
+        '.env-production' file will be chosen to copy prior to '.env' to ease the local development.
+        """
+
         project_path = dirname(realpath(join(__file__, pardir)))
 
         with self.cd(REPO_NAME):
@@ -62,9 +73,13 @@ class DeployTask:
             self.run(f'mv {env_file} {ENV_FILE}')
 
     def copy_content(self, content: str, path: str):
+        """Add content to remote server file, new file will be create if not exists"""
+
         self.sudo(f'bash -c "echo \'{content}\' >> {path}"')
 
     def executable_exist(self, executable: str):
+        """Check whether a executable binary is ready."""
+
         result = self.run(f'which {executable}', hide=True, warn=True).ok
         if result:
             version_info = self.run(
@@ -73,6 +88,12 @@ class DeployTask:
         return result
 
     def fetch_repo(self):
+        """Sync git repository on remote server.
+
+        Repository will be cloned from remote for the first time. `pull` procedure will be execute to
+        get further update.
+        """
+
         if self.remote_exists(REPO_NAME):
             with self.cd(REPO_NAME):
                 self.run('git pull')
@@ -81,14 +102,20 @@ class DeployTask:
             logger.info('Clone successfully.')
 
     def pip_install(self, package: str):
+        """Use pip to install python package on remote server."""
+
         if not self.executable_exist(package):
             logger.info(f'Installing {package}......')
             self.sudo(f'pip install {package}')
 
     def remote_exists(self, path: str):
+        """Check whether a file or directory exists on remote server."""
+
         return self.run(f'test -e "$(echo {path})"', hide=True, warn=True).ok
 
     def register_ssl_certification(self, path: str):
+        """User openssl to create ssl certification file."""
+
         self.sudo(
             f'openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout {path}/key.pem -out {path}/cert.pem',
             pty=True)
