@@ -61,7 +61,7 @@ class DeployTask:
             # rename .env-production to .env
             self.run(f'mv {env_file} {ENV_FILE}')
 
-    def append_content(self, content: str, path: str):
+    def copy_content(self, content: str, path: str):
         self.sudo(f'bash -c "echo \'{content}\' >> {path}"')
 
     def executable_exist(self, executable: str):
@@ -87,6 +87,11 @@ class DeployTask:
 
     def remote_exists(self, path: str):
         return self.run(f'test -e "$(echo {path})"', hide=True, warn=True).ok
+
+    def register_ssl_certification(self, path: str):
+        self.sudo(
+            f'openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout {path}/key.pem -out {path}/cert.pem',
+            pty=True)
 
     def start_app(self):
         """Start the docker compose.
@@ -123,4 +128,4 @@ class DeployTask:
         docker_mirror_file = '/etc/docker/daemon.json'
         if not self.remote_exists(docker_mirror_file):
             logger.info('Registering docker mirror...')
-            self.append_content(mirror_info, docker_mirror_file)
+            self.copy_content(mirror_info, docker_mirror_file)
