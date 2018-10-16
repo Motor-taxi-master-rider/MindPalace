@@ -104,9 +104,8 @@ class DeployTask:
     def pip_install(self, package: str):
         """Use pip to install python package on remote server."""
 
-        if not self.executable_exist(package):
-            logger.info(f'Installing {package}......')
-            self.sudo(f'pip install {package}')
+        logger.info(f'Installing {package}......')
+        self.sudo(f'pip3 install {package}')
 
     def remote_exists(self, path: str):
         """Check whether a file or directory exists on remote server."""
@@ -116,6 +115,8 @@ class DeployTask:
     def register_ssl_certification(self, path: str):
         """User openssl to create ssl certification file."""
 
+        if not self.remote_exists(path):
+            self.run(f'mkdir {path}')
         self.sudo(
             f'openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout {path}/key.pem -out {path}/cert.pem',
             pty=True)
@@ -129,7 +130,9 @@ class DeployTask:
         TODO: move the workaround after the bug fix
         """
 
-        self.sudo(f'bash -c "cd {REPO_NAME} && docker-compose up -d"')
+        self.sudo(
+            f'bash -c "cd {REPO_NAME} && docker-compose down && docker-compose up -d"'
+        )
 
     def _install_docker(self):
         """Special process to install docker.

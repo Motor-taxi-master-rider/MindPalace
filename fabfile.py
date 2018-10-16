@@ -1,8 +1,10 @@
 import os
+from functools import partial
 
 from fabric import task
+from invoke.exceptions import ThreadException
 
-from deploy.utils import DeployTask
+from deploy.utils import DeployTask, logger
 
 
 def _load_env_file():
@@ -29,13 +31,20 @@ def setup_environment(conn):
     task.sudo('apt update')
     task.register_ssl_certification(os.environ['SSL_CERT_PATH'])
 
-    system_packages = ('git', 'docker', ('ruby-sass', 'sass'))
+    system_packages = ('git', 'docker', ('ruby-sass', 'sass'), 'python3',
+                       ('python3-pip', 'pip3'))
     for package in system_packages:
         if isinstance(package, tuple):
             package, executable = package
-            task.apt_install(package, executable=executable)
+            apt_install = partial(task.apt_install, executable=executable)
         else:
-            task.apt_install(package)
+            apt_install = task.apt_install
+
+        try:
+            apt_install(package)
+        except ThreadException:
+            logger.exception(f'Unable to install {package}.')
+            return
 
     python_packages = ('docker-compose', )
     for package in python_packages:
