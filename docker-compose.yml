@@ -6,7 +6,10 @@ services:
         ports:
             - '43960:8000'
         volumes:
-            - static_file:/home/mindpalace/app/static
+            - ./app:/home/mindpalace/app
+            - ./deploy:/home/mindpalace/deploy
+            - ./manage.py:/home/mindpalace/manage.py
+            - ./config.py:/home/mindpalace/config.py
         depends_on:
             - mongo
             - redis
@@ -35,7 +38,7 @@ services:
             - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ${SSL_CERT_PATH}/cert.pem:/etc/cert.pem
             - ${SSL_CERT_PATH}/key.pem:/etc/key.pem
-            - static_file:/home/mindpalace/static
+            - ./app/static:/home/mindpalace/static
         ports:
             - '80:80'
             - '443:443'
@@ -44,4 +47,3 @@ services:
 volumes:
     mongo_data:
     redis_data:
-    static_file:

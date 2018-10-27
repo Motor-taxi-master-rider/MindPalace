@@ -14,12 +14,6 @@ RUN pip install pipenv -i https://pypi.tuna.tsinghua.edu.cn/simple
 COPY Pipfile.lock Pipfile ./
 RUN pipenv install -v --deploy --system --ignore-pipfile --pypi-mirror https://pypi.tuna.tsinghua.edu.cn/simple
 
-COPY manage.py config.py ./
-COPY app app
-RUN chmod 777 manage.py
-
-COPY deploy/supervisor/supervisord.conf ./supervisord.conf
-
 RUN chown -R mindpalace:mindpalace ./
 
 EXPOSE 8000
