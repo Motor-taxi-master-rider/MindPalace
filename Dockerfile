@@ -10,11 +10,12 @@ RUN apk add --no-cache \
     sassc \
     supervisor
 
-RUN pip install pipenv -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install pipenv==2018.10.9 -i https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install pip==18.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
 COPY Pipfile.lock Pipfile ./
 RUN pipenv install -v --deploy --system --ignore-pipfile --pypi-mirror https://pypi.tuna.tsinghua.edu.cn/simple
 
 RUN chown -R mindpalace:mindpalace ./
 
 EXPOSE 8000
-ENTRYPOINT ["/usr/bin/supervisord", "-c", "/home/mindpalace/supervisord.conf"]
+ENTRYPOINT ["/usr/bin/supervisord", "-c", "/home/mindpalace/deploy/supervisor/supervisord.conf"]
