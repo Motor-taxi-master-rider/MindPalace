@@ -15,9 +15,9 @@ def update_modified(sender, document):
 
 
 class Category(Enum):
-    FLIP = 'flip'
     SHORT_TERM = 'short_term'
     LONG_TERM = 'long_term'
+    FLIP = 'flip'
 
 
 class UserTag(Enum):
