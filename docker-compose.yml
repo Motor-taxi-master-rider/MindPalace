@@ -1,7 +1,7 @@
 version: '3.7'
 services:
     webapp:
-        image: losdetective/mindpalace:latest
+        image: mindpalace:latest
         env_file: .env
         ports:
             - '43960:8000'
@@ -10,6 +10,20 @@ services:
             - ./deploy:/home/mindpalace/deploy
             - ./manage.py:/home/mindpalace/manage.py
             - ./config.py:/home/mindpalace/config.py
+        entrypoint: gunicorn -w 4 manage:app -b 0.0.0.0:8000 --chdir /home/mindpalace
+        depends_on:
+            - mongo
+            - redis
+   
+    redis_worker:
+        image: mindpalace:latest
+        env_file: .env
+        volumes:
+            - ./app:/home/mindpalace/app
+            - ./deploy:/home/mindpalace/deploy
+            - ./manage.py:/home/mindpalace/manage.py
+            - ./config.py:/home/mindpalace/config.py
+        entrypoint: python3 /home/mindpalace/manage.py run_worker
         depends_on:
             - mongo
             - redis
