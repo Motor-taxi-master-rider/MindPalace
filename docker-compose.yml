@@ -1,61 +1,65 @@
 version: '3.7'
 services:
+    mongo:
+        image: mongo:latest
+        command: mongod -auth
+        ports:
+            - '43961:27017'
+        restart: always
+        volumes:
+            - mongo_data:/data/db
+
+    redis:
+        image: redis:latest
+        command: redis-server --appendonly yes
+        ports:
+            - '43962:6379'
+        restart: always
+        volumes:
+            - redis_data:/data
+
     webapp:
         image: mindpalace:latest
+        entrypoint: gunicorn -w 4 manage:app -b 0.0.0.0:8000 --chdir /home/mindpalace
         env_file: .env
         ports:
             - '43960:8000'
+        restart: always
         volumes:
             - ./app:/home/mindpalace/app
-            - ./deploy:/home/mindpalace/deploy
             - ./manage.py:/home/mindpalace/manage.py
             - ./config.py:/home/mindpalace/config.py
-        entrypoint: gunicorn -w 4 manage:app -b 0.0.0.0:8000 --chdir /home/mindpalace
         depends_on:
             - mongo
             - redis
    
     redis_worker:
         image: mindpalace:latest
+        entrypoint: python3 /home/mindpalace/manage.py run_worker
         env_file: .env
+        restart: always
         volumes:
             - ./app:/home/mindpalace/app
-            - ./deploy:/home/mindpalace/deploy
             - ./manage.py:/home/mindpalace/manage.py
             - ./config.py:/home/mindpalace/config.py
-        entrypoint: python3 /home/mindpalace/manage.py run_worker
         depends_on:
             - mongo
             - redis
 
-    mongo:
-        image: mongo:latest
-        volumes:
-            - mongo_data:/data/db
-        command: mongod -auth
-        ports:
-            - '43961:27017'
-
-    redis:
-        image: redis:latest
-        command: redis-server --appendonly yes
-        volumes:
-            - redis_data:/data
-        ports:
-            - '43962:6379'
-
     nginx:
         image: nginx:latest
+        env_file: .env
         environment:
             - APP_HOST=webapp
+        ports:
+            - '80:80'
+            - '443:443'
+        restart: always
         volumes:
             - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ${SSL_CERT_PATH}/cert.pem:/etc/cert.pem
             - ${SSL_CERT_PATH}/key.pem:/etc/key.pem
             - ./app/static:/home/mindpalace/static
-        ports:
-            - '80:80'
-            - '443:443'
         depends_on:
             - webapp
 volumes:
