@@ -136,7 +136,7 @@ class DeployTask:
         """
 
         self.sudo(
-            f'bash -c "cd {REPO_NAME} && docker-compose down && docker-compose up -d"'
+            f'bash -c "cd {REPO_NAME} && docker-compose pull &&docker-compose down && docker-compose up -d"'
         )
 
     def _install_docker(self):

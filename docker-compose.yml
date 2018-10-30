@@ -24,7 +24,6 @@ services:
         env_file: .env
         ports:
             - '43960:8000'
-        pull: true
         restart: always
         volumes:
             - ./app:/home/mindpalace/app
