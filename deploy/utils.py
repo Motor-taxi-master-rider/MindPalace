@@ -115,6 +115,11 @@ class DeployTask:
     def register_ssl_certification(self, path: str):
         """User openssl to create ssl certification file."""
 
+        if self.remote_exists(f'{path}/key.pem') or self.remote_exists(
+                f'{path}/cert.pem'):
+            logger.info('Ssl certification file is already existed in {path}.')
+            return
+
         if not self.remote_exists(path):
             self.run(f'mkdir {path}')
         self.sudo(

@@ -19,7 +19,7 @@ services:
             - redis_data:/data
 
     webapp:
-        image: mindpalace:latest
+        image: losdetective/mindpalace:latest
         entrypoint: gunicorn -w 4 manage:app -b 0.0.0.0:8000 --chdir /home/mindpalace
         env_file: .env
         ports:
@@ -32,9 +32,9 @@ services:
         depends_on:
             - mongo
             - redis
-   
+
     redis_worker:
-        image: mindpalace:latest
+        image: losdetective/mindpalace:latest
         entrypoint: python3 /home/mindpalace/manage.py run_worker
         env_file: .env
         restart: always
