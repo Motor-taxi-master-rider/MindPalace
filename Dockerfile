@@ -6,8 +6,10 @@ WORKDIR /home/mindpalace
 
 RUN apk add alpine-sdk
 RUN apk add --no-cache \
-    libsass \
-    sassc
+    ruby \
+    ruby-dev
+
+RUN gem install sass
 
 RUN pip install pipenv -i https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip install pip==18.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
