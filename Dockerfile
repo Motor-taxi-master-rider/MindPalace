@@ -7,7 +7,8 @@ WORKDIR /home/mindpalace
 RUN apk add alpine-sdk
 RUN apk add --no-cache \
     ruby \
-    ruby-dev
+    ruby-dev \
+    ruby-rdoc
 
 RUN gem install sass
 
