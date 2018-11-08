@@ -2,6 +2,7 @@ from flask import (Blueprint, abort, flash, redirect, render_template, request,
                    url_for)
 from flask_login import current_user, login_required
 from mongoengine.errors import NotUniqueError
+from flask_mongoengine.pagination import Pagination
 
 from app.globals import ALL_CATEGORY, DOCUMENT_PER_PAGE
 from app.models import Category, DocumentMeta, Permission, UserTag
@@ -42,7 +43,7 @@ MY_DOC_PIPELINE = [{
                     }]
         }
     }
-}]
+}, {"$sort": {"score": -1, "priority": -1, "update_at": -1}}]
 
 task = Blueprint('task', __name__)
 
@@ -64,8 +65,9 @@ def my_doc_meta():
     if search:
         documents = documents.search_text(search)
 
-    documents = documents.aggregate(*MY_DOC_PIPELINE).paginate(
-        page=page, per_page=DOCUMENT_PER_PAGE)
+    documents_list = list(documents.aggregate(*MY_DOC_PIPELINE))
+    documents = Pagination(documents_list,
+                           page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
         current_category=category,
