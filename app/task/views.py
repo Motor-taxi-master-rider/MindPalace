@@ -20,26 +20,26 @@ MY_DOC_PIPELINE = [{
         "created_by": 1,
         "score": {
             "$cond":
-            [{
-                "$eq": ["$tags", None]
-            }, 2,
-             {
-                 "$cond":
-                 [{
-                     "$in": [UserTag.impressive.value, "$tags"]
-                 }, 1,
-                  {
-                      "$cond": [{
-                          "$in": [UserTag.reviewed.value, "$tags"]
-                      }, 0,
+                [{
+                    "$not": "$tags"
+                }, 2,
+                    {
+                        "$cond":
+                            [{
+                                "$in": [UserTag.impressive.value, "$tags"]
+                            }, 1,
                                 {
-                                    "$cond":
-                                    [{
-                                        "$in": [UserTag.to_do.value, "$tags"]
-                                    }, 3, 2]
+                                    "$cond": [{
+                                        "$in": [UserTag.reviewed.value, "$tags"]
+                                    }, 0,
+                                        {
+                                            "$cond":
+                                                [{
+                                                    "$in": [UserTag.to_do.value, "$tags"]
+                                                }, 3, 2]
+                                        }]
                                 }]
-                  }]
-             }]
+                    }]
         }
     }
 }]
