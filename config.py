@@ -55,9 +55,11 @@ class Config(ABC):
 class DevelopmentConfig(Config):
     DEBUG = True
     ASSETS_DEBUG = True
-    MONGODB_DB = 'doc_search'
-    MONGODB_HOST = '127.0.0.1'
-    MONGODB_PORT = 27017
+    MONGODB_DB = os.environ.get('MONGODB_DB') or 'doc_search'
+    MONGODB_HOST = os.environ.get('MONGODB_HOST') or '127.0.0.1'
+    MONGODB_PORT = int(os.environ.get('MONGODB_PORT')) or 27017
+    MONGODB_USERNAME = os.environ.get('MONGODB_USERNAME')
+    MONGODB_PASSWORD = os.environ.get('MONGODB_PASSWORD')
 
     @classmethod
     def init_app(cls, app):
@@ -81,7 +83,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     MONGODB_DB = os.environ.get('MONGODB_DB')
     MONGODB_HOST = os.environ.get('MONGODB_HOST')
-    MONGODB_PORT = int(os.environ.get('MONGODB_PORT') or '27017')
+    MONGODB_PORT = int(os.environ.get('MONGODB_PORT')) or 27017
     MONGODB_USERNAME = os.environ.get('MONGODB_USERNAME')
     MONGODB_PASSWORD = os.environ.get('MONGODB_PASSWORD')
     SSL_DISABLE = (os.environ.get('SSL_DISABLE') or 'True') == 'True'

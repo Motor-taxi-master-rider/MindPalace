@@ -4,8 +4,45 @@ from flask_login import current_user, login_required
 from mongoengine.errors import NotUniqueError
 
 from app.globals import ALL_CATEGORY, DOCUMENT_PER_PAGE
-from app.models import Category, DocumentMeta, Permission
+from app.models import Category, DocumentMeta, Permission, UserTag
 from app.task.forms import DocMetaForm
+
+MY_DOC_PIPELINE = [{
+    "$project": {
+        "_id": 0,
+        "priority": 1,
+        "category": 1,
+        "theme": 1,
+        "tags": 1,
+        "comment": 1,
+        "update_at": 1,
+        "url": 1,
+        "created_by": 1,
+        "score": {
+            "$cond":
+            [{
+                "$eq": ["$tags", None]
+            }, 2,
+             {
+                 "$cond":
+                 [{
+                     "$in": [UserTag.impressive.value, "$tags"]
+                 }, 1,
+                  {
+                      "$cond": [{
+                          "$in": [UserTag.reviewed.value, "$tags"]
+                      }, 0,
+                                {
+                                    "$cond":
+                                    [{
+                                        "$in": [UserTag.to_do.value, "$tags"]
+                                    }, 3, 2]
+                                }]
+                  }]
+             }]
+        }
+    }
+}]
 
 task = Blueprint('task', __name__)
 
@@ -18,7 +55,6 @@ def my_doc_meta():
     category = request.args.get('category', ALL_CATEGORY, type=str)
     search = request.args.get('search', None)
     filter = {'create_by': current_user.id}
-    order = ['-priority', '-update_at']
 
     if category != ALL_CATEGORY:
         filter['category'] = category
@@ -26,10 +62,9 @@ def my_doc_meta():
     documents = DocumentMeta.objects(**filter).exclude('cache')
 
     if search:
-        order.insert(0, '$text_score')
         documents = documents.search_text(search)
 
-    documents = documents.order_by(*order).paginate(
+    documents = documents.aggregate(*MY_DOC_PIPELINE).paginate(
         page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
