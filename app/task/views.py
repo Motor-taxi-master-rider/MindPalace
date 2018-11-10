@@ -1,8 +1,8 @@
 from flask import (Blueprint, abort, flash, redirect, render_template, request,
                    url_for)
 from flask_login import current_user, login_required
-from mongoengine.errors import NotUniqueError
 from flask_mongoengine.pagination import Pagination
+from mongoengine.errors import NotUniqueError
 
 from app.globals import ALL_CATEGORY, DOCUMENT_PER_PAGE
 from app.models import Category, DocumentMeta, Permission, UserTag
@@ -18,32 +18,39 @@ MY_DOC_PIPELINE = [{
         "comment": 1,
         "update_at": 1,
         "url": 1,
-        "created_by": 1,
+        "create_by": 1,
         "score": {
             "$cond":
-                [{
-                    "$not": "$tags"
-                }, 2,
-                    {
-                        "$cond":
-                            [{
-                                "$in": [UserTag.impressive.value, "$tags"]
-                            }, 1,
+            [{
+                "$eq": [{
+                    "$ifNull": ["$tags", None]
+                }, None]
+            }, 2,
+             {
+                 "$cond": [{
+                     "$eq": [UserTag.impressive.value, "$tags"]
+                 }, 1,
+                           {
+                               "$cond":
+                               [{
+                                   "$eq": [UserTag.reviewed.value, "$tags"]
+                               }, 0,
                                 {
                                     "$cond": [{
-                                        "$in": [UserTag.reviewed.value, "$tags"]
-                                    }, 0,
-                                        {
-                                            "$cond":
-                                                [{
-                                                    "$in": [UserTag.to_do.value, "$tags"]
-                                                }, 3, 2]
-                                        }]
+                                        "$eq": [UserTag.to_do.value, "$tags"]
+                                    }, 3, 2]
                                 }]
-                    }]
+                           }]
+             }]
         }
     }
-}, {"$sort": {"score": -1, "priority": -1, "update_at": -1}}]
+}, {
+    "$sort": {
+        "score": -1,
+        "priority": -1,
+        "update_at": -1
+    }
+}]
 
 task = Blueprint('task', __name__)
 
@@ -65,9 +72,9 @@ def my_doc_meta():
     if search:
         documents = documents.search_text(search)
 
-    documents_list = list(documents.aggregate(*MY_DOC_PIPELINE))
-    documents = Pagination(documents_list,
-                           page=page, per_page=DOCUMENT_PER_PAGE)
+    documents_cursor = documents.aggregate(*MY_DOC_PIPELINE)
+    documents = Pagination(
+        list(documents_cursor), page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
         current_category=category,

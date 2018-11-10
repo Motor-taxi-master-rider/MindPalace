@@ -23,8 +23,10 @@ class DocMetaForm(FlaskForm):
                             URL()])
     tags = SelectMultipleField(
         'Tags',
-        choices=[(tag.value, beautify_static(tag.value))
-                 for tag in iter(itertools.chain(UserTag, SystemTag))])
+        choices=[
+            (tag.value, beautify_static(tag.value))  # type:ignore
+            for tag in iter(itertools.chain(UserTag, SystemTag))  # type:ignore
+        ])
     priority = SelectField(
         'Priority',
         choices=[(i, i) for i in range(0, 4)],
