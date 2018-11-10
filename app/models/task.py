@@ -49,7 +49,8 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
     comment = db.ListField(db.StringField())
     tags = db.ListField(
         db.StringField(choices=[
-            tag.value for tag in iter(itertools.chain(UserTag, SystemTag))
+            tag.value
+            for tag in iter(itertools.chain(UserTag, SystemTag))  # type:ignore
         ]))
     update_at = db.DateTimeField(default=datetime.datetime.utcnow)
     create_by = db.ReferenceField(User)

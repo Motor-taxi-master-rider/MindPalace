@@ -1,11 +1,14 @@
 from contextlib import contextmanager
+from functools import partial
+from operator import attrgetter, itemgetter
 from queue import Queue
-from typing import Any, Coroutine, Generic, List, Optional, Tuple, Type, Union
+from typing import Callable, Iterable, List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse, urlunparse
 
 from flask import Response, template_rendered, url_for
 from flask.testing import FlaskClient
 from mock import MagicMock
+from mongoengine import Document
 from mongomock import MongoClient
 
 from app.models import User
@@ -14,7 +17,7 @@ from app.utils import T
 
 @contextmanager
 def captured_templates(app):
-    """Context manger to capture all rendered templates into a list."""
+    """ Context manger to capture all rendered templates into a list."""
 
     def record(sender, template, context, **extra):
         nonlocal recorded
@@ -29,10 +32,16 @@ def captured_templates(app):
 
 
 def create_mock_motor_connection(db: MongoClient) -> Tuple:
+    """ Mock a mongodb for motor which will share the some context with given pymongo client.
+
+    It is imcompatible for mongomock to mock motor client. Make the mock manually with hacks and
+    fun.
+    #TODO：update the mock if mongomock has new release. Current release:
+    """
     import mongomock
     from collections import deque
 
-    class MockBaseBaseProperties(object):
+    class MockBaseBaseProperties:
         codec_options = None
         read_preference = None
         read_concern = None
@@ -167,8 +176,20 @@ def create_mock_motor_connection(db: MongoClient) -> Tuple:
     return MockClient, MockDatabase, MockCollection, Cursor
 
 
+def get_ids(documents: list) -> Iterable:
+    """ Unified function to get id generator for mongoengine documents and pymongo collections."""
+    if isinstance(documents[0], Document):
+        id_mapper = partial(map, attrgetter('id'))
+    elif isinstance(documents[0], dict):
+        id_mapper = partial(map, itemgetter('_id'))
+    else:
+        raise NotImplementedError()
+
+    return id_mapper(documents)
+
+
 def login(client: FlaskClient, user: User, password: str = 'test') -> Response:
-    """Login a user."""
+    """ Login a user."""
     return client.post(
         url_for('account.login'),
         data={
@@ -194,9 +215,9 @@ def real_url(route: str, **arguments) -> str:
     return url_for(route, **arguments, _external=True)
 
 
-def mock_coroutine(return_value: Optional[T] = None,
-                   side_effects: Optional[Union[List[Type], Type]] = None
-                   ) -> Coroutine[Any, Any, Optional[T]]:
+def mock_coroutine(
+        return_value: Optional[T] = None,
+        side_effects: Optional[Union[List[Type], Type]] = None) -> Callable:
     async def _coroutine(*args, **kwargs) -> Optional[T]:
         if return_value:
             return return_value
@@ -210,7 +231,7 @@ def mock_coroutine(return_value: Optional[T] = None,
                 raise side_effect()
         return None
 
-    return _coroutine  # type: ignore
+    return _coroutine
 
 
 class MockRedisQueue(Queue):
