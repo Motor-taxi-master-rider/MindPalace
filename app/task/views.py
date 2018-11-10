@@ -1,3 +1,6 @@
+from functools import partial
+from operator import itemgetter
+
 from flask import (Blueprint, abort, flash, redirect, render_template, request,
                    url_for)
 from flask_login import current_user, login_required
@@ -22,25 +25,24 @@ MY_DOC_PIPELINE = [{
         "score": {
             "$cond":
             [{
-                "$eq": [{
-                    "$ifNull": ["$tags", None]
-                }, None]
+                "$not": "$tags"
             }, 2,
              {
-                 "$cond": [{
+                 "$cond":
+                 [{
                      "$in": [UserTag.impressive.value, "$tags"]
                  }, 1,
-                           {
-                               "$cond":
-                               [{
-                                   "$in": [UserTag.reviewed.value, "$tags"]
-                               }, 0,
+                  {
+                      "$cond": [{
+                          "$in": [UserTag.reviewed.value, "$tags"]
+                      }, 0,
                                 {
-                                    "$cond": [{
+                                    "$cond":
+                                    [{
                                         "$in": [UserTag.to_do.value, "$tags"]
                                     }, 3, 2]
                                 }]
-                           }]
+                  }]
              }]
         }
     }
@@ -71,10 +73,10 @@ def my_doc_meta():
 
     if search:
         documents = documents.search_text(search)
-
-    documents_cursor = documents.aggregate(*MY_DOC_PIPELINE)
-    documents = Pagination(
-        list(documents_cursor), page=page, per_page=DOCUMENT_PER_PAGE)
+        documents = documents.order_by('$text_score')
+    else:
+        documents = list(documents.aggregate(*MY_DOC_PIPELINE))
+    documents = Pagination(documents, page=page, per_page=DOCUMENT_PER_PAGE)
     return render_template(
         'task/document_dashboard.html',
         current_category=category,
