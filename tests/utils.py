@@ -35,7 +35,7 @@ def create_mock_motor_connection(db: MongoClient) -> Tuple:
     """ Mock a mongodb for motor which will share the some context with given pymongo client.
 
     It is imcompatible for mongomock to mock motor client. Make the mock manually with hacks and
-    funs.
+    fun.
     #TODO：update the mock if mongomock has new release. Current release:
     """
     import mongomock

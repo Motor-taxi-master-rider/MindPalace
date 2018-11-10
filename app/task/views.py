@@ -28,16 +28,16 @@ MY_DOC_PIPELINE = [{
             }, 2,
              {
                  "$cond": [{
-                     "$eq": [UserTag.impressive.value, "$tags"]
+                     "$in": [UserTag.impressive.value, "$tags"]
                  }, 1,
                            {
                                "$cond":
                                [{
-                                   "$eq": [UserTag.reviewed.value, "$tags"]
+                                   "$in": [UserTag.reviewed.value, "$tags"]
                                }, 0,
                                 {
                                     "$cond": [{
-                                        "$eq": [UserTag.to_do.value, "$tags"]
+                                        "$in": [UserTag.to_do.value, "$tags"]
                                     }, 3, 2]
                                 }]
                            }]
