@@ -13,7 +13,7 @@ from app.task.forms import DocMetaForm
 
 MY_DOC_PIPELINE = [{
     "$project": {
-        "_id": 0,
+        "id": "$_id",
         "priority": 1,
         "category": 1,
         "theme": 1,
