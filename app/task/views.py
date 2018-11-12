@@ -94,6 +94,7 @@ def new_doc_meta():
             theme=form.theme.data,
             category=form.category.data,
             url=form.url.data,
+            tags=form.tags.data,
             priority=form.priority.data,
             create_by=current_user.id)
         try:
