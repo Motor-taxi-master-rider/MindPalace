@@ -1,6 +1,4 @@
-import datetime
 import os
-import urllib.parse
 from abc import ABC, abstractmethod
 
 from dotenv import load_dotenv

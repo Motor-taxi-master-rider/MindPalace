@@ -1,6 +1,3 @@
-from functools import partial
-from operator import itemgetter
-
 from flask import (Blueprint, abort, flash, redirect, render_template, request,
                    url_for)
 from flask_login import current_user, login_required
@@ -8,51 +5,9 @@ from flask_mongoengine.pagination import Pagination
 from mongoengine.errors import NotUniqueError
 
 from app.globals import ALL_CATEGORY, DOCUMENT_PER_PAGE
-from app.models import Category, DocumentMeta, Permission, UserTag
+from app.models import Category, DocumentMeta, Permission
 from app.task.forms import DocMetaForm
-
-MY_DOC_PIPELINE = [{
-    "$project": {
-        "id": "$_id",
-        "priority": 1,
-        "category": 1,
-        "theme": 1,
-        "tags": 1,
-        "comment": 1,
-        "update_at": 1,
-        "url": 1,
-        "create_by": 1,
-        "score": {
-            "$cond":
-            [{
-                "$not": "$tags"
-            }, 2,
-             {
-                 "$cond":
-                 [{
-                     "$in": [UserTag.impressive.value, "$tags"]
-                 }, 1,
-                  {
-                      "$cond": [{
-                          "$in": [UserTag.reviewed.value, "$tags"]
-                      }, 0,
-                                {
-                                    "$cond":
-                                    [{
-                                        "$in": [UserTag.to_do.value, "$tags"]
-                                    }, 3, 2]
-                                }]
-                  }]
-             }]
-        }
-    }
-}, {
-    "$sort": {
-        "score": -1,
-        "priority": -1,
-        "update_at": -1
-    }
-}]
+from app.task.utils import MY_DOC_PIPELINE
 
 task = Blueprint('task', __name__)
 
