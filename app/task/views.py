@@ -62,7 +62,8 @@ task = Blueprint('task', __name__)
 def my_doc_meta():
     """Get all documents meta data of user"""
     page = request.args.get('page', 1, type=int)
-    category = request.args.get('category', ALL_CATEGORY, type=str)
+    category = request.args.get(
+        'category', Category.SHORT_TERM.value, type=str)
     search = request.args.get('search', None)
     filter = {'create_by': current_user.id}
 
