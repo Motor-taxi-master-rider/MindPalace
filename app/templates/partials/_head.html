@@ -2,6 +2,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block page_title %}{{ config.APP_NAME }}{% endblock %}</title>
 
+<link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+
 {% assets 'vendor_css' %}
     <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">{% endassets %}
 {% assets 'app_css' %}
