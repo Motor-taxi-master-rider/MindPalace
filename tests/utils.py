@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urlunparse
 
 from flask import Response, template_rendered, url_for
 from flask.testing import FlaskClient
-from mock import MagicMock
+from unittest.mock import MagicMock
 from mongoengine import Document
 from mongomock import MongoClient
 

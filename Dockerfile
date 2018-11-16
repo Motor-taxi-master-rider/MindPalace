@@ -13,7 +13,6 @@ RUN apk add --no-cache \
 RUN gem install sass
 
 RUN pip install pipenv -i https://pypi.tuna.tsinghua.edu.cn/simple
-RUN pip install pip==18.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
 COPY Pipfile.lock Pipfile ./
 RUN pipenv install -v --deploy --system --ignore-pipfile --pypi-mirror https://pypi.tuna.tsinghua.edu.cn/simple
 
