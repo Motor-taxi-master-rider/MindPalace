@@ -1,5 +1,6 @@
 import pytest
 from flask import url_for
+from pymongo.errors import OperationFailure
 from utils import captured_templates, get_ids, login, real_url, redirect_to
 
 from app.globals import ALL_CATEGORY, INVALID_OBJECT_ID
@@ -7,6 +8,7 @@ from app.models import Category, DocumentMeta
 from app.task.forms import DocMetaForm
 
 
+@pytest.mark.xfail(raises=NotImplementedError)
 @pytest.mark.usefixtures('doc_list')
 def test_get_my_doc_meta(client, admin, monkeypatch):
     login(client, admin)
@@ -17,43 +19,30 @@ def test_get_my_doc_meta(client, admin, monkeypatch):
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
         assert context['categories'] == [c.value for c in Category]
-        assert context['current_category'] == Category.SHORT_TERM.value
-        assert set(get_ids(context['documents'].items)) == set(
-            get_ids(
-                DocumentMeta.objects(
-                    create_by=admin,
-                    category=Category.SHORT_TERM.value).order_by(
-                        '-priority', '-update_at').all()[:3]))
-
-        assert client.get(url_for('task.my_doc_meta',
-                                  page=2)).status_code == 200
-        template, context = templates.pop()
-        assert template.name == 'task/document_dashboard.html'
-        assert context['current_category'] == Category.SHORT_TERM.value
-        assert set(get_ids(context['documents'].items)) == set(
-            get_ids(
-                DocumentMeta.objects(
-                    create_by=admin,
-                    category=Category.SHORT_TERM.value).order_by(
-                        '-priority', '-update_at').all()[3:6]))
-
-
-@pytest.mark.usefixtures('doc_list')
-def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
-    login(client, admin)
-    monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 3)
-
-    with captured_templates(client.application) as templates:
-        assert client.get(url_for('task.my_doc_meta',
-                                  category=ALL_CATEGORY)).status_code == 200
-        template, context = templates.pop()
-        assert template.name == 'task/document_dashboard.html'
         assert context['current_category'] == ALL_CATEGORY
         assert set(get_ids(context['documents'].items)) == set(
             get_ids(
                 DocumentMeta.objects(create_by=admin).order_by(
                     '-priority', '-update_at').all()[:3]))
 
+        assert client.get(url_for('task.my_doc_meta',
+                                  page=2)).status_code == 200
+        template, context = templates.pop()
+        assert template.name == 'task/document_dashboard.html'
+        assert context['current_category'] == ALL_CATEGORY
+        assert set(get_ids(context['documents'].items)) == set(
+            get_ids(
+                DocumentMeta.objects(create_by=admin).order_by(
+                    '-priority', '-update_at').all()[3:6]))
+
+
+@pytest.mark.xfail(raises=NotImplementedError)
+@pytest.mark.usefixtures('doc_list')
+def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
+    login(client, admin)
+    monkeypatch.setattr('app.task.views.DOCUMENT_PER_PAGE', 3)
+
+    with captured_templates(client.application) as templates:
         assert client.get(
             url_for('task.my_doc_meta',
                     category=Category.FLIP.value)).status_code == 200
@@ -68,19 +57,20 @@ def test_get_my_doc_meta_with_category(client, admin, monkeypatch):
 
         assert client.get(
             url_for(
-                'task.my_doc_meta', category=Category.LONG_TERM.value,
+                'task.my_doc_meta', category=Category.SHORT_TERM.value,
                 page=2)).status_code == 200
         template, context = templates.pop()
         assert template.name == 'task/document_dashboard.html'
-        assert context['current_category'] == Category.LONG_TERM.value
+        assert context['current_category'] == Category.SHORT_TERM.value
         assert set(get_ids(context['documents'].items)) == set(
             get_ids(
                 DocumentMeta.objects(
                     create_by=admin,
-                    category=Category.LONG_TERM.value).order_by(
+                    category=Category.SHORT_TERM.value).order_by(
                         '-priority', '-update_at').all()[3:6]))
 
 
+@pytest.mark.xfail(raises=NotImplementedError)
 @pytest.mark.usefixtures('doc_list')
 def test_get_my_doc_meta_with_search(client, admin, monkeypatch):
     login(client, admin)
@@ -95,10 +85,8 @@ def test_get_my_doc_meta_with_search(client, admin, monkeypatch):
         assert context['current_search'] == ''
         assert set(get_ids(context['documents'].items)) == set(
             get_ids(
-                DocumentMeta.objects(
-                    create_by=admin,
-                    category=Category.SHORT_TERM.value).order_by(
-                        '-priority', '-update_at').all()[:3]))
+                DocumentMeta.objects(create_by=admin).order_by(
+                    '-priority', '-update_at').all()[:3]))
 
 
 @pytest.mark.usefixtures('doc')

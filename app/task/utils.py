@@ -14,25 +14,24 @@ MY_DOC_PIPELINE = [{
         "score": {
             "$cond":
             [{
-                "$eq": [{
-                    "$ifNull": ["$tags", None]
-                }, None]
+                "$not": "$tags"
             }, 2,
              {
-                 "$cond": [{
-                     "in": [UserTag.impressive.value, "$tags"]
+                 "$cond":
+                 [{
+                     "$in": [UserTag.impressive.value, "$tags"]
                  }, 1,
-                           {
-                               "$cond":
-                               [{
-                                   "in": [UserTag.reviewed.value, "$tags"]
-                               }, 0,
+                  {
+                      "$cond": [{
+                          "$in": [UserTag.reviewed.value, "$tags"]
+                      }, 0,
                                 {
-                                    "$cond": [{
-                                        "in": [UserTag.to_do.value, "$tags"]
+                                    "$cond":
+                                    [{
+                                        "$in": [UserTag.to_do.value, "$tags"]
                                     }, 3, 2]
                                 }]
-                           }]
+                  }]
              }]
         }
     }
