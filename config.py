@@ -1,10 +1,11 @@
 import os
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from dotenv import load_dotenv
 from raygun4py.middleware import flask as flask_raygun
 
-if os.path.exists('.env'):
+if Path('.env').exists():
     load_dotenv()
 
 

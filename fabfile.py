@@ -8,12 +8,12 @@ from deploy.utils import DeployTask, logger
 
 
 def _load_env_file():
-    from os.path import exists
+    from pathlib import Path
     from dotenv import load_dotenv
 
-    env_file = '.env-production'
-    if not exists(env_file):
-        env_file = '.env'
+    env_file = Path('.env-production')
+    if not env_file.exists():
+        env_file = Path('.env')
 
     load_dotenv(env_file)
 

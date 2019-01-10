@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from flask import Flask
 from flask_assets import Environment
@@ -13,7 +13,7 @@ from flask_wtf import CSRFProtect
 from app.assets import app_css, app_js, vendor_css, vendor_js
 from config import config
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+basedir = Path(__file__).parent
 
 mail = Mail()
 db = MongoEngine()
@@ -51,7 +51,7 @@ def create_app(config_name):
     assets_env = Environment(app)
     dirs = ['assets/styles', 'assets/scripts']
     for path in dirs:
-        assets_env.append_path(os.path.join(basedir, path))
+        assets_env.append_path(basedir / path)
     assets_env.url_expire = True
 
     assets_env.register('app_css', app_css)

@@ -1,6 +1,6 @@
 import logging
 import sys
-from os.path import dirname, exists, join, pardir, realpath
+from pathlib import Path
 
 from fabric.connection import Connection
 
@@ -50,17 +50,17 @@ class DeployTask:
         '.env-production' file will be chosen to copy prior to '.env' to ease the local development.
         """
 
-        project_path = dirname(realpath(join(__file__, pardir)))
+        project_path = Path(__file__).parent.parent
 
         with self.cd(REPO_NAME):
             if self.remote_exists(ENV_FILE):
                 return
 
-            if exists(join(project_path, ENV_FILE_PRODUCTION)):
+            if (project_path / ENV_FILE_PRODUCTION).exits():
                 env_file = ENV_FILE_PRODUCTION
                 logger.info(
                     f'Copy {ENV_FILE_PRODUCTION} to {self._conn.host}.')
-            elif exists(join(project_path, ENV_FILE)):
+            elif (project_path / ENV_FILE).exits:
                 env_file = ENV_FILE
                 logger.info(
                     f'Copy {ENV_FILE_PRODUCTION} to {self._conn.host}.')
@@ -68,7 +68,7 @@ class DeployTask:
                 logger.error(f'No env file found in {project_path}.')
                 return
 
-            self.put(env_file, remote=f'{REPO_NAME}/')
+            self.put(str(env_file), remote=f'{REPO_NAME}/')
             # rename .env-production to .env
             self.run(f'mv {env_file} {ENV_FILE}')
 
