@@ -27,6 +27,8 @@ rednose = "*"
 nose = "*"
 coverage = "*"
 flask-mongoengine = "*"
+pytest-asyncio = "*"
+pytest = "*"
 
 [dev-packages]
 isort = "*"

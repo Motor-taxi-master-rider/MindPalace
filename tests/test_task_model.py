@@ -93,3 +93,22 @@ def test_document_tag():
     dm.tags.append('invalid tag')
     with pytest.raises(ValidationError):
         dm.save()
+
+
+@pytest.mark.usefixtures('database')
+def test_save_document():
+    dm = DocumentMeta(
+        theme='review_done',
+        category=Category.SHORT_TERM.value,
+        tags=[UserTag.reviewed.value],
+        priority=3)
+    dm.save()
+    assert dm.priority == 0
+
+    dm = DocumentMeta(
+        theme='review_not_done',
+        category=Category.SHORT_TERM.value,
+        tags=[UserTag.to_do.value],
+        priority=3)
+    dm.save()
+    assert dm.priority == 3

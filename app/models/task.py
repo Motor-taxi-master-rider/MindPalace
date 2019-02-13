@@ -72,6 +72,14 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
         }]
     }  # yapf: disable
 
+    def is_review_done(self):
+        return UserTag.reviewed.value in self.tags
+
+    @classmethod
+    def pre_save(cls, sender, document, **kwargs):
+        if document.is_review_done():
+            document.priority = 0
+
     def __repr__(self):
         return f'<Document \'{str(self)}\'>'
 
@@ -81,3 +89,6 @@ class DocumentMeta(db.DynamicDocument):  # type: ignore
         else:
             title = self.theme
         return title
+
+
+signals.pre_save.connect(DocumentMeta.pre_save, sender=DocumentMeta)
