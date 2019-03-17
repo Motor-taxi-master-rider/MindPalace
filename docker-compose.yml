@@ -57,8 +57,8 @@ services:
         restart: always
         volumes:
             - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf
-            - ${SSL_CERT_PATH}/cert.pem:/etc/cert.pem
-            - ${SSL_CERT_PATH}/key.pem:/etc/key.pem
+            - ${SSL_CERT_PATH}/fullchain.pem:/etc/cert.pem
+            - ${SSL_CERT_PATH}/privkey.pem:/etc/key.pem
             - ./app/static:/home/mindpalace/static
         depends_on:
             - webapp
