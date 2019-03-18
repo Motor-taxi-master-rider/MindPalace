@@ -127,17 +127,12 @@ class DeployTask:
             pty=True)
 
     def start_app(self):
-        """Start the docker compose.
+        """Start the docker compose."""
 
-        Currently this is a workaround for `cd` and `sudo` interaction in fabric 2.4.0.
-        Trace the issue https://github.com/pyinvoke/invoke/issues/459 to
-        get more bug detail.
-        TODO: move the workaround after the bug fix
-        """
-
-        self.sudo(
-            f'bash -c "cd {REPO_NAME} && docker-compose pull &&docker-compose down && docker-compose up -d"'
-        )
+        docker_compose_config_file = Path('.') / REPO_NAME / 'docker-compose.yml'
+        self.sudo(f'docker-compose -f {docker_compose_config_file} pull')
+        self.sudo(f'docker-compose -f {docker_compose_config_file} down')
+        self.sudo(f'docker-compose -f {docker_compose_config_file} up -d')
 
     def _install_docker(self):
         """Special process to install docker.
