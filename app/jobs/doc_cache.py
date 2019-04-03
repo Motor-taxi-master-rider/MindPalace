@@ -26,7 +26,7 @@ def _check_update_one(result: UpdateResult):
 
 
 async def get_document(collection: AsyncIOMotorCollection, **options) -> List:
-    """Async generator to  pop up fulfilled documents from db"""
+    """Pop up fulfilled documents from db asynchronously."""
 
     default_filter = {
         '$and': [{
